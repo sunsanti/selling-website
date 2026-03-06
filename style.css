@@ -35,16 +35,190 @@ html::-webkit-scrollbar-thumb{
 section{
     padding: 3rem 3%;
 }
-
-.heading{
-    display: inline-block;
-    font-size: 17px;
-    margin: 3rem 0;
-    border: 2px solid black;
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
+/* button here */
+.btn-get-in-touch {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 28px;
+  border: 1px solid #d1d1d1;
+  border-radius: 50px;
+  text-decoration: none;
+  color: #111;
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden;
+  transition: border-color 0.4s ease;
 }
 
+.btn-get-in-touch::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 15px;
+  height: 15px;
+  background-color: #111;
+  border-radius: 50%;
+  
+  transform: translateY(-50%) scale(0); 
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); 
+  z-index: 0;
+}
+
+.btn-get-in-touch:hover::before {
+  transform: translateY(-50%) scale(30); 
+}
+
+.btn-get-in-touch:hover {
+  border-color: #111;
+}
+
+.btn-text {
+  position: relative;
+  z-index: 1;
+  transition: color 0.4s ease;
+  margin-right: 16px;
+}
+
+.btn-get-in-touch:hover .btn-text {
+  color: #fff;
+}
+
+.btn-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #111;
+  border-radius: 50%;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.arrow {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  color: #fff;
+  opacity: 0;
+  transform: translate(-5px, 5px); 
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.btn-get-in-touch:hover .dot {
+  opacity: 0;
+  transform: scale(0);
+}
+
+.btn-get-in-touch:hover .arrow {
+  opacity: 1;
+  transform: translate(0, 0);
+}
+
+
+.btn-services {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  padding: 12px 28px;
+  background-color: #111;
+  border: 1px solid #111;
+  border-radius: 50px;
+  text-decoration: none;
+  font-family: sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  overflow: hidden; 
+  transition: border-color 0.4s ease;
+  margin-left: 12px;
+}
+
+.btn-services::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  right: 14px;
+  width: 15px;
+  height: 15px;
+  background-color: #fff;
+  border-radius: 50%;
+  
+  transform: translateY(-50%) scale(0); 
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); 
+  z-index: 0;
+}
+
+.btn-services:hover::before {
+  transform: translateY(-50%) scale(30); 
+}
+
+.btn-services:hover {
+  border-color: #d1d1d1;
+}
+
+.btn-services .btn-text {
+  position: relative;
+  z-index: 1;
+  color: #fff;
+  transition: color 0.4s ease;
+  margin-right: 16px;
+}
+
+.btn-services:hover .btn-text {
+  color: #111;
+}
+
+.btn-services .btn-icon {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+}
+
+.btn-services .dot {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  background-color: #fff; 
+  border-radius: 50%;
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.btn-services .arrow {
+  position: absolute;
+  width: 18px;
+  height: 18px;
+  color: #111;
+  opacity: 0; 
+  transform: translate(-5px, 5px); 
+  transition: transform 0.4s ease, opacity 0.4s ease;
+}
+
+.btn-services:hover .dot {
+  opacity: 0;
+  transform: scale(0); 
+}
+
+.btn-services:hover .arrow {
+  opacity: 1;
+  transform: translate(0, 0); 
+}
+
+/* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
+/* full app start from here */
 /* header */
 .header{
     position: fixed;
@@ -108,12 +282,6 @@ section{
     display: flex;
     align-items: center;
     gap: 2rem;
-}
-.home .sub-content .home-btn a{
-    margin-left: 10px;
-    border: 2px solid var(--black);
-    border-radius: 50px;
-    padding: 0.5rem 1rem;
 }
 .home .home-image{
     margin-top: 1rem;
@@ -223,6 +391,45 @@ section{
     height: 100%;
     width: 1px;
     background-color: black;
+}
+
+/* services */
+.services{
+    width: 100%;
+}
+.services .service-item{
+    display: flex;
+    border: 1px solid black;
+    justify-content: space-between;
+    margin-left: 10rem;
+    margin-right: 10rem;
+    min-height: 480px;
+    margin-bottom: 5rem;
+}
+.services .service-item .content{
+    text-align: center;
+    border: 1px solid red;
+    width: 40%;
+    margin-bottom: 11rem;
+}
+.services .service-item .content .main-content{
+    font-size: 5rem;
+    border: 1px solid blue;
+    margin-top: 8rem;
+    margin-bottom: 1rem;
+
+}
+.services .service-item .content .sub-content{
+    font-size: 1.5rem;
+    border: 1px solid purple;
+    margin-left: 100px;
+    margin-right: 100px;
+    margin-bottom: 15px;
+}
+.services .service-item .image{
+    border: 1px solid green;
+    width: 60%;
+    margin-top: 8.5rem;
 }
 
 /* footer */
