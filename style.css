@@ -19,6 +19,7 @@
 }
 body{
   padding-top: 80px;
+  background-color: #f7f7ed
 }
 html{
   font-size: 62.5%;
@@ -49,12 +50,15 @@ section{
     padding: 1rem 2.5rem;
 }
 /* button here */
+.home-btn{
+  margin-bottom: 2rem;
+}
 .btn-get-in-touch {
   position: relative;
   display: inline-flex;
   align-items: center;
   padding: 12px 28px;
-  border: 1px solid #d1d1d1;
+  border: 1px solid #A9A9A9;
   border-radius: 50px;
   text-decoration: none;
   color: #111;
@@ -163,7 +167,7 @@ section{
   right: 14px;
   width: 15px;
   height: 15px;
-  background-color: #fff;
+  background-color: #f7f7ed;
   border-radius: 50%;
   
   transform: translateY(-50%) scale(0); 
@@ -176,7 +180,7 @@ section{
 }
 
 .btn-services:hover {
-  border-color: #d1d1d1;
+  border-color: #A9A9A9;
 }
 
 .btn-services .btn-text {
@@ -294,6 +298,7 @@ section{
 /* home */
 .home{
     display: flex;
+    position: relative;
     align-items: center;
     flex-direction: column;
 }
@@ -318,7 +323,10 @@ section{
     gap: 2rem;
 }
 .home .home-image{
-    margin-top: 1rem;
+    margin-top: 1rem;  
+}
+.home .home-image img{
+
 }
 
 /* about us */
@@ -385,80 +393,62 @@ section{
 }
 
 /* feature */ 
-/* cái feature đang lỗi */
+/* ========== ĐÃ SỬA ĐỂ ẢNH BẰNG NHAU ========== */
 .feature-project{
     width: 100%;
 }
-.feature-project .feature-list1{
+.feature-project .feature-list1,
+.feature-project .feature-list2 {
     display: grid;
     position: relative;
-    grid-template-columns: repeat(2,1fr);
-    margin-bottom: 10px;
-    margin-left: 6rem;
-    margin-right: 6rem;
+    grid-template-columns: repeat(2, 1fr);
+    margin: 0 6rem 10px;
     border-top: 1px solid black;
-}
-.feature-project .feature-list1::after{
-  content: "";
-  position: absolute;
-  top: 5%;
-  bottom: 5%;
-  left: 50%;
-  width: 1px;
-  background: black;
-}
-.feature-project .feature-list1 .feature-item{
-  margin-top: 2rem;
-  width: 100%;
-}
-.feature-project .feature-list1 .feature-item .feature-image{
-  margin: 3rem 6rem;
-  border: 1px solid red;
-}
-.feature-project .feature-list1 .feature-item .feature-image img{
-  
-}
-.feature-project .feature-list1 .feature-item p{
-  border: 1px solid blue;
-  margin: 3rem 6rem;
-  text-align: center;
 }
 
-/* ====== */
-.feature-project .feature-list2{
-    display: grid;
-    position: relative;
-    grid-template-columns: repeat(2,1fr);
-    margin-bottom: 10px;
-    margin-left: 6rem;
-    margin-right: 6rem;
-    border-top: 1px solid black;
+.feature-project .feature-list2 {
     border-bottom: 1px solid black;
 }
-.feature-project .feature-list2::after{
-  content: "";
-  position: absolute;
-  top: 5%;
-  bottom: 5%;
-  left: 50%;
-  width: 1px;
-  background: black;
-}
-.feature-project .feature-list2 .feature-item{
-  margin-bottom: 1rem;
-  margin-top: 2rem;
-  width: 100%;
-}
-.feature-project .feature-list2 .feature-item .feature-image{
-  padding: 20rem 0;
-  margin: 3rem 4rem;
-  border: 1px solid red;
-}
-.feature-project .feature-list2 .feature-item p{
-  width: 100%;
-  text-align: center;
+
+.feature-project .feature-list1::after,
+.feature-project .feature-list2::after {
+    content: "";
+    position: absolute;
+    top: 5%;
+    bottom: 5%;
+    left: 50%;
+    width: 1px;
+    background: black;
 }
 
+.feature-project .feature-item {
+    margin: 2rem 0;
+    padding: 0 1rem;
+}
+
+.feature-project .feature-item .feature-image {
+    margin: 0 auto 2rem; /* giữ khung đỏ để dễ kiểm tra */
+    width: 100%;
+    height: 650px;         /* chiều cao cố định cho mọi khung */
+    overflow: hidden;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.feature-project .feature-item .feature-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;     /* ảnh phủ kín khung, có thể crop nhẹ */
+    display: block;
+}
+
+.feature-project .feature-item p {
+    text-align: center;
+    margin: 1rem 0 3rem;
+    font-size: 1.6rem;
+}
+/* ========== KẾT THÚC PHẦN FEATURE ========== */
 
 /* services */
 .services{
@@ -466,7 +456,6 @@ section{
 }
 .services .service-item{
     display: flex;
-    border: 1px solid black;
     justify-content: space-between;
     margin-left: 10rem;
     margin-right: 10rem;
@@ -475,28 +464,36 @@ section{
 }
 .services .service-item .content{
     text-align: center;
-    border: 1px solid red;
+    background-color: #d4d4c9;
     width: 40%;
     margin-bottom: 11rem;
+    display: flex;
+    justify-content: center; /* căn giữa ngang */
+    align-items: center;
 }
-.services .service-item .content .main-content{
-    font-size: 5rem;
-    border: 1px solid blue;
-    margin-top: 8rem;
-    margin-bottom: 1rem;
+.services .service-item .content .box-content{
 
 }
-.services .service-item .content .sub-content{
+.services .service-item .content .box-content .main-content{
+    font-size: 5rem;
+    margin: 0 2rem;
+    margin-bottom: 0.5rem;
+}
+.services .service-item .content .box-content .sub-content{
     font-size: 1.5rem;
-    border: 1px solid purple;
     margin-left: 100px;
     margin-right: 100px;
-    margin-bottom: 15px;
+    margin-bottom: 1.5rem;
 }
 .services .service-item .image{
-    border: 1px solid green;
     width: 60%;
     margin-top: 8.5rem;
+}
+
+.services .service-item .image img{
+    width: 100%;
+    height: auto;
+    display: block;
 }
 
 /* footer */
@@ -598,6 +595,15 @@ html{
     width:100%;
 }
 
+/* feature trên tablet giữ nguyên cấu trúc lưới, có thể giảm margin */
+.feature-project .feature-list1,
+.feature-project .feature-list2 {
+    margin-left: 3rem;
+    margin-right: 3rem;
+}
+.feature-project .feature-item .feature-image {
+    height: 400px; /* điều chỉnh cho vừa */
+}
 }
 /* ================= MOBILE ================= */
 @media (max-width:768px){
@@ -673,6 +679,11 @@ html{
 .feature-project .feature-list1::after,
 .feature-project .feature-list2::after{
     display:none;
+}
+
+/* trên mobile giảm chiều cao khung ảnh */
+.feature-project .feature-item .feature-image {
+    height: 200px;
 }
 
 /* services */
