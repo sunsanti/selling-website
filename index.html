@@ -30,7 +30,7 @@
                 <!-- <h3 class="content1">SOMETHING &<br></h3>
                 <h3 class="content2">REAL ESTATE</h3> -->
                 <div class="left">
-                    <p>SOMETHING &</p>
+                    <p>INVESTMENT &</p>
                 </div>
                 <div class="right">
                     <p>REAL ESTATE</p>
@@ -117,31 +117,32 @@
 
         <div class="feature-list1">
             <div class="feature-item">
-                <div class="feature-image">
+                <div class="feature-image" onclick="openPopup('project1')">
                     <img src="images/project1_1.jpg" alt="">
+                    <!-- <div class="explore">EXPLORE</div> -->
                 </div>
-                <p>Short description of feature 1</p>
+                <p>PROPERTY DESIGN</p>
             </div>
             <div class="feature-item">
-                <div class="feature-image">
+                <div class="feature-image" onclick="openPopup('project2')">
                     <img src="images/project2_2.jpg" alt="">
                 </div>
-                <p>Short description of feature 2</p>
+                <p>PROPERTY DESIGN</p>
             </div>
         </div>
         
         <div class="feature-list2">
             <div class="feature-item">
-                <div class="feature-image">
+                <div class="feature-image" onclick="openPopup('project3')">
                     <img src="images/project3_3.jpg" alt="">
                 </div>
-                <p>Short description of feature 1</p>
+                <p>PROPERTY DESIGN</p>
             </div>
             <div class="feature-item">
-                <div class="feature-image">
+                <div class="feature-image" onclick="openPopup('project4')">
                     <img src="images/project4.jpg" alt="">
                 </div>
-                <p>Short description of feature 2</p>
+                <p>PROPERTY DESIGN</p>
             </div>
         </div>
         
@@ -161,7 +162,7 @@
                     <p>Our company specializes in buying and selling real estate with a focus on value and long-term investment.</p>
                 </div>
                 <div>
-                    <a href="#" class="btn-get-in-touch">
+                    <a onclick="fillInfoPopup()" class="btn-get-in-touch">
                         <span class="btn-text">click here</span>
                         
                         <span class="btn-icon">
@@ -190,7 +191,7 @@
                     <p>Take a look at our projects and discover properties designed for value, quality, and long-term investment.</p>
                 </div>
                 <div>
-                    <a href="#" class="btn-get-in-touch">
+                    <a onclick="fillInfoPopup()" class="btn-get-in-touch">
                         <span class="btn-text">click here</span>
                         
                         <span class="btn-icon">
@@ -220,7 +221,7 @@
                     <p>Sell or buy properties from our company</p>
                 </div>
                 <div>
-                    <a href="#" class="btn-get-in-touch">
+                    <a onclick="fillInfoPopup()" class="btn-get-in-touch">
                         <span class="btn-text">click here</span>
                         
                         <span class="btn-icon">
@@ -256,6 +257,113 @@
         <div class="credit">created by <span>TAOWORK</span> | all rights reserved!</div>
 
     </section>
+
+
+<!-- pop up -->
+<div id="popup" class="popup">
+  <div class="popup-content">
+    <div class="title">
+        LIVING ROOM DESIGN
+    </div>
+
+    <div class="content">
+        <div class="left">
+            <div class="small-content" id="popup-small-content">
+
+            </div>
+            <div class="project-details" id="popup-project-details">
+                <span>PROJECT DETAILS</span>
+            </div>
+
+            <div class="details">
+                <div class="detail" id="popup-detail1">
+                    <div class="left">
+                        <span>PROJECT</span>
+                    </div>
+                    <div class="right" id="popup-right1">
+
+                    </div>
+                </div>
+
+                <div class="detail" id="popup-detail2">
+                    <div class="left">
+                        <span>M<sub>2</sub></span>
+                    </div>
+                    <div class="right" id="popup-right2">
+
+                    </div>
+                </div>
+
+                <div class="detail" id="popup-detail3">
+                    <div class="left">
+                        <span>CATEGORY</span>
+                    </div>
+                    <div class="right" id="popup-right3">
+
+                    </div>
+                </div>
+
+                <div class="detail" id="popup-detail4">
+                    <div class="left">
+                        <span>YEAR</span>
+                    </div>
+                    <div class="right" id="popup-right4">
+
+                    </div>
+                </div>
+
+                <div class="detail" id="popup-detail5">
+                    <div class="left">
+                        <span>STYLE</span>
+                    </div>
+                    <div class="right" id="popup-right5">
+
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="right">
+            <img id="popup-image" src="" alt="">
+        </div>
+    </div>
+  </div>
+</div>
+
+<div id="fill-popup" class="fill-popup">
+    <div class="fill-popup-content">
+        <div class="content">
+            <div class="right">
+                <div class="image">
+                    <img src="images/fillinfo.jpg" alt="">
+                </div>
+            </div>
+            <div class="left">
+                <div class="title">
+                PLEASE FILL OUT <br> THE FORM BELOW
+            </div>
+            <div class="fill-content">
+                <div class="name-box">
+                    <span>NAME</span><br>
+                    <input type="text" placeholder="Enter your name" required>
+                </div>
+
+                <div class="phone-box">
+                    <span>PHONE</span><br>
+                    <input type="tel" placeholder="Enter your phone number" pattern="[0-9]*" oninput="this.value = this.value.replace(/[^0-9]/g, '');" required>
+                </div>
+
+                <div class="email-box">
+                    <span>EMAIL</span><br>
+                    <input type="email" placeholder="Enter your email" required>
+                </div>
+            </div>
+            <div class="submit-btn">
+                <a href="">SUBMIT</a>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
 
     <script src="script.js"></script>
 </body>
