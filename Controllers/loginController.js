@@ -5,19 +5,29 @@ const getLoginPage = (req, res) => {
     res.sendFile(path.join(__dirname, '../Views/login/index.html'));
 };
 
-const handleLogin = (req, res) => {
-    const {username, password} = req.body;
+const getMainPage = (req, res) => {
+    res.sendFile(path.join(__dirname, '../Views/main/index.html'));
+};
 
-    const isValidUser = userModel.checkCredentials(username, password);
+const handleLogin = async(req, res) => {
+    console.log("Dữ liệu form gửi lên:", req.body);
+    const {username, password} = req.body
 
-    if (isValidUser) {
-        res.sendFile(path.join(__dirname, '../Views/main/index.html'));
-    } else {
-        res.status(401).send('Sai tên đăng nhâp hoặc mật khẩu');
+    try {
+        const isValidUser = await userModel.checkCredentials(username, password);
+        console.log(isValidUser);
+        if (isValidUser) {
+            res.redirect('/main');
+        } else {
+            res.status(401).send('Sai tên đăng nhập hoặc mật khẩu!');
+        }
+    } catch(error) {
+        res.status(500).send('Đã xảy ra lỗi máy chủ!');
     }
 };
 
 module.exports = {
     getLoginPage,
+    getMainPage,
     handleLogin
 };

@@ -14,9 +14,11 @@ const loginController = require('./Controllers/loginController');
 
 app.get('/login', loginController.getLoginPage);
 app.post('/login', loginController.handleLogin);
+app.get('/main', loginController.getMainPage);
 
 const PORT = 5500;
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy tại http://localhost:${PORT}/login`);
 });
+
