@@ -80,3 +80,31 @@ window.onclick = function(event) {
 function fillInfoPopup(){
     document.getElementById("fill-popup").style.display = "flex";
 }
+
+
+$(document).ready(function(){
+
+    $('.region').click(function(){
+        $(this).addClass('active').siblings().removeClass('active');
+
+        var filter = $(this).attr('data-filter')
+
+        if(filter == 'all'){
+            $('.feature-project .feature-item').show(400);
+        }
+        else{
+            $('.feature-project .feature-item').not('.' +filter).hide(200);
+            $('.feature-project .feature-item').filter('.' +filter).show(200);
+        }
+
+    });
+
+    $('.feature-project').magnificPopup({
+        delegate:'div',
+        type:'feature-item',
+        gallery:{
+            enabled:true,
+        }
+    });
+
+});

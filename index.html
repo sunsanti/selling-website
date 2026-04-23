@@ -5,7 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
     <!-- font-awesome cdn link -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <!-- This will be the header of the website -->
@@ -18,7 +19,7 @@
                 <a class = 'nav-item' href="#services">Services</a>
                 <a class = 'nav-item' href="#footer">Contract</a>
         </nav>
-        <p>phone number</p>
+        <p>phone number</p
 
         <button class="menu-btn">
             <i class="fa-solid fa-bars"></i>
@@ -118,12 +119,12 @@
     <section id="feature-project" class="feature-project">
         <h1 class="heading">Projects</h1>
 
-        <div class="select">
-            <span class="region-active">Sydney</span>
-            <span class="region">Melbourne</span>
-            <span class="region">Brisbane</span>
-            <span class="region">Goldcoast</span>
-        </div>
+        <ul class="select">
+            <li class="region active" data-filter="sydney">Sydney</li>
+            <li class="region" data-filter="melbourne">Melbourne</li>
+            <li class="region" data-filter="brisbane">Brisbane</li>
+            <li class="region" data-filter="goldcoast">Goldcoast</li>
+        </ul>
 
         <div class="feature-list1">
             <div class="feature-item">
@@ -387,7 +388,8 @@
         </div>
     </div>
 </div>
-
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
