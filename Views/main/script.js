@@ -36,6 +36,36 @@ const projects = {
         imgSrc: "images/project4.jpg"
     }
 };
+//ad session here
+const adminBtn = document.getElementById("admin-btn");
+const logoutBtn = document.getElementById("logout-btn");
+
+fetch("/check-auth")
+    .then(res => res.json())
+    .then(data => {
+        if (data.loggedIn) {
+            adminBtn.style.display = "block"; // hiện nút
+            logoutBtn.style.display = "block";
+        } else {
+            adminBtn.style.display = "none"; // ẩn (cũng có thể bỏ dòng này)
+            logoutBtn.style.display = "none";
+        }
+    })
+    .catch(err => console.log(err));
+//delete session
+function logoutAdmin(){
+    fetch("/logout", {
+        method: "POST"
+    })
+    .then(res => res.text())
+    .then(data => {
+        console.log(data);
+        // reload hoặc chuyển trang
+        window.location.reload();
+    })
+    .catch(err => console.log(err));
+}
+
 
 document.querySelectorAll('.feature-image').forEach(img => {
     const type = img.dataset.type;

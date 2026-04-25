@@ -1,22 +1,28 @@
-const { sql, poolPromise } = require('../config/database');
+const { sql, poolPromise } = require('../config/database.js');
+
+const pool = require('../config/database'); // nhớ đúng path
 
 const checkCredentials = async (username, password) => {
     try {
         if (!username || !password) {
-            return false;
+            return null;
         }
 
-        const pool = await poolPromise;
-        const result = await pool.request()
-            .input('user_name', sql.VarChar, username)
-            .input('user_pass', sql.VarChar, password)
-            .query('SELECT * FROM users WHERE username = @user_name AND password = @user_pass');
-        
-        return result.recordset.length > 0;
+        const [rows] = await pool.query(
+            'SELECT * FROM users WHERE username = ? AND password = ?',
+            [username, password]
+        );
+
+        return rows.length > 0 ? rows[0] : null;
+
     } catch (error) {
         console.error("Lỗi khi truy vấn dữ liệu:", error);
-        throw error; 
+        throw error;
     }
+};
+
+module.exports = {
+    checkCredentials
 };
 
 module.exports = {
