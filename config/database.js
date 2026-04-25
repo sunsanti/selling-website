@@ -1,28 +1,24 @@
-const sql = require('mssql');
+const mysql = require('mysql2/promise');
 
-const config = {
-    user: 'sa',
-    password: '123',
-    server: 'localhost',
+const pool = mysql.createPool({
+    host: 'localhost',
+    user: 'root',     // user bạn đã tạo
+    password: '12345678',
     database: 'sellingweb',
-    options: {
-        encrypt: false,
-        trustServerCertificate: true
+    waitForConnections: true,
+    connectionLimit: 10,
+    queueLimit: 0
+});
+
+// test kết nối
+(async () => {
+    try {
+        const connection = await pool.getConnection();
+        console.log('✅ Đã kết nối thành công tới MySQL!');
+        connection.release();
+    } catch (err) {
+        console.error('❌ Lỗi kết nối MySQL:', err);
     }
-};
+})();
 
-const poolPromise = new sql.ConnectionPool(config)
-    .connect()
-    .then(pool => {
-        console.log('✅ Đã kết nối thành công tới SQL Server!');
-        return pool;
-    })
-
-    .catch(err => {
-        console.error('❌ Lỗi kết nối SQL Server:', err);
-    });
-
-module.exports = {
-    sql,
-    poolPromise
-};
+module.exports = pool;
