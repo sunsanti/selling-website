@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header class="header">
+        <a href="#" class="logo"><i class="fas"></i> <span id="site-logo">LOGO</span></a>
+        <nav class="navbar">
+            <a class='nav-item' href="#about-us">About us</a>
+            <a class='nav-item' href="#feature-project">Project</a>
+            <a class='nav-item' href="#services">Services</a>
+            <a class='nav-item' href="#footer">Contract</a>
+        </nav>
+        <p id="site-phone">phone number</p>
+        <button class="menu-btn"><i class="fa-solid fa-bars"></i></button>
+        <button id="admin-btn" style="display: none;"><div>quan tri vien</div></button>
+        <hr>
+        <button id="logout-btn" onclick="logoutAdmin()"><div>logout</div></button>
+    </header>
+
+    <section>
+        <div class="home" id="home">
+            <div class="content">
+                <div class="left"><p>SOMETHING &</p></div>
+                <div class="right"><p>REAL ESTATE</p></div>
+            </div>
+            <div class="sub-content">
+                <div class="home-btn">
+                    <a href="#" class="btn-get-in-touch">
+                        <span class="btn-text">GET IN TOUCH</span>
+                        <span class="btn-icon">
+                            <span class="dot"></span>
+                            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                <polyline points="7 7 17 7 17 17"></polyline>
+                            </svg>
+                        </span>
+                    </a>
+                    <a href="#services" class="btn-services">
+                        <span class="btn-text">SERVICES</span>
+                        <span class="btn-icon">
+                            <span class="dot"></span>
+                            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="7" y1="17" x2="17" y2="7"></line>
+                                <polyline points="7 7 17 7 17 17"></polyline>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
+            </div>
+            <div class="home-image">
+                <img id="site-main-image" src="/assets/images/service3.jpg" alt="">
+            </div>
+        </div>
+    </section>
+
+    <section id="about-us" class="about-us">
+        <h1 class="heading">About us</h1>
+        <div class="content">
+            <div class="banner">MANY BEAUTIFUL PLACES<br>ARE WAITING FOR YOU TO SEE</div>
+            <div class="small-content">
+                <div class="left">
+                    <div class="text">We are a passionate real estate team dedicated to developing modern and sustainable properties that blend aesthetic design with practical functionality, creating high-quality living and working spaces that offer lasting value and reflect distinctive character.</div>
+                </div>
+                <div class="right">
+                    <div class="text">With a strong commitment to quality and professionalism, we collaborate closely with our clients to turn their real estate goals into reality. From project planning and development to final delivery, we focus on exceeding expectations and providing properties that offer comfort, value, and long-term satisfaction.</div>
+                </div>
+            </div>
+        </div>
+        <div class="info">
+            <div class="block-num"><div class="content-num1">20+</div><div class="detail-content">years of experience</div></div>
+            <div class="block-num"><div class="content-num1">200+</div><div class="detail-content">projects have done</div></div>
+            <div class="block-num"><div class="content-num1">7+</div><div class="detail-content">awards received</div></div>
+            <div class="block-num"><div class="content-num1">15+</div><div class="detail-content">team members</div></div>
+        </div>
+    </section>
+
+    <section id="feature-project" class="feature-project">
+        <h1 class="heading">Projects</h1>
+        <ul class="select">
+            <li class="region active" data-filter="all">All</li>
+            <li class="region" data-filter="sydney">Sydney</li>
+            <li class="region" data-filter="melbourne">Melbourne</li>
+            <li class="region" data-filter="brisbane">Brisbane</li>
+            <li class="region" data-filter="goldcoast">Goldcoast</li>
+        </ul>
+        <div class="feature-list1" id="project-list-1"></div>
+        <div class="feature-list2" id="project-list-2" style="display:none;"></div>
+    </section>
+
+    <section id="services" class="services">
+        <h1 class="heading">Services</h1>
+        <div class="service-item">
+            <div class="content">
+                <div class="box-content">
+                    <div class="main-content"><p>See more about our business</p></div>
+                    <div class="sub-content"><p>Our company specializes in buying and selling real estate with a focus on value and long-term investment.</p></div>
+                    <div><a onclick="fillInfoPopup()" class="btn-get-in-touch"><span class="btn-text">click here</span><span class="btn-icon"><span class="dot"></span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></span></a></div>
+                </div>
+            </div>
+            <div class="image"><img src="/assets/images/service1.jpg" alt=""></div>
+        </div>
+        <div class="service-item">
+            <div class="content">
+                <div class="box-content">
+                    <div class="main-content"><p>Take a look at our projects</p></div>
+                    <div class="sub-content"><p>Take a look at our projects and discover properties designed for value, quality, and long-term investment.</p></div>
+                    <div><a onclick="fillInfoPopup()" class="btn-get-in-touch"><span class="btn-text">click here</span><span class="btn-icon"><span class="dot"></span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></span></a></div>
+                </div>
+            </div>
+            <div class="image"><img src="/assets/images/service2.jpg" alt=""></div>
+        </div>
+        <div class="service-item">
+            <div class="content">
+                <div class="box-content">
+                    <div class="main-content"><p>Be confident to be one of our partner</p></div>
+                    <div class="sub-content"><p>Sell or buy properties from our company</p></div>
+                    <div><a onclick="fillInfoPopup()" class="btn-get-in-touch"><span class="btn-text">click here</span><span class="btn-icon"><span class="dot"></span><svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="7" y1="17" x2="17" y2="7"></line><polyline points="7 7 17 7 17 17"></polyline></svg></span></a></div>
+                </div>
+            </div>
+            <div class="image"><img src="/assets/images/service3_3.jpg" alt=""></div>
+        </div>
+    </section>
+
+    <section id="footer" class="footer">
+        <div class="share">
+            <a href="#" class="fab fa-facebook-f"></a>
+            <a href="#" class="fab fa-instagram"></a>
+            <a href="#" class="fab fa-twitter"></a>
+            <a href="#" class="fab fa-linkedin"></a>
+            <a href="#" class="fab fa-pinterest"></a>
+        </div>
+        <div class="credit">created by <span>TAOWORK</span> | all rights reserved!</div>
+    </section>
+
+    <!-- Popup -->
+    <div id="popup" class="popup">
+        <div class="popup-content">
+            <div class="title">LIVING ROOM DESIGN</div>
+            <div class="content">
+                <div class="left">
+                    <div class="small-content" id="popup-small-content"></div>
+                    <div class="project-details" id="popup-project-details"><span>PROJECT DETAILS</span></div>
+                    <div class="details">
+                        <div class="detail" id="popup-detail1"><div class="left2"><span>PROJECT</span></div><div class="right" id="popup-right1"></div></div>
+                        <div class="detail" id="popup-detail2"><div class="left2"><span>M<sub>2</sub></span></div><div class="right" id="popup-right2"></div></div>
+                        <div class="detail" id="popup-detail3"><div class="left2"><span>CATEGORY</span></div><div class="right" id="popup-right3"></div></div>
+                        <div class="detail" id="popup-detail4"><div class="left2"><span>YEAR</span></div><div class="right" id="popup-right4"></div></div>
+                        <div class="detail" id="popup-detail5"><div class="left2"><span>STYLE</span></div><div class="right" id="popup-right5"></div></div>
+                    </div>
+                </div>
+                <div class="right"><img id="popup-image" src="" alt=""></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="fill-popup" class="fill-popup">
+        <div class="fill-popup-content">
+            <div class="content">
+                <div class="right"><div class="image"><img src="/assets/images/fillinfo.jpg" alt=""></div></div>
+                <div class="left">
+                    <div class="title">PLEASE FILL OUT<br>THE FORM BELOW</div>
+                    <div class="fill-content">
+                        <div class="name-box"><span>NAME</span><br><input type="text" placeholder="Enter your name"></div>
+                        <div class="phone-box"><span>PHONE</span><br><input type="text" placeholder="Enter your phone number"></div>
+                        <div class="email-box"><span>EMAIL</span><br><input type="text" placeholder="Enter your email"></div>
+                    </div>
+                    <div class="submit-btn"><a href="">SUBMIT</a></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+    <script src="script.js"></script>
+</body>
+</html>

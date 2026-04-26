@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Projects - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/public/admin/style.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-building"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/public/admin/index.html" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="/public/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="/public/admin/projects.html" class="nav-item active"><i class="fas fa-building"></i><span>Projects</span></a>
+                <a href="/public/admin/contacts.html" class="nav-item"><i class="fas fa-address-book"></i><span>Contact List</span></a>
+                <a href="/main" class="nav-item"><i class="fas fa-external-link-alt"></i><span>View Website</span></a>
+                <a href="#" id="logout-link" class="nav-item logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Projects Management</h1>
+                    <p>Add, edit, or soft-delete projects displayed on your website.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal()">
+                    <i class="fas fa-plus"></i> Add Project
+                </button>
+            </div>
+
+            <div class="filter-tabs">
+                <button class="filter-tab active" data-filter="active">Active Projects</button>
+                <button class="filter-tab" data-filter="deleted">Deleted Projects</button>
+            </div>
+
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>Image</th><th>Name</th><th>Region</th><th>Category</th>
+                            <th>Size</th><th>Year</th><th>Style</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="projects-tbody">
+                        <tr><td colspan="8" class="loading-cell">Loading...</td></tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" id="empty-state" style="display:none;">
+                    <i class="fas fa-folder-open"></i><p>No projects found.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="project-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Project</h3>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="project-form">
+                <input type="hidden" id="project-id">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-name"><i class="fas fa-building"></i> Project Name *</label>
+                        <input type="text" id="project-name" required placeholder="e.g., QUANDUONG COMPLEX">
+                    </div>
+                    <div class="form-group">
+                        <label for="project-region"><i class="fas fa-map-marker-alt"></i> Region *</label>
+                        <select id="project-region" required>
+                            <option value="">-- Select --</option>
+                            <option value="sydney">Sydney</option>
+                            <option value="melbourne">Melbourne</option>
+                            <option value="brisbane">Brisbane</option>
+                            <option value="goldcoast">Gold Coast</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-category"><i class="fas fa-tag"></i> Category *</label>
+                        <input type="text" id="project-category" required placeholder="e.g., LIVING ROOM">
+                    </div>
+                    <div class="form-group">
+                        <label for="project-size"><i class="fas fa-expand"></i> Size (m2) *</label>
+                        <input type="text" id="project-size" required placeholder="e.g., 25">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="project-year"><i class="fas fa-calendar"></i> Year *</label>
+                        <input type="text" id="project-year" required placeholder="e.g., 2024">
+                    </div>
+                    <div class="form-group">
+                        <label for="project-style"><i class="fas fa-palette"></i> Style *</label>
+                        <input type="text" id="project-style" required placeholder="e.g., MODERN">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="project-image"><i class="fas fa-image"></i> Image URL *</label>
+                    <input type="text" id="project-image" required placeholder="e.g., /assets/images/project1.jpg">
+                </div>
+                <div class="form-group">
+                    <label for="project-description"><i class="fas fa-align-left"></i> Description</label>
+                    <textarea id="project-description" rows="3" placeholder="Enter project description..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label for="project-order"><i class="fas fa-sort-numeric-up"></i> Display Order</label>
+                    <input type="number" id="project-order" value="0" min="0">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="modal-save-btn">
+                        <i class="fas fa-save"></i> Save Project
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/public/admin/script.js"></script>
+    <script>
+        let currentFilter = 'active';
+        let editingId = null;
+
+        async function loadProjects() {
+            const tbody = document.getElementById('projects-tbody');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Loading...</td></tr>';
+
+            try {
+                const res = await fetch('/api/projects?includeDeleted=true');
+                const projects = await res.json();
+                const filtered = projects.filter(p =>
+                    currentFilter === 'deleted' ? p.is_deleted : !p.is_deleted
+                );
+
+                if (filtered.length === 0) {
+                    tbody.innerHTML = '';
+                    emptyState.style.display = 'flex';
+                    return;
+                }
+                emptyState.style.display = 'none';
+
+                tbody.innerHTML = filtered.map(p => `
+                    <tr class="${p.is_deleted ? 'row-deleted' : ''}">
+                        <td>
+                            <img src="${p.image_url}" alt="${p.name}" class="table-img"
+                                onerror="this.src='https://via.placeholder.com/60x40?text=No+Image'">
+                        </td>
+                        <td><strong>${p.name}</strong></td>
+                        <td><span class="badge badge-${p.region}">${p.region}</span></td>
+                        <td>${p.category}</td>
+                        <td>${p.size} m2</td>
+                        <td>${p.year}</td>
+                        <td>${p.style}</td>
+                        <td>
+                            <div class="action-btns">
+                                <button class="btn-icon" onclick="editProject(${p.id})" title="Edit">
+                                    <i class="fas fa-edit"></i>
+                                </button>
+                                ${p.is_deleted
+                                    ? `<button class="btn-icon btn-restore" onclick="restoreProject(${p.id})" title="Restore">
+                                        <i class="fas fa-undo"></i></button>`
+                                    : `<button class="btn-icon btn-delete" onclick="softDeleteProject(${p.id})" title="Soft Delete">
+                                        <i class="fas fa-trash"></i></button>`
+                                }
+                            </div>
+                        </td>
+                    </tr>
+                `).join('');
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="8" class="loading-cell">Error loading projects.</td></tr>';
+            }
+        }
+
+        document.querySelectorAll('.filter-tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentFilter = tab.dataset.filter;
+                loadProjects();
+            });
+        });
+
+        function openModal(id = null) {
+            editingId = id;
+            document.getElementById('project-form').reset();
+            document.getElementById('project-id').value = '';
+            document.getElementById('modal-title').textContent = id ? 'Edit Project' : 'Add Project';
+            document.getElementById('modal-save-btn').innerHTML =
+                `<i class="fas fa-save"></i> ${id ? 'Update Project' : 'Save Project'}`;
+            if (id) loadProjectForEdit(id);
+            document.getElementById('project-modal').style.display = 'flex';
+        }
+
+        async function loadProjectForEdit(id) {
+            try {
+                const res = await fetch(`/api/projects/${id}`);
+                const p = await res.json();
+                document.getElementById('project-id').value = p.id;
+                document.getElementById('project-name').value = p.name;
+                document.getElementById('project-region').value = p.region;
+                document.getElementById('project-category').value = p.category;
+                document.getElementById('project-size').value = p.size;
+                document.getElementById('project-year').value = p.year;
+                document.getElementById('project-style').value = p.style;
+                document.getElementById('project-image').value = p.image_url;
+                document.getElementById('project-description').value = p.description || '';
+                document.getElementById('project-order').value = p.display_order || 0;
+            } catch (err) { console.error(err); }
+        }
+
+        function closeModal() {
+            document.getElementById('project-modal').style.display = 'none';
+            editingId = null;
+        }
+
+        document.getElementById('project-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('modal-save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            const body = {
+                name: document.getElementById('project-name').value,
+                region: document.getElementById('project-region').value,
+                category: document.getElementById('project-category').value,
+                size: document.getElementById('project-size').value,
+                year: document.getElementById('project-year').value,
+                style: document.getElementById('project-style').value,
+                image_url: document.getElementById('project-image').value,
+                description: document.getElementById('project-description').value,
+                display_order: parseInt(document.getElementById('project-order').value) || 0
+            };
+
+            try {
+                const url = editingId ? `/api/projects/${editingId}` : '/api/projects';
+                const method = editingId ? 'PUT' : 'POST';
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (res.ok) { closeModal(); loadProjects(); }
+                else { const d = await res.json(); alert('Error: ' + (d.error || 'Unknown')); }
+            } catch (err) { alert('Network error.'); }
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-save"></i> ${editingId ? 'Update Project' : 'Save Project'}`;
+        });
+
+        async function softDeleteProject(id) {
+            if (!confirm('Soft delete this project? It will be hidden from the website.')) return;
+            await fetch(`/api/projects/${id}/delete`, { method: 'PATCH' });
+            loadProjects();
+        }
+
+        async function restoreProject(id) {
+            if (!confirm('Restore this project?')) return;
+            await fetch(`/api/projects/${id}/restore`, { method: 'PATCH' });
+            loadProjects();
+        }
+
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/login';
+        });
+
+        loadProjects();
+    </script>
+</body>
+</html>

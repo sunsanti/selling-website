@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact List - Admin</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/public/admin/style.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-building"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/public/admin/index.html" class="nav-item"><i class="fas fa-home"></i><span>Dashboard</span></a>
+                <a href="/public/admin/settings.html" class="nav-item"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="/public/admin/projects.html" class="nav-item"><i class="fas fa-building"></i><span>Projects</span></a>
+                <a href="/public/admin/contacts.html" class="nav-item active"><i class="fas fa-address-book"></i><span>Contact List</span></a>
+                <a href="/main" class="nav-item"><i class="fas fa-external-link-alt"></i><span>View Website</span></a>
+                <a href="#" id="logout-link" class="nav-item logout"><i class="fas fa-sign-out-alt"></i><span>Logout</span></a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Contact List</h1>
+                    <p>Manage contact submissions from your website visitors.</p>
+                </div>
+                <button class="btn btn-primary" onclick="openModal()">
+                    <i class="fas fa-plus"></i> Add Contact
+                </button>
+            </div>
+
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="search-input" placeholder="Search by name, phone, or email...">
+            </div>
+
+            <div class="table-card">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>#</th><th>Name</th><th>Phone</th><th>Email</th>
+                            <th>Submitted At</th><th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contacts-tbody">
+                        <tr><td colspan="6" class="loading-cell">Loading...</td></tr>
+                    </tbody>
+                </table>
+                <div class="empty-state" id="empty-state" style="display:none;">
+                    <i class="fas fa-folder-open"></i><p>No contacts found.</p>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <div class="modal-overlay" id="contact-modal">
+        <div class="modal">
+            <div class="modal-header">
+                <h3 id="modal-title">Add Contact</h3>
+                <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            </div>
+            <form id="contact-form">
+                <input type="hidden" id="contact-id">
+                <div class="form-group">
+                    <label for="contact-name"><i class="fas fa-user"></i> Name *</label>
+                    <input type="text" id="contact-name" required placeholder="Enter full name">
+                </div>
+                <div class="form-group">
+                    <label for="contact-phone"><i class="fas fa-phone"></i> Phone *</label>
+                    <input type="text" id="contact-phone" required placeholder="e.g., +1 234 567 890">
+                </div>
+                <div class="form-group">
+                    <label for="contact-email"><i class="fas fa-envelope"></i> Email *</label>
+                    <input type="email" id="contact-email" required placeholder="e.g., user@example.com">
+                </div>
+                <div class="form-actions">
+                    <button type="button" class="btn btn-secondary" onclick="closeModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary" id="modal-save-btn">
+                        <i class="fas fa-save"></i> Save Contact
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="/public/admin/script.js"></script>
+    <script>
+        let allContacts = [];
+        let editingId = null;
+
+        async function loadContacts() {
+            const tbody = document.getElementById('contacts-tbody');
+            const emptyState = document.getElementById('empty-state');
+            tbody.innerHTML = '<tr><td colspan="6" class="loading-cell">Loading...</td></tr>';
+            try {
+                const res = await fetch('/api/contacts');
+                allContacts = await res.json();
+                renderContacts(allContacts);
+            } catch (err) {
+                tbody.innerHTML = '<tr><td colspan="6" class="loading-cell">Error loading contacts.</td></tr>';
+            }
+        }
+
+        function renderContacts(contacts) {
+            const tbody = document.getElementById('contacts-tbody');
+            const emptyState = document.getElementById('empty-state');
+            if (contacts.length === 0) {
+                tbody.innerHTML = '';
+                emptyState.style.display = 'flex';
+                return;
+            }
+            emptyState.style.display = 'none';
+            tbody.innerHTML = contacts.map((c, i) => `
+                <tr>
+                    <td>${i + 1}</td>
+                    <td><strong>${c.name}</strong></td>
+                    <td><i class="fas fa-phone" style="color:#1565c0;"></i> ${c.phone}</td>
+                    <td><i class="fas fa-envelope" style="color:#7b1fa2;"></i> ${c.email}</td>
+                    <td><i class="fas fa-clock"></i> ${new Date(c.created_at).toLocaleString()}</td>
+                    <td>
+                        <div class="action-btns">
+                            <button class="btn-icon" onclick="editContact(${c.id})" title="Edit">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon btn-delete" onclick="deleteContact(${c.id})" title="Delete">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        document.getElementById('search-input').addEventListener('input', (e) => {
+            const q = e.target.value.toLowerCase();
+            renderContacts(allContacts.filter(c =>
+                c.name.toLowerCase().includes(q) ||
+                c.phone.toLowerCase().includes(q) ||
+                c.email.toLowerCase().includes(q)
+            ));
+        });
+
+        function openModal(id = null) {
+            editingId = id;
+            document.getElementById('contact-form').reset();
+            document.getElementById('contact-id').value = '';
+            document.getElementById('modal-title').textContent = id ? 'Edit Contact' : 'Add Contact';
+            document.getElementById('modal-save-btn').innerHTML =
+                `<i class="fas fa-save"></i> ${id ? 'Update Contact' : 'Save Contact'}`;
+            if (id) {
+                const c = allContacts.find(x => x.id === id);
+                if (c) {
+                    document.getElementById('contact-id').value = c.id;
+                    document.getElementById('contact-name').value = c.name;
+                    document.getElementById('contact-phone').value = c.phone;
+                    document.getElementById('contact-email').value = c.email;
+                }
+            }
+            document.getElementById('contact-modal').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('contact-modal').style.display = 'none';
+            editingId = null;
+        }
+
+        document.getElementById('contact-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.getElementById('modal-save-btn');
+            btn.disabled = true;
+            btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+
+            const body = {
+                name: document.getElementById('contact-name').value,
+                phone: document.getElementById('contact-phone').value,
+                email: document.getElementById('contact-email').value
+            };
+
+            try {
+                const url = editingId ? `/api/contacts/${editingId}` : '/api/contacts';
+                const method = editingId ? 'PUT' : 'POST';
+                const res = await fetch(url, { method, headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+                if (res.ok) { closeModal(); loadContacts(); }
+                else { const d = await res.json(); alert('Error: ' + (d.error || 'Unknown')); }
+            } catch (err) { alert('Network error.'); }
+            btn.disabled = false;
+            btn.innerHTML = `<i class="fas fa-save"></i> ${editingId ? 'Update Contact' : 'Save Contact'}`;
+        });
+
+        async function deleteContact(id) {
+            if (!confirm('Permanently delete this contact? This cannot be undone.')) return;
+            await fetch(`/api/contacts/${id}`, { method: 'DELETE' });
+            loadContacts();
+        }
+
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/login';
+        });
+
+        loadContacts();
+    </script>
+</body>
+</html>

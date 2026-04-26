@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/public/admin/style.css">
+</head>
+<body>
+    <div class="admin-layout">
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <i class="fas fa-building"></i>
+                <h2>Admin Panel</h2>
+            </div>
+            <nav class="sidebar-nav">
+                <a href="/public/admin/index.html" class="nav-item active">
+                    <i class="fas fa-home"></i><span>Dashboard</span>
+                </a>
+                <a href="/public/admin/settings.html" class="nav-item">
+                    <i class="fas fa-cog"></i><span>Settings</span>
+                </a>
+                <a href="/public/admin/projects.html" class="nav-item">
+                    <i class="fas fa-building"></i><span>Projects</span>
+                </a>
+                <a href="/public/admin/contacts.html" class="nav-item">
+                    <i class="fas fa-address-book"></i><span>Contact List</span>
+                </a>
+                <a href="/main" class="nav-item">
+                    <i class="fas fa-external-link-alt"></i><span>View Website</span>
+                </a>
+                <a href="#" id="logout-link" class="nav-item logout">
+                    <i class="fas fa-sign-out-alt"></i><span>Logout</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="main-content">
+            <div class="top-bar">
+                <div class="page-title">
+                    <h1>Dashboard</h1>
+                    <p>Welcome back! Here's an overview of your website.</p>
+                </div>
+                <div class="user-info">
+                    <i class="fas fa-user-circle"></i>
+                    <span>Admin</span>
+                </div>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e3f2fd; color: #1565c0;">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="stat-projects">0</div>
+                        <div class="stat-label">Active Projects</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #f3e5f5; color: #7b1fa2;">
+                        <i class="fas fa-address-book"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="stat-contacts">0</div>
+                        <div class="stat-label">Contact Entries</div>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: #e8f5e9; color: #2e7d32;">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-info">
+                        <div class="stat-number" id="stat-deleted">0</div>
+                        <div class="stat-label">Deleted Projects</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="quick-actions">
+                <h3>Quick Actions</h3>
+                <div class="action-buttons">
+                    <a href="/public/admin/settings.html" class="action-btn">
+                        <i class="fas fa-cog"></i><span>Edit Website Settings</span>
+                    </a>
+                    <a href="/public/admin/projects.html" class="action-btn">
+                        <i class="fas fa-plus"></i><span>Add New Project</span>
+                    </a>
+                    <a href="/public/admin/contacts.html" class="action-btn">
+                        <i class="fas fa-envelope"></i><span>View Contact List</span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="recent-section">
+                <h3>Recent Projects</h3>
+                <div id="recent-projects"><div class="loading-cell">Loading...</div></div>
+            </div>
+        </main>
+    </div>
+
+    <script src="/public/admin/script.js"></script>
+    <script>
+        async function loadDashboard() {
+            try {
+                const [projectsRes, contactsRes] = await Promise.all([
+                    fetch('/api/projects?includeDeleted=true'),
+                    fetch('/api/contacts')
+                ]);
+                const projects = await projectsRes.json();
+                const contacts = await contactsRes.json();
+                const active = projects.filter(p => !p.is_deleted).length;
+                const deleted = projects.filter(p => p.is_deleted).length;
+
+                document.getElementById('stat-projects').textContent = active;
+                document.getElementById('stat-contacts').textContent = contacts.length;
+                document.getElementById('stat-deleted').textContent = deleted;
+
+                const recent = projects.filter(p => !p.is_deleted).slice(0, 5);
+                const container = document.getElementById('recent-projects');
+
+                if (recent.length === 0) {
+                    container.innerHTML = '<p class="empty-state"><i class="fas fa-folder-open"></i><span>No projects yet.</span></p>';
+                    return;
+                }
+
+                container.innerHTML = `
+                    <table class="data-table">
+                        <thead><tr><th>Name</th><th>Region</th><th>Category</th><th>Size</th><th>Year</th></tr></thead>
+                        <tbody>
+                            ${recent.map(p => `
+                                <tr>
+                                    <td><strong>${p.name}</strong></td>
+                                    <td><span class="badge badge-${p.region}">${p.region}</span></td>
+                                    <td>${p.category}</td>
+                                    <td>${p.size} m2</td>
+                                    <td>${p.year}</td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
+                `;
+            } catch (err) {
+                console.error(err);
+            }
+        }
+
+        document.getElementById('logout-link').addEventListener('click', async (e) => {
+            e.preventDefault();
+            await fetch('/logout', { method: 'POST' });
+            window.location.href = '/login';
+        });
+
+        loadDashboard();
+    </script>
+</body>
+</html>
