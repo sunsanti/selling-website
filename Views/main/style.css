@@ -289,10 +289,13 @@ section{
     transform-origin: left;
 }
 
-.header p{
+/* .header p{
     font-size: 1.75rem;
     color: var(--black);
     margin-right: -10rem;
+} */
+.header-right{
+  margin-right: -10rem;
 }
 .menu-btn{
   display: none;
@@ -301,7 +304,15 @@ section{
   border: none;
   cursor: pointer;
 }
-
+.admin-btn{
+  display: none;
+}
+.logout-btn{
+  display: none;
+}
+.phone-number{
+  font-size: 1.75rem;
+}
 /* home */
 .home{
     display: flex;
