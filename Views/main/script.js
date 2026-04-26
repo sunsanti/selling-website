@@ -1,3 +1,5 @@
+// ===================== STATE =====================
+// Static project data kept for fallback (projects loaded from DB via inline script in index.html)
 const projects = {
     project1: {
         smallContent: "A 25m² house designed to maximize every inch of space, offering comfort and practicality in a compact layout. Despite its small size, it provides all the essential amenities for modern and convenient living.",
@@ -36,7 +38,8 @@ const projects = {
         imgSrc: "images/project4.jpg"
     }
 };
-//ad session here
+
+// ===================== ADMIN SESSION =====================
 const adminBtn = document.getElementById("admin-btn");
 const logoutBtn = document.getElementById("logout-btn");
 
@@ -44,15 +47,15 @@ fetch("/check-auth")
     .then(res => res.json())
     .then(data => {
         if (data.loggedIn) {
-            adminBtn.style.display = "block"; // hiện nút
+            adminBtn.style.display = "block";
             logoutBtn.style.display = "block";
         } else {
-            adminBtn.style.display = "none"; // ẩn (cũng có thể bỏ dòng này)
+            adminBtn.style.display = "none";
             logoutBtn.style.display = "none";
         }
     })
     .catch(err => console.log(err));
-//delete session
+
 function logoutAdmin(){
     fetch("/logout", {
         method: "POST"
@@ -60,21 +63,24 @@ function logoutAdmin(){
     .then(res => res.text())
     .then(data => {
         console.log(data);
-        // reload hoặc chuyển trang
         window.location.reload();
     })
     .catch(err => console.log(err));
 }
 
+// ===================== POPUP HANDLERS (fallback for non-DB projects) =====================
+// Hover events for static projects in script.js are superseded by DB-loaded version in index.html inline script
+// This ensures backward compatibility if DB is not yet set up
 
 document.querySelectorAll('.feature-image').forEach(img => {
     const type = img.dataset.type;
     const overlay = img.querySelector('.overlay-text');
 
     img.addEventListener('mouseenter', () => {
-        console.log("Hover vào:", type);
-        overlay.textContent = projects[type].detail1; 
-        overlay.style.opacity = 1;
+        if (projects[type]) {
+            overlay.textContent = projects[type].detail1;
+            overlay.style.opacity = 1;
+        }
     });
 
     img.addEventListener('mouseleave', () => {
@@ -84,7 +90,6 @@ document.querySelectorAll('.feature-image').forEach(img => {
 
 function openPopup(type){
     const project = projects[type];
-
     if(!project) return;
 
     document.getElementById("popup-small-content").innerText = project.smallContent;
@@ -97,6 +102,7 @@ function openPopup(type){
 
     document.getElementById("popup").style.display = "flex";
 }
+
 window.onclick = function(event) {
     const popup = document.getElementById("popup");
     const fillpopup = document.getElementById("fill-popup");
@@ -111,7 +117,7 @@ function fillInfoPopup(){
     document.getElementById("fill-popup").style.display = "flex";
 }
 
-
+// ===================== JQUERY =====================
 $(document).ready(function(){
 
     $('.region').click(function(){
@@ -123,7 +129,7 @@ $(document).ready(function(){
             $('.feature-project .feature-item').show(400);
         }
         else{
-            $('.feature-project .feature-item').not('.' +filter).hide(200);
+            $('.feature-project .feature-item').hide(200);
             $('.feature-project .feature-item').filter('.' +filter).show(200);
         }
 

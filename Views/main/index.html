@@ -11,7 +11,7 @@
 <body>
     <!-- This will be the header of the website -->
     <header class="header">
-        <a href="#" class="logo"> <i class="fas"></i> LOGO</a>
+        <a href="#" class="logo"> <i class="fas"></i> <span id="site-logo">LOGO</span></a>
 
         <nav class="navbar">
                 <a class = 'nav-item' href="#about-us">About us</a>
@@ -19,15 +19,14 @@
                 <a class = 'nav-item' href="#services">Services</a>
                 <a class = 'nav-item' href="#footer">Contract</a>
         </nav>
-        <p>phone number</p
-
+        <p id="site-phone">phone number</p>
             <abc></abc>
         <button class="menu-btn">
             <i class="fa-solid fa-bars"></i>
         </button>
 
 
-        <button id="admin-btn" style="display: none;">
+        <button id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">
             <div>quan tri vien</div>
         </button>
         <hr>
@@ -378,21 +377,21 @@
             <div class="fill-content">
                 <div class="name-box">
                     <span>NAME</span><br>
-                    <input type="text" placeholder="Enter your name">
+                    <input type="text" id="contact-name" placeholder="Enter your name">
                 </div>
 
                 <div class="phone-box">
                     <span>PHONE</span><br>
-                    <input type="text" placeholder="Enter your phone number">
+                    <input type="text" id="contact-phone" placeholder="Enter your phone number">
                 </div>
 
                 <div class="email-box">
                     <span>EMAIL</span><br>
-                    <input type="text" placeholder="Enter your email">
+                    <input type="text" id="contact-email" placeholder="Enter your email">
                 </div>
             </div>
             <div class="submit-btn">
-                <a href="">SUBMIT</a>
+                <a href="#" id="contact-submit">SUBMIT</a>
             </div>
             </div>
         </div>
@@ -400,6 +399,144 @@
 </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+    <script>
+        // Load settings from database
+        (async function loadSettings() {
+            try {
+                const res = await fetch('/api/admin/settings');
+                const data = await res.json();
+                if (data.success && data.data) {
+                    document.getElementById('site-logo').textContent = data.data.logo || 'LOGO';
+                    document.getElementById('site-phone').textContent = data.data.phone || 'phone number';
+                    if (data.data.main_image) {
+                        document.querySelector('.home-image img').src = data.data.main_image;
+                    }
+                }
+            } catch (e) {
+                console.log('Settings not loaded:', e);
+            }
+        })();
+
+        // Load projects from database and render
+        async function loadProjectsFromDB() {
+            try {
+                const res = await fetch('/api/admin/projects');
+                const data = await res.json();
+                if (data.success && data.data && data.data.length > 0) {
+                    renderProjects(data.data);
+                }
+            } catch (e) {
+                console.log('Projects not loaded:', e);
+            }
+        }
+
+        function renderProjects(projects) {
+            // Group projects by area for the two lists
+            const sydney = projects.filter(p => p.area === 'sydney' || p.area === 'melbourne');
+            const others = projects.filter(p => p.area === 'brisbane' || p.area === 'goldcoast');
+
+            // Update feature-list1
+            const list1 = document.querySelector('.feature-list1');
+            if (list1) {
+                list1.innerHTML = sydney.map(p => `
+                    <div class="feature-item ${p.area}">
+                        <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
+                            <img src="${p.image_path}" alt="${p.name}">
+                            <div class="overlay-text"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Update feature-list2
+            const list2 = document.querySelector('.feature-list2');
+            if (list2) {
+                list2.innerHTML = others.map(p => `
+                    <div class="feature-item ${p.area}">
+                        <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
+                            <img src="${p.image_path}" alt="${p.name}">
+                            <div class="overlay-text"></div>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            // Reattach hover events
+            attachHoverEvents();
+        }
+
+        function openPopupFromDB(el) {
+            const projectId = el.dataset.id;
+            const img = el.querySelector('img');
+
+            // Find project data
+            fetch('/api/admin/projects/' + projectId)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data) {
+                        const p = data.data;
+                        document.getElementById('popup-small-content').textContent = p.small_content || '';
+                        document.getElementById('popup-right1').textContent = p.name || '';
+                        document.getElementById('popup-right2').textContent = p.square_meters || '-';
+                        document.getElementById('popup-right3').textContent = p.category || '-';
+                        document.getElementById('popup-right4').textContent = p.year || '-';
+                        document.getElementById('popup-right5').textContent = p.style || '-';
+                        document.getElementById('popup-image').src = p.image_path || img.src;
+                        document.getElementById('popup').style.display = 'flex';
+                    }
+                });
+        }
+
+        function attachHoverEvents() {
+            document.querySelectorAll('.feature-image').forEach(img => {
+                const overlay = img.querySelector('.overlay-text');
+                img.addEventListener('mouseenter', () => {
+                    const name = img.dataset.type || '';
+                    overlay.textContent = name;
+                    overlay.style.opacity = 1;
+                });
+                img.addEventListener('mouseleave', () => {
+                    overlay.style.opacity = 0;
+                });
+            });
+        }
+
+        // Init
+        loadProjectsFromDB();
+
+        // Contact form submission
+        document.getElementById('contact-submit').addEventListener('click', async (e) => {
+            e.preventDefault();
+            const name = document.getElementById('contact-name').value.trim();
+            const phone = document.getElementById('contact-phone').value.trim();
+            const email = document.getElementById('contact-email').value.trim();
+
+            if (!name) {
+                alert('Please enter your name');
+                return;
+            }
+
+            try {
+                const res = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, phone, email })
+                });
+                const result = await res.json();
+                if (result.success) {
+                    alert('Thank you! We will contact you soon.');
+                    document.getElementById('contact-name').value = '';
+                    document.getElementById('contact-phone').value = '';
+                    document.getElementById('contact-email').value = '';
+                    document.getElementById('fill-popup').style.display = 'none';
+                } else {
+                    alert(result.message || 'Error sending contact');
+                }
+            } catch (err) {
+                alert('Error sending contact');
+            }
+        });
+    </script>
     <script src="script.js"></script>
 </body>
 </html>
