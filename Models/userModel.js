@@ -1,6 +1,4 @@
-const { sql, poolPromise } = require('../config/database.js');
-
-const pool = require('../config/database'); // nhớ đúng path
+const pool = require('../config/database');
 
 const checkCredentials = async (username, password) => {
     try {
@@ -9,7 +7,7 @@ const checkCredentials = async (username, password) => {
         }
 
         const [rows] = await pool.query(
-            'SELECT * FROM users WHERE username = ? AND password = ?',
+            'SELECT * FROM accounts WHERE username = ? AND password = ?',
             [username, password]
         );
 
@@ -19,10 +17,6 @@ const checkCredentials = async (username, password) => {
         console.error("Lỗi khi truy vấn dữ liệu:", error);
         throw error;
     }
-};
-
-module.exports = {
-    checkCredentials
 };
 
 module.exports = {

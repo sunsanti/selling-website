@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Panel</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<div class="admin-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-header">
+            <h2>Admin Panel</h2>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="#" class="nav-item active" data-section="dashboard">
+                <i class="fas fa-tachometer-alt"></i>
+                <span>Dashboard</span>
+            </a>
+            <a href="#" class="nav-item" data-section="projects">
+                <i class="fas fa-building"></i>
+                <span>Projects</span>
+            </a>
+            <a href="#" class="nav-item" data-section="contacts">
+                <i class="fas fa-address-book"></i>
+                <span>Contact List</span>
+            </a>
+            <a href="#" class="nav-item" data-section="accounts">
+                <i class="fas fa-users"></i>
+                <span>Account</span>
+            </a>
+        </nav>
+        <div class="sidebar-footer">
+            <a href="/main" class="back-to-site">
+                <i class="fas fa-arrow-left"></i>
+                <span>Back to Site</span>
+            </a>
+            <button onclick="logoutAdmin()" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard Section -->
+        <section id="dashboard" class="content-section active">
+            <div class="section-header">
+                <h1>Dashboard</h1>
+            </div>
+            <div class="dashboard-stats">
+                <div class="stat-card">
+                    <i class="fas fa-building"></i>
+                    <div class="stat-info">
+                        <span class="stat-number" id="stat-projects">0</span>
+                        <span class="stat-label">Active Projects</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-address-book"></i>
+                    <div class="stat-info">
+                        <span class="stat-number" id="stat-contacts">0</span>
+                        <span class="stat-label">Total Contacts</span>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <i class="fas fa-users"></i>
+                    <div class="stat-info">
+                        <span class="stat-number" id="stat-accounts">0</span>
+                        <span class="stat-label">Accounts</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Form -->
+            <div class="settings-panel">
+                <h2><i class="fas fa-cog"></i> Website Settings</h2>
+                <form id="settings-form" class="settings-form">
+                    <div class="form-group">
+                        <label>Logo Text</label>
+                        <input type="text" id="setting-logo" placeholder="Enter logo text">
+                    </div>
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="setting-phone" placeholder="Enter phone number">
+                    </div>
+                    <div class="form-group">
+                        <label>Main Image Path</label>
+                        <input type="text" id="setting-main-image" placeholder="your-image.jpg">
+                    </div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save">
+                            <i class="fas fa-save"></i> Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </section>
+
+        <!-- Projects Section -->
+        <section id="projects" class="content-section">
+            <div class="section-header">
+                <h1>Projects Management</h1>
+                <button class="btn-add" onclick="openProjectModal()">
+                    <i class="fas fa-plus"></i> Add Project
+                </button>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="project-search" placeholder="Search projects by name or area...">
+                <button class="btn-search" onclick="searchProjects()">Search</button>
+                <button class="btn-reset" onclick="resetProjectSearch()">Reset</button>
+            </div>
+
+            <!-- Active Projects -->
+            <div class="project-section-title">
+                <h3><i class="fas fa-check-circle"></i> Active Projects</h3>
+            </div>
+            <div class="table-container" id="active-projects-container">
+                <table class="data-table" id="active-projects-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">#</th>
+                            <th style="width:80px">Image</th>
+                            <th>Name</th>
+                            <th>Area</th>
+                            <th>m²</th>
+                            <th>Category</th>
+                            <th>Year</th>
+                            <th style="width:120px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="active-projects-tbody">
+                    </tbody>
+                </table>
+            </div>
+
+            <!-- Inactive Projects -->
+            <div class="project-section-title">
+                <h3><i class="fas fa-ban" style="color:#e74c3c"></i> Inactive Projects</h3>
+            </div>
+            <div class="table-container inactive-table" id="inactive-projects-container">
+                <table class="data-table" id="inactive-projects-table">
+                    <thead>
+                        <tr>
+                            <th style="width:50px">#</th>
+                            <th style="width:80px">Image</th>
+                            <th>Name</th>
+                            <th>Area</th>
+                            <th>m²</th>
+                            <th>Category</th>
+                            <th>Year</th>
+                            <th style="width:150px">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="inactive-projects-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Contacts Section -->
+        <section id="contacts" class="content-section">
+            <div class="section-header">
+                <h1>Contact List</h1>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="contact-search" placeholder="Search by name, phone or email...">
+                <button class="btn-search" onclick="searchContacts()">Search</button>
+                <button class="btn-reset" onclick="resetContactSearch()">Reset</button>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="contacts-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="contacts-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Accounts Section -->
+        <section id="accounts" class="content-section">
+            <div class="section-header">
+                <h1>Account Management</h1>
+                <button class="btn-add" onclick="openAccountModal()">
+                    <i class="fas fa-plus"></i> Add Account
+                </button>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="accounts-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Username</th>
+                            <th>Created At</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="accounts-tbody">
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+</div>
+
+<!-- Project Modal -->
+<div id="project-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="project-modal-title">Add Project</h2>
+            <button class="modal-close" onclick="closeProjectModal()">&times;</button>
+        </div>
+        <form id="project-form" class="modal-form">
+            <input type="hidden" id="project-id">
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Project Name *</label>
+                    <input type="text" id="project-name" required>
+                </div>
+                <div class="form-group">
+                    <label>Area *</label>
+                    <select id="project-area" required>
+                        <option value="">Select Area</option>
+                        <option value="sydney">Sydney</option>
+                        <option value="melbourne">Melbourne</option>
+                        <option value="brisbane">Brisbane</option>
+                        <option value="goldcoast">Gold Coast</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Square Meters (m²)</label>
+                    <input type="number" id="project-square" min="1">
+                </div>
+                <div class="form-group">
+                    <label>Category</label>
+                    <input type="text" id="project-category" placeholder="e.g. Living Room">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Year</label>
+                    <input type="number" id="project-year" min="2000" max="2100">
+                </div>
+                <div class="form-group">
+                    <label>Style</label>
+                    <input type="text" id="project-style" placeholder="e.g. Modern">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Display Order</label>
+                <input type="number" id="project-order" min="0" value="0">
+            </div>
+            <div class="form-group">
+                <label>Media (Image / Video)</label>
+                <div class="media-upload-area" id="media-upload-area">
+                    <div class="media-upload-placeholder" id="media-placeholder">
+                        <i class="fas fa-cloud-upload-alt"></i>
+                        <p>Click to upload image or video</p>
+                        <span>Supports: JPG, PNG, GIF, MP4, WEBM</span>
+                    </div>
+                    <div class="media-preview" id="media-preview" style="display:none">
+                        <img id="media-preview-img" style="display:none">
+                        <video id="media-preview-video" controls style="display:none"></video>
+                        <button type="button" class="media-remove-btn" onclick="removeMediaPreview()">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="project-media-path">
+                <input type="file" id="project-media-file" accept="image/*,video/*" style="display:none">
+            </div>
+            <div class="form-group">
+                <label>Small Content</label>
+                <textarea id="project-content" rows="3" placeholder="Brief description..."></textarea>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeProjectModal()">Cancel</button>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Account Modal -->
+<div id="account-modal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="account-modal-title">Add Account</h2>
+            <button class="modal-close" onclick="closeAccountModal()">&times;</button>
+        </div>
+        <form id="account-form" class="modal-form">
+            <input type="hidden" id="account-id">
+            <div class="form-group">
+                <label>Username *</label>
+                <input type="text" id="account-username" required>
+            </div>
+            <div class="form-group">
+                <label>Password <span id="password-hint">(leave blank to keep current)</span></label>
+                <input type="password" id="account-password">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeAccountModal()">Cancel</button>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Confirm Modal -->
+<div id="confirm-modal" class="modal">
+    <div class="modal-content modal-small">
+        <div class="modal-header">
+            <h2>Confirm</h2>
+            <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <p id="confirm-message">Are you sure?</p>
+        </div>
+        <div class="form-actions">
+            <button type="button" class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
+            <button type="button" class="btn-danger" id="confirm-btn">Confirm</button>
+        </div>
+    </div>
+</div>
+
+<!-- Toast Notification -->
+<div id="toast" class="toast"></div>
+
+<script src="script.js"></script>
+</body>
+</html>
