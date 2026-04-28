@@ -1,18 +1,53 @@
 // ===================== STATE =====================
-let currentProjectFilter = 'active';
 let currentProjectKeyword = '';
 let currentEditId = null;
 let currentAccountEditId = null;
 let projectSearchTimeout = null;
-
-// ===================== INIT =====================
 let contactSearchTimeout = null;
 
+// ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
     setupNavigation();
     setupForms();
-    setupProjectFilter();
+
+    // Realtime project search with debounce
+    const searchInput = document.getElementById('project-search');
+    if (searchInput) {
+        searchInput.addEventListener('input', (e) => {
+            clearTimeout(projectSearchTimeout);
+            projectSearchTimeout = setTimeout(() => {
+                currentProjectKeyword = e.target.value.trim();
+                loadActiveProjects();
+                loadInactiveProjects();
+            }, 400);
+        });
+        searchInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                clearTimeout(projectSearchTimeout);
+                currentProjectKeyword = e.target.value.trim();
+                loadActiveProjects();
+                loadInactiveProjects();
+            }
+        });
+    }
+
+    // Media upload handlers
+    const uploadArea = document.getElementById('media-upload-area');
+    const fileInput = document.getElementById('project-media-file');
+    if (uploadArea && fileInput) {
+        uploadArea.addEventListener('click', () => fileInput.click());
+        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
+        uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            if (e.dataTransfer.files.length > 0) handleMediaFile(e.dataTransfer.files[0]);
+        });
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) handleMediaFile(e.target.files[0]);
+        });
+    }
 
     // Realtime contact search with debounce
     const contactSearchInput = document.getElementById('contact-search');
@@ -112,102 +147,108 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
 });
 
 // ===================== PROJECTS =====================
-function setupProjectFilter() {
-    document.querySelectorAll('.filter-btn').forEach(btn => {
-        btn.addEventListener('click', () => {
-            document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
-            btn.classList.add('active');
-            currentProjectFilter = btn.dataset.filter;
-            if (currentProjectKeyword) {
-                searchProjects();
-            } else {
-                loadProjects();
-            }
-        });
-    });
-
-    // Realtime search with debounce
-    document.getElementById('project-search').addEventListener('input', (e) => {
-        clearTimeout(projectSearchTimeout);
-        projectSearchTimeout = setTimeout(() => {
-            currentProjectKeyword = e.target.value.trim();
-            if (currentProjectKeyword) {
-                searchProjects();
-            } else {
-                loadProjects();
-            }
-        }, 400);
-    });
-
-    // Enter key search
-    document.getElementById('project-search').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            clearTimeout(projectSearchTimeout);
-            currentProjectKeyword = e.target.value.trim();
-            if (currentProjectKeyword) {
-                searchProjects();
-            } else {
-                loadProjects();
-            }
-        }
-    });
-}
-
-async function loadProjects() {
-    try {
-        const res = await fetch(`/api/admin/projects/search?keyword=&status=${currentProjectFilter}`);
-        const data = await res.json();
-        if (!data.success) return;
-        renderProjectsTable(data.data);
-    } catch (error) {
-        console.error('Error loading projects:', error);
+function handleMediaFile(file) {
+    const acceptTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
+    if (!acceptTypes.includes(file.type)) {
+        showToast('Only JPG, PNG, GIF, MP4, WEBM allowed', 'error');
+        return;
     }
-}
-
-async function searchProjects() {
-    try {
-        const res = await fetch(
-            `/api/admin/projects/search?keyword=${encodeURIComponent(currentProjectKeyword)}&status=${currentProjectFilter}`
-        );
-        const data = await res.json();
-        if (!data.success) return;
-        renderProjectsTable(data.data);
-    } catch (error) {
-        console.error('Error searching projects:', error);
-    }
-}
-
-function resetProjectSearch() {
-    document.getElementById('project-search').value = '';
-    currentProjectKeyword = '';
-    loadProjects();
-}
-
-function renderProjectsTable(projects) {
-    const tbody = document.getElementById('projects-tbody');
-    if (!projects || projects.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;padding:30px;color:#95a5a6;">No projects found</td></tr>';
+    if (file.size > 50 * 1024 * 1024) {
+        showToast('File must be under 50MB', 'error');
         return;
     }
 
-    tbody.innerHTML = projects.map(p => `
+    document.getElementById('project-media-path').value = '';
+    document.getElementById('media-placeholder').style.display = 'none';
+    document.getElementById('media-preview').style.display = 'block';
+
+    if (file.type.startsWith('image/')) {
+        document.getElementById('media-preview-img').style.display = 'block';
+        document.getElementById('media-preview-img').src = URL.createObjectURL(file);
+        document.getElementById('media-preview-video').style.display = 'none';
+    } else {
+        document.getElementById('media-preview-video').style.display = 'block';
+        document.getElementById('media-preview-video').src = URL.createObjectURL(file);
+        document.getElementById('media-preview-img').style.display = 'none';
+    }
+
+    const hiddenInput = document.getElementById('project-media-file');
+    const dt = new DataTransfer();
+    dt.items.add(file);
+    hiddenInput.files = dt.files;
+}
+
+function removeMediaPreview() {
+    document.getElementById('project-media-file').value = '';
+    document.getElementById('project-media-path').value = '';
+    document.getElementById('media-placeholder').style.display = 'block';
+    document.getElementById('media-preview').style.display = 'none';
+    document.getElementById('media-preview-img').src = '';
+    document.getElementById('media-preview-video').src = '';
+}
+
+function loadActiveProjects() {
+    const keyword = currentProjectKeyword || '';
+    fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=active`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) renderActiveProjects(data.data);
+        });
+}
+
+function loadInactiveProjects() {
+    const keyword = currentProjectKeyword || '';
+    fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=inactive`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success) renderInactiveProjects(data.data);
+        });
+}
+
+function renderActiveProjects(projects) {
+    const tbody = document.getElementById('active-projects-tbody');
+    if (!projects || projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#95a5a6;">No active projects</td></tr>';
+        return;
+    }
+    tbody.innerHTML = projects.map((p, i) => `
         <tr>
-            <td>${p.id}</td>
-            <td><img src="${p.image_path || 'images/placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/60x40?text=No+Image'"></td>
+            <td>${i + 1}</td>
+            <td><img src="${p.image_path || 'placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/80x60?text=No+Img'"></td>
             <td>${escapeHtml(p.name)}</td>
             <td><span class="status-badge status-${p.area}">${capitalize(p.area)}</span></td>
             <td>${p.square_meters || '-'}</td>
             <td>${escapeHtml(p.category || '-')}</td>
             <td>${p.year || '-'}</td>
-            <td>${escapeHtml(p.style || '-')}</td>
-            <td><span class="status-badge ${p.status === 'active' ? 'status-active' : 'status-inactive'}">${p.status === 'active' ? 'Active' : 'Inactive'}</span></td>
             <td>
                 <div class="action-btns">
-                    ${p.status === 'inactive'
-                        ? `<button class="action-btn restore" onclick="restoreProject(${p.id})" title="Restore"><i class="fas fa-undo"></i></button>`
-                        : `<button class="action-btn edit" onclick="editProject(${p.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                           <button class="action-btn delete" onclick="confirmAction('Stop this project?', () => softDeleteProject(${p.id}))" title="Stop"><i class="fas fa-ban"></i></button>`
-                    }
+                    <button class="action-btn edit" onclick="editProject(${p.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Stop this project?', () => softDeleteProject(${p.id}))" title="Stop"><i class="fas fa-ban"></i></button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function renderInactiveProjects(projects) {
+    const tbody = document.getElementById('inactive-projects-tbody');
+    if (!projects || projects.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#95a5a6;">No inactive projects</td></tr>';
+        return;
+    }
+    tbody.innerHTML = projects.map((p, i) => `
+        <tr>
+            <td>${i + 1}</td>
+            <td><img src="${p.image_path || 'placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/80x60?text=No+Img'"></td>
+            <td>${escapeHtml(p.name)}</td>
+            <td><span class="status-badge status-${p.area}">${capitalize(p.area)}</span></td>
+            <td>${p.square_meters || '-'}</td>
+            <td>${escapeHtml(p.category || '-')}</td>
+            <td>${p.year || '-'}</td>
+            <td>
+                <div class="action-btns">
+                    <button class="action-btn restore" onclick="restoreProject(${p.id})" title="Restore"><i class="fas fa-undo"></i> Restore</button>
+                    <button class="action-btn delete" onclick="confirmAction('Permanently delete this project?', () => permanentlyDeleteProject(${p.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -218,10 +259,7 @@ async function editProject(id) {
     try {
         const res = await fetch(`/api/admin/projects/${id}`);
         const data = await res.json();
-        if (!data.success) {
-            showToast('Project not found', 'error');
-            return;
-        }
+        if (!data.success) { showToast('Project not found', 'error'); return; }
         const p = data.data;
         currentEditId = id;
         document.getElementById('project-modal-title').textContent = 'Edit Project';
@@ -233,8 +271,19 @@ async function editProject(id) {
         document.getElementById('project-year').value = p.year || '';
         document.getElementById('project-style').value = p.style || '';
         document.getElementById('project-order').value = p.display_order || 0;
-        document.getElementById('project-image').value = p.image_path || '';
         document.getElementById('project-content').value = p.small_content || '';
+        document.getElementById('project-media-path').value = p.image_path || '';
+
+        if (p.image_path) {
+            document.getElementById('media-placeholder').style.display = 'none';
+            document.getElementById('media-preview').style.display = 'block';
+            document.getElementById('media-preview-img').style.display = 'block';
+            document.getElementById('media-preview-img').src = p.image_path;
+            document.getElementById('media-preview-video').style.display = 'none';
+        } else {
+            removeMediaPreview();
+        }
+
         document.getElementById('project-modal').style.display = 'flex';
     } catch (error) {
         showToast('Error loading project', 'error');
@@ -246,6 +295,7 @@ function openProjectModal() {
     document.getElementById('project-modal-title').textContent = 'Add Project';
     document.getElementById('project-form').reset();
     document.getElementById('project-id').value = '';
+    removeMediaPreview();
     document.getElementById('project-modal').style.display = 'flex';
 }
 
@@ -259,8 +309,9 @@ async function softDeleteProject(id) {
         const res = await fetch(`/api/admin/projects/${id}/soft-delete`, { method: 'PUT' });
         const data = await res.json();
         if (data.success) {
-            showToast('Project stopped successfully', 'success');
-            loadProjects();
+            showToast('Project stopped', 'success');
+            loadActiveProjects();
+            loadInactiveProjects();
         } else {
             showToast(data.message || 'Error', 'error');
         }
@@ -274,8 +325,9 @@ async function restoreProject(id) {
         const res = await fetch(`/api/admin/projects/${id}/restore`, { method: 'PUT' });
         const data = await res.json();
         if (data.success) {
-            showToast('Project restored successfully', 'success');
-            loadProjects();
+            showToast('Project restored', 'success');
+            loadActiveProjects();
+            loadInactiveProjects();
         } else {
             showToast(data.message || 'Error', 'error');
         }
@@ -284,9 +336,57 @@ async function restoreProject(id) {
     }
 }
 
+async function permanentlyDeleteProject(id) {
+    try {
+        const res = await fetch(`/api/admin/projects/${id}`, { method: 'DELETE' });
+        const data = await res.json();
+        if (data.success) {
+            showToast('Project permanently deleted', 'success');
+            loadInactiveProjects();
+        } else {
+            showToast(data.message || 'Error', 'error');
+        }
+    } catch (error) {
+        showToast('Error deleting project', 'error');
+    }
+}
+
+function resetProjectSearch() {
+    document.getElementById('project-search').value = '';
+    currentProjectKeyword = '';
+    loadActiveProjects();
+    loadInactiveProjects();
+}
+
 document.getElementById('project-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const data = {
+    const fileInput = document.getElementById('project-media-file');
+    const mediaPath = document.getElementById('project-media-path').value;
+    let imagePath = mediaPath;
+
+    if (fileInput.files.length > 0) {
+        showToast('Uploading media...', 'info');
+        const formData = new FormData();
+        formData.append('media', fileInput.files[0]);
+        try {
+            const uploadRes = await fetch('/api/admin/projects/upload', {
+                method: 'POST',
+                body: formData
+            });
+            const uploadData = await uploadRes.json();
+            if (uploadData.success) {
+                imagePath = uploadData.path;
+            } else {
+                showToast(uploadData.message || 'Upload failed', 'error');
+                return;
+            }
+        } catch (error) {
+            showToast('Upload error', 'error');
+            return;
+        }
+    }
+
+    const payload = {
         name: document.getElementById('project-name').value,
         area: document.getElementById('project-area').value,
         square_meters: document.getElementById('project-square').value,
@@ -294,7 +394,7 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
         year: document.getElementById('project-year').value,
         style: document.getElementById('project-style').value,
         display_order: document.getElementById('project-order').value,
-        image_path: document.getElementById('project-image').value,
+        image_path: imagePath,
         small_content: document.getElementById('project-content').value
     };
 
@@ -304,13 +404,15 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
         const res = await fetch(url, {
             method,
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(data)
+            body: JSON.stringify(payload)
         });
         const result = await res.json();
         if (result.success) {
             showToast(currentEditId ? 'Project updated!' : 'Project added!', 'success');
             closeProjectModal();
-            loadProjects();
+            removeMediaPreview();
+            loadActiveProjects();
+            loadInactiveProjects();
         } else {
             showToast(result.message || 'Error', 'error');
         }
@@ -318,6 +420,16 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
         showToast('Error saving project', 'error');
     }
 });
+
+async function searchProjects() {
+    loadActiveProjects();
+    loadInactiveProjects();
+}
+
+function loadProjects() {
+    loadActiveProjects();
+    loadInactiveProjects();
+}
 
 // ===================== CONTACTS =====================
 async function loadContacts() {

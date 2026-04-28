@@ -212,34 +212,40 @@ function computeContactRelevance(keyword, contact) {
 }
 
 // ===================== PROJECT SEARCH =====================
-async function searchProjects(keyword) {
-    if (!keyword || keyword.trim().length === 0) {
-        const [rows] = await pool.query(
-            'SELECT * FROM projects WHERE status = "active" ORDER BY display_order ASC, id DESC'
-        );
-        return rows;
-    }
-
-    const kw = keyword.trim();
+async function searchProjects(keyword, status = 'active') {
+    const kw = keyword ? keyword.trim() : '';
 
     // Lấy tất cả projects
     const [rows] = await pool.query(
         'SELECT * FROM projects ORDER BY display_order ASC, id DESC'
     );
 
+    // Filter theo status trước
+    let filtered = rows;
+    if (status === 'active') {
+        filtered = rows.filter(p => p.status === 'active');
+    } else if (status === 'inactive') {
+        filtered = rows.filter(p => p.status === 'inactive');
+    }
+
+    // Không có keyword → trả kết quả đã filter
+    if (!kw) {
+        return filtered;
+    }
+
     // Tính relevance score
-    const scored = rows.map(project => ({
+    const scored = filtered.map(project => ({
         ...project,
         relevance: computeRelevance(kw, project)
     }));
 
     // Lọc: relevance > 0
-    const filtered = scored.filter(p => p.relevance > 0);
+    const result = scored.filter(p => p.relevance > 0);
 
     // Sắp xếp theo relevance giảm dần
-    filtered.sort((a, b) => b.relevance - a.relevance);
+    result.sort((a, b) => b.relevance - a.relevance);
 
-    return filtered;
+    return result;
 }
 
 // ===================== CONTACT SEARCH =====================

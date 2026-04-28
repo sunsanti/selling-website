@@ -4,7 +4,10 @@ const projectModel = require('../Models/projectModel');
 const contactModel = require('../Models/contactModel');
 const accountModel = require('../Models/accountModel');
 const searchModel = require('../Models/searchModel');
+const uploadService = require('../Services/uploadService');
+const renumberService = require('../Services/renumberService');
 
+// ===================== ADMIN PAGE =====================
 const getAdminPage = (req, res) => {
     if (!req.session.user) {
         return res.redirect('/login');
@@ -27,7 +30,9 @@ const updateSettings = async (req, res) => {
         const { logo, phone, main_image } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
-        if (main_image !== undefined) await settingModel.updateSetting('main_image', main_image);
+        if (main_image !== undefined) {
+            await settingModel.updateSetting('main_image', main_image.replace(/^\/images\//, ''));
+        }
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -74,9 +79,10 @@ const createProject = async (req, res) => {
         if (!name || !area) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
         }
+        const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
         const id = await projectModel.createProject({
             name, area, square_meters, category, year, style,
-            small_content, image_path, display_order
+            small_content, image_path: cleanImagePath, display_order
         });
         res.json({ success: true, message: 'Thêm dự án thành công', id });
     } catch (error) {
@@ -87,9 +93,10 @@ const createProject = async (req, res) => {
 const updateProject = async (req, res) => {
     try {
         const { name, area, square_meters, category, year, style, small_content, image_path, display_order } = req.body;
+        const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
         const success = await projectModel.updateProject(req.params.id, {
             name, area, square_meters, category, year, style,
-            small_content, image_path, display_order
+            small_content, image_path: cleanImagePath, display_order
         });
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
@@ -124,6 +131,31 @@ const restoreProject = async (req, res) => {
     }
 };
 
+const deleteProject = async (req, res) => {
+    try {
+        const success = await projectModel.deleteProject(req.params.id);
+        if (!success) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
+        }
+        // Renumber display_order after deletion
+        await renumberService.renumberProjectDisplayOrder();
+        res.json({ success: true, message: 'Đã xóa vĩnh viễn dự án' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// ===================== PROJECT SEARCH =====================
+const searchProjects = async (req, res) => {
+    try {
+        const { keyword, status } = req.query;
+        const projects = await searchModel.searchProjects(keyword || '', status || 'active');
+        res.json({ success: true, data: projects });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
 // ===================== CONTACTS =====================
 const getContacts = async (req, res) => {
     try {
@@ -144,31 +176,14 @@ const searchContacts = async (req, res) => {
     }
 };
 
-// ===================== PROJECT SEARCH =====================
-const searchProjects = async (req, res) => {
-    try {
-        const { keyword } = req.query;
-        const { status } = req.query; // active, inactive, all
-        let projects = await searchModel.searchProjects(keyword || '');
-
-        if (status === 'active') {
-            projects = projects.filter(p => p.status === 'active');
-        } else if (status === 'inactive') {
-            projects = projects.filter(p => p.status === 'inactive');
-        }
-
-        res.json({ success: true, data: projects });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Lỗi server' });
-    }
-};
-
 const deleteContact = async (req, res) => {
     try {
         const success = await contactModel.deleteContact(req.params.id);
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy liên hệ' });
         }
+        // Renumber IDs after deletion
+        await renumberService.renumberContactIds();
         res.json({ success: true, message: 'Xóa thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -234,6 +249,15 @@ const deleteAccount = async (req, res) => {
     }
 };
 
+// ===================== UPLOAD =====================
+const handleUpload = (req, res) => {
+    if (!req.file) {
+        return res.status(400).json({ success: false, message: 'No file uploaded' });
+    }
+    const fileUrl = `/uploads/${req.file.filename}`;
+    res.json({ success: true, path: fileUrl });
+};
+
 module.exports = {
     getAdminPage,
     getSettings,
@@ -245,12 +269,15 @@ module.exports = {
     updateProject,
     softDeleteProject,
     restoreProject,
+    deleteProject,
+    searchProjects,
     getContacts,
     searchContacts,
     deleteContact,
-    searchProjects,
     getAccounts,
     createAccount,
     updateAccount,
-    deleteAccount
+    deleteAccount,
+    handleUpload,
+    uploadMiddleware: uploadService.upload
 };

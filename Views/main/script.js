@@ -8,7 +8,7 @@ const projects = {
         detail3: "LIVING ROOM",
         detail4: "2024",
         detail5: "MODERN",
-        imgSrc: "images/project1_1.jpg"
+        imgSrc: "project1_1.jpg"
     },
     project2: {
         smallContent: "A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.",
@@ -17,7 +17,7 @@ const projects = {
         detail3: "BEDROOM ROOM",
         detail4: "2025",
         detail5: "MODERN",
-        imgSrc: "images/project2_2.jpg"
+        imgSrc: "project2_2.jpg"
     },
     project3: {
         smallContent: "A modern living room connected to a small private garden, bringing natural light and fresh air into the home. This relaxing space blends indoor comfort with a touch of greenery, creating a calm and inviting atmosphere.",
@@ -26,7 +26,7 @@ const projects = {
         detail3: "LIVING ROOM",
         detail4: "2023",
         detail5: "MODERN",
-        imgSrc: "images/project3_3.jpg"
+        imgSrc: "project3_3.jpg"
     },
     project4: {
         smallContent: "A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.",
@@ -35,7 +35,7 @@ const projects = {
         detail3: "BEDROOM ROOM",
         detail4: "2025",
         detail5: "MODERN",
-        imgSrc: "images/project4.jpg"
+        imgSrc: "project4.jpg"
     }
 };
 
@@ -122,17 +122,10 @@ $(document).ready(function(){
 
     $('.region').click(function(){
         $(this).addClass('active').siblings().removeClass('active');
-
-        var filter = $(this).attr('data-filter')
-
-        if(filter == 'all'){
-            $('.feature-project .feature-item').show(400);
+        var filter = $(this).attr('data-filter');
+        if (typeof filterProjects === 'function') {
+            filterProjects(filter);
         }
-        else{
-            $('.feature-project .feature-item').hide(200);
-            $('.feature-project .feature-item').filter('.' +filter).show(200);
-        }
-
     });
 
     $('.feature-project').magnificPopup({

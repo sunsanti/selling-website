@@ -89,6 +89,16 @@ const getInactiveProjects = async () => {
     }
 };
 
+const deleteProject = async (id) => {
+    try {
+        const [result] = await pool.query('DELETE FROM projects WHERE id = ?', [id]);
+        return result.affectedRows > 0;
+    } catch (error) {
+        console.error('Lỗi deleteProject:', error);
+        throw error;
+    }
+};
+
 module.exports = {
     getAllProjects,
     getProjectById,
@@ -96,5 +106,6 @@ module.exports = {
     updateProject,
     softDeleteProject,
     restoreProject,
-    getInactiveProjects
+    getInactiveProjects,
+    deleteProject
 };
