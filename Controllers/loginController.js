@@ -22,6 +22,7 @@ const handleLogin = async (req, res) => {
             // lưu session
             req.session.user = {
                 id: user.id,
+                name: user.name,
                 username: user.username
             };
 

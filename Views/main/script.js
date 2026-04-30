@@ -42,6 +42,9 @@ const projects = {
 // ===================== ADMIN SESSION =====================
 const adminBtn = document.getElementById("admin-btn");
 const logoutBtn = document.getElementById("logout-btn");
+const accountName = document.getElementById("account");
+const leftSite = document.querySelector(".left-site");
+
 
 fetch("/check-auth")
     .then(res => res.json())
@@ -49,13 +52,17 @@ fetch("/check-auth")
         if (data.loggedIn) {
             adminBtn.style.display = "block";
             logoutBtn.style.display = "block";
+            accountName.style.display = "block";
+            leftSite.classList.remove("hide-line");
         } else {
             adminBtn.style.display = "none";
             logoutBtn.style.display = "none";
+            accountName.style.display = "none";
+            leftSite.classList.add("hide-line");
         }
     })
     .catch(err => console.log(err));
-
+console.log(accountName);
 function logoutAdmin(){
     fetch("/logout", {
         method: "POST"

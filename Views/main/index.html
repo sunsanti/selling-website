@@ -18,21 +18,29 @@
                 <a class = 'nav-item' href="#feature-project">Project</a>
                 <a class = 'nav-item' href="#services">Services</a>
                 <a class = 'nav-item' href="#footer">Contract</a>
+                <a class = 'nav-item' id="admin-btn" style="display: none;color: red;" onclick="window.location.href='/admin'"> Admin</a>
         </nav>
-        <p id="site-phone">phone number</p>
-            <abc></abc>
-        <button class="menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
-
-        <button id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">
-            <div>quan tri vien</div>
-        </button>
-        <hr>
-        <button id="logout-btn" onclick="logoutAdmin()">
-            <div>logout</div>
-        </button>
+        <div class="header-right">
+            <!-- <div id="content-header-left" class="content-header-left">
+                <div id="admin-text" class="admin-text">Admin</div>
+            </div> -->
+            <div class="content-header-right">
+                <div class="left-site">
+                    <div id="site-phone" class="site-phone">phone number</div>
+                    <!-- <div class="account-name">Name</div> -->
+                </div>
+                <hr>
+                <div class="right-site">
+                    <div class="account-name" id="account">Name</div>
+                    <button id="logout-btn" onclick="logoutAdmin()">
+                        <div>logout</div>
+                    </button>
+                </div>
+                </div>
+                <button class="menu-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+        </div>
     </header>
 
 
