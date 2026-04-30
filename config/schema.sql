@@ -30,7 +30,7 @@ CREATE TABLE IF NOT EXISTS settings (
 INSERT IGNORE INTO settings (setting_key, setting_value) VALUES
 ('logo', 'LOGO'),
 ('phone', 'phone number'),
-('main_image', 'images/service3.jpg');
+('main_image', 'service3.jpg');
 
 -- ----------------------------
 -- 3. PROJECTS TABLE
@@ -51,12 +51,12 @@ CREATE TABLE IF NOT EXISTS projects (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert default projects
+-- Insert default projects (image_path: /photo.jpg → serve from root static)
 INSERT IGNORE INTO projects (name, area, square_meters, category, year, style, small_content, image_path, status, display_order) VALUES
-('QUANDUONG COMPLEX', 'sydney', 25, 'LIVING ROOM', 2024, 'MODERN', 'A 25m² house designed to maximize every inch of space, offering comfort and practicality in a compact layout. Despite its small size, it provides all the essential amenities for modern and convenient living.', 'images/project1_1.jpg', 'active', 1),
-('NGUYENTHIEN COMPLEX', 'melbourne', 20, 'BEDROOM ROOM', 2025, 'MODERN', 'A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.', 'images/project2_2.jpg', 'active', 2),
-('TUANANH COMPLEX', 'brisbane', 30, 'LIVING ROOM', 2023, 'MODERN', 'A modern living room connected to a small private garden, bringing natural light and fresh air into the home. This relaxing space blends indoor comfort with a touch of greenery, creating a calm and inviting atmosphere.', 'images/project3_3.jpg', 'active', 3),
-('PHONG COMPLEX', 'goldcoast', 25, 'BEDROOM ROOM', 2025, 'MODERN', 'A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.', 'images/project4.jpg', 'active', 4);
+('QUANDUONG COMPLEX', 'sydney', 25, 'LIVING ROOM', 2024, 'MODERN', 'A 25m² house designed to maximize every inch of space, offering comfort and practicality in a compact layout. Despite its small size, it provides all the essential amenities for modern and convenient living.', 'project1_1.jpg', 'active', 1),
+('NGUYENTHIEN COMPLEX', 'melbourne', 20, 'BEDROOM ROOM', 2025, 'MODERN', 'A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.', 'project2_2.jpg', 'active', 2),
+('TUANANH COMPLEX', 'brisbane', 30, 'LIVING ROOM', 2023, 'MODERN', 'A modern living room connected to a small private garden, bringing natural light and fresh air into the home. This relaxing space blends indoor comfort with a touch of greenery, creating a calm and inviting atmosphere.', 'project3_3.jpg', 'active', 3),
+('PHONG COMPLEX', 'goldcoast', 25, 'BEDROOM ROOM', 2025, 'MODERN', 'A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.', 'project4.jpg', 'active', 4);
 
 -- ----------------------------
 -- 4. CONTACTS TABLE (from contact form)

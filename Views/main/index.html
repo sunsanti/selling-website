@@ -18,22 +18,28 @@
                 <a class = 'nav-item' href="#feature-project">Project</a>
                 <a class = 'nav-item' href="#services">Services</a>
                 <a class = 'nav-item' href="#footer">Contract</a>
+                <a class = 'nav-item' id="admin-btn" style="display: none;color: red;" onclick="window.location.href='/admin'"> Admin</a>
         </nav>
         <div class="header-right">
-            <div id="site-phone" class="phone-number">phone num</div>
-
-        <button class="menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
-
-        <button class="admin-btn" id="admin-btn" onclick="window.location.href='/admin'">
-            <div>quan tri vien</div>
-        </button>
-        <hr>
-        <button class="logout-btn" id="logout-btn" onclick="logoutAdmin()">
-            <div>logout</div>
-        </button>
+            <!-- <div id="content-header-left" class="content-header-left">
+                <div id="admin-text" class="admin-text">Admin</div>
+            </div> -->
+            <div class="content-header-right">
+                <div class="left-site">
+                    <div id="site-phone" class="site-phone">phone number</div>
+                    <!-- <div class="account-name">Name</div> -->
+                </div>
+                <hr>
+                <div class="right-site">
+                    <div class="account-name" id="account">Name</div>
+                    <button id="logout-btn" onclick="logoutAdmin()">
+                        <div>logout</div>
+                    </button>
+                </div>
+                </div>
+                <button class="menu-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
         </div>
     </header>
 
@@ -83,7 +89,7 @@
             </div>
             <div class="home-image">
                 <!-- làm sau -->
-                <img src="/service3.jpg" alt="">
+                <img src="service3.jpg" alt="">
             </div>
         </div>
     </section>
@@ -137,49 +143,7 @@
             <li class="region" data-filter="goldcoast">Goldcoast</li>
         </ul>
 
-        <div class="feature-list1">
-            <div class="feature-item">
-                <div class="feature-image" data-type="project1" onclick="openPopup('project1')">
-                    <img src="/project1_1.jpg" alt="">
-                    <div class="overlay-text"></div>
-                    <!-- <div class="explore">EXPLORE</div> -->
-                </div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-image" data-type="project2" onclick="openPopup('project2')">
-                    <img src="/project2_2.jpg" alt="">
-                    <div class="overlay-text"></div>
-                </div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-image" data-type="project1" onclick="openPopup('project1')">
-                    <img src="/project1_1.jpg" alt="">
-                    <div class="overlay-text"></div>
-                    <!-- <div class="explore">EXPLORE</div> -->
-                </div>
-            </div>
-        </div>
-        
-        <div class="feature-list2">
-            <div class="feature-item">
-                <div class="feature-image" data-type="project2" onclick="openPopup('project3')">
-                    <img src="/project3_3.jpg" alt="">
-                    <div class="overlay-text"></div>
-                </div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-image" data-type="project4" onclick="openPopup('project4')">
-                    <img src="/project4.jpg" alt="">
-                    <div class="overlay-text"></div>
-                </div>
-            </div>
-            <div class="feature-item">
-                <div class="feature-image" data-type="project3" onclick="openPopup('project3')">
-                    <img src="/project3_3.jpg" alt="">
-                    <div class="overlay-text"></div>
-                </div>
-            </div>
-        </div>
+        <div class="project-grid" id="project-grid"></div>
         
     </section>
 
@@ -213,7 +177,7 @@
                 </div>
             </div>
             <div class="image">
-                <img src="/service1.jpg" alt="">
+                <img src="service1.jpg" alt="">
             </div>
         </div>
         <div class="service-item">
@@ -242,7 +206,7 @@
                 </div>
             </div>
             <div class="image">
-                <img src="/service2.jpg" alt="">
+                <img src="service2.jpg" alt="">
             </div>
             
         </div>
@@ -272,7 +236,7 @@
                 </div>
             </div>
             <div class="image">
-                <img src="/service3_3.jpg" alt="">
+                <img src="service3_3.jpg" alt="">
             </div>
         </div>
 
@@ -369,7 +333,7 @@
         <div class="content">
             <div class="right">
                 <div class="image">
-                    <img src="/fillinfo.jpg" alt="">
+                    <img src="fillinfo.jpg" alt="">
                 </div>
             </div>
             <div class="left">
@@ -432,38 +396,35 @@
             }
         }
 
+        let currentFilter = 'sydney';
+        let allProjects = [];
+
         function renderProjects(projects) {
-            // Group projects by area for the two lists
-            const sydney = projects.filter(p => p.area === 'sydney' || p.area === 'melbourne');
-            const others = projects.filter(p => p.area === 'brisbane' || p.area === 'goldcoast');
+            allProjects = projects;
+            filterProjects(currentFilter);
+        }
 
-            // Update feature-list1
-            const list1 = document.querySelector('.feature-list1');
-            if (list1) {
-                list1.innerHTML = sydney.map(p => `
-                    <div class="feature-item ${p.area}">
-                        <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
-                            <img src="${p.image_path}" alt="${p.name}">
-                            <div class="overlay-text"></div>
-                        </div>
-                    </div>
-                `).join('');
+        function filterProjects(area) {
+            currentFilter = area;
+            const grid = document.getElementById('project-grid');
+            if (!grid) return;
+
+            const filtered = allProjects.filter(p => p.area === area);
+
+            if (filtered.length === 0) {
+                grid.innerHTML = '<p style="text-align:center; padding:2rem;">No projects in this area.</p>';
+                return;
             }
 
-            // Update feature-list2
-            const list2 = document.querySelector('.feature-list2');
-            if (list2) {
-                list2.innerHTML = others.map(p => `
-                    <div class="feature-item ${p.area}">
-                        <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
-                            <img src="${p.image_path}" alt="${p.name}">
-                            <div class="overlay-text"></div>
-                        </div>
+            grid.innerHTML = filtered.map(p => `
+                <div class="feature-item ${p.area}">
+                    <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
+                        <img src="${p.image_path}" alt="${p.name}">
+                        <div class="overlay-text"></div>
                     </div>
-                `).join('');
-            }
+                </div>
+            `).join('');
 
-            // Reattach hover events
             attachHoverEvents();
         }
 

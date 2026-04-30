@@ -250,11 +250,66 @@ section{
     background: white;
     box-shadow: var(--box-shadow);
 }
-
+.header-right {
+  display: flex;
+}
+.content-header-right{
+  display: flex;
+  align-self: center;
+  justify-content: space-between;
+}
+.site-phone{
+  font-size: 1.5rem;
+}
+.account-name{
+  font-size: 1.5rem;
+}
+.content-header-left {
+  align-self: center;
+  margin-right: 2rem;
+  border: 1.5px solid black;
+  border-radius: 50px;
+  padding: 10px 20px;
+  display: none;
+}
+.right-site{
+  margin-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  align-self: center;
+}
+.left-site{
+  display: flex;
+  flex-direction: column;
+  margin-right: 1rem;
+  position: relative;
+  align-self: center;
+  padding: 10px 0;
+}
+.left-site::after {
+  content: "";
+  position: absolute;
+  right: -10px;
+  top: 10%;
+  height: 100%; /* chỉnh chiều cao tùy ý */
+  width: 1px;
+  background-color: black;
+}
+.left-site.hide-line::after {
+  display: none;
+}
 .header .logo{
     font-size: 2rem;
     color: var(--black);
     margin-left: -10rem;
+}
+
+.header .navbar {
+  display: flex;
+} 
+
+.admin-text {
+  font-size: 1.5rem;
 }
 
 .header .navbar a{
@@ -438,17 +493,12 @@ section{
 .feature-project{
     width: 100%;
 }
-.feature-project .feature-list1,
-.feature-project .feature-list2 {
+.feature-project .project-grid {
     display: grid;
     position: relative;
     grid-template-columns: repeat(3, 1fr);
     margin: 0 6rem 10px;
 }
-
-/* .feature-project .feature-list2 {
-    border-bottom: 1px solid black;
-} */
 
 
 .feature-project .feature-item {
@@ -725,8 +775,7 @@ html{
 }
 
 /* feature trên tablet giữ nguyên cấu trúc lưới, có thể giảm margin */
-.feature-project .feature-list1,
-.feature-project .feature-list2 {
+.feature-project .project-grid {
     margin-left: 3rem;
     margin-right: 3rem;
 }
@@ -798,15 +847,13 @@ html{
 }
 
 /* feature project */
-.feature-project .feature-list1,
-.feature-project .feature-list2{
+.feature-project .project-grid {
     grid-template-columns:1fr;
     margin-left:2rem;
     margin-right:2rem;
 }
 
-.feature-project .feature-list1::after,
-.feature-project .feature-list2::after{
+.feature-project .project-grid::after {
     display:none;
 }
 
