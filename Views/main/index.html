@@ -18,21 +18,29 @@
                 <a class = 'nav-item' href="#feature-project">Project</a>
                 <a class = 'nav-item' href="#services">Services</a>
                 <a class = 'nav-item' href="#footer">Contract</a>
+                <a class = 'nav-item' id="admin-btn" style="display: none;color: red;" onclick="window.location.href='/admin'"> Admin</a>
         </nav>
-        <p id="site-phone">phone number</p>
-            <abc></abc>
-        <button class="menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-
-
-        <button id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">
-            <div>quan tri vien</div>
-        </button>
-        <hr>
-        <button id="logout-btn" onclick="logoutAdmin()">
-            <div>logout</div>
-        </button>
+        <div class="header-right">
+            <!-- <div id="content-header-left" class="content-header-left">
+                <div id="admin-text" class="admin-text">Admin</div>
+            </div> -->
+            <div class="content-header-right">
+                <div class="left-site">
+                    <div id="site-phone" class="site-phone">phone number</div>
+                    <!-- <div class="account-name">Name</div> -->
+                </div>
+                <hr>
+                <div class="right-site">
+                    <div class="account-name" id="account">Name</div>
+                    <button id="logout-btn" onclick="logoutAdmin()">
+                        <div>logout</div>
+                    </button>
+                </div>
+                </div>
+                <button class="menu-btn">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+        </div>
     </header>
 
 
@@ -237,15 +245,86 @@
     <!-- footer -->
     <section id="footer" class="footer">
 
-        <div class="share">
-            <a href="#" class="fab fa-facebook-f"></a>
-            <a href="#" class="fab fa-instagram"></a>
-            <a href="#" class="fab fa-twitter"></a>
-            <a href="#" class="fab fa-linkedin"></a>
-            <a href="#" class="fab fa-pinterest"></a>
-        </div>
+        <div class="footer-container">
+            
+            <div class="footer-person">
+                <div class="img-footer">
+                    <img src="/images/footer/Long.jpg" alt="">
+                </div>
+                <div class="line"></div>
+                <div class="footer-content">
+                    <div class="name">
+                        Hoang Long
+                    </div>
 
-        <div class="credit">created by <span>TAOWORK</span> | all rights reserved!</div>
+                    <div class="footer-detail">
+                        <div class="contact-row">
+                            <i class="fa-solid fa-envelope"></i>
+                            <a href="mailto:Leong@sealandproperty.com.au">
+                                Leong@sealandproperty.com.au
+                            </a>
+                        </div>
+                        <div class="contact-row">
+                            <i class="fa-solid fa-phone"></i>
+                            <a href="tel:+61432285678">
+                                + 61 432 285 678
+                            </a>
+                        </div>
+                        <div class="contact-row">
+                            <i class="fa-solid fa-phone"></i>
+                            <a href="tel:+84905160805">
+                                + 84 905 160 805
+                            </a>
+                        </div>
+                        <div class="contact-row">
+                            <i class="fa-brands fa-facebook"></i>
+                            <a href="https://www.facebook.com/longg1313?mibextid=wwXIfr&rdid=SOe0AlP4Tr18lZNm&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1H2JQrCdbP#">
+                                Hoang Long
+                            </a>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <div class="footer-person">
+                <div class="img-footer">
+                    <img src="/images/footer/Phat.jpg" alt="">
+                </div>
+                <div class="line"></div>
+                <div class="footer-content">
+                    <div class="name">
+                        Tran Minh Phat (Jeremy)
+                    </div>
+                    <div class="footer-detail">
+                        <div class="contact-row">
+                            <i class="fa-solid fa-envelope"></i>
+                            <a href="mailto:Jeremy@sealandproperty.com.au">
+                                Jeremy@sealandproperty.com.au
+                            </a>
+                        </div>
+                        <div class="contact-row">
+                            <i class="fa-solid fa-phone"></i>
+                            <a href="tel:+61452467893">
+                                +61 45 246 7893
+                            </a>
+                        </div>
+                        <div class="contact-row">
+                            <i class="fa-solid fa-phone"></i>
+                            <a href="tel:+84787665388">
+                                +84 787665388
+                            </a>
+                        </div>
+                        <div class="contact-row">
+                            <i class="fa-brands fa-facebook"></i>
+                            <a href="https://www.facebook.com/minhphat88?mibextid=wwXIfr&rdid=jIekGVNJ933bNXGh&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1D1ARJPSA1%2F%3Fmibextid%3DwwXIfr#">
+                                Minh Phat Tran
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
 
     </section>
 
