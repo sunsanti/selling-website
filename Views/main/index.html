@@ -11,23 +11,27 @@
 <body>
     <!-- This will be the header of the website -->
     <header class="header">
-        <a href="#" class="logo"> <i class="fas"></i> <span id="site-logo">LOGO</span></a>
+        <a href="#" class="logo" id="logo-link">
+            <span id="site-logo-text" style="display:none"></span>
+            <img id="site-logo-img" src="" alt="" style="display:none; height:40px; object-fit:contain;">
+        </a>
 
-        <nav class="navbar">
+        <nav class="navbar" id="main-navbar">
+                <div class="mobile-nav-header" style="display: none;">
+                    <div id="mobile-site-phone" class="mobile-site-phone"></div>
+                    <div id="mobile-account" class="mobile-account-name"></div>
+                </div>
                 <a class = 'nav-item' href="#about-us">About us</a>
                 <a class = 'nav-item' href="#feature-project">Project</a>
                 <a class = 'nav-item' href="#services">Services</a>
                 <a class = 'nav-item' href="#footer">Contract</a>
-                <a class = 'nav-item' id="admin-btn" style="display: none;color: red;" onclick="window.location.href='/admin'"> Admin</a>
+                <a class = 'nav-item desktop-admin-btn' id="admin-btn" style="display: none; color: red;" onclick="window.location.href='/admin'">Admin</a>
+                <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()" >logout</button>
         </nav>
         <div class="header-right">
-            <!-- <div id="content-header-left" class="content-header-left">
-                <div id="admin-text" class="admin-text">Admin</div>
-            </div> -->
             <div class="content-header-right">
                 <div class="left-site">
                     <div id="site-phone" class="site-phone">phone number</div>
-                    <!-- <div class="account-name">Name</div> -->
                 </div>
                 <hr>
                 <div class="right-site">
@@ -36,18 +40,21 @@
                         <div>logout</div>
                     </button>
                 </div>
-                </div>
-                <button class="menu-btn">
-                    <i class="fa-solid fa-bars"></i>
-                </button>
+            </div>
         </div>
+        <button class="menu-btn" id="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
     </header>
+
+    <!-- Mobile overlay backdrop -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
 
 
     <!-- home -->
     <section>
         <div class="home" id="home">
-            <div class="content">
+<div class="content">
                 <!-- <h3 class="content1">SOMETHING &<br></h3>
                 <h3 class="content2">REAL ESTATE</h3> -->
                 <div class="left">
@@ -89,7 +96,7 @@
             </div>
             <div class="home-image">
                 <!-- làm sau -->
-                <img src="service3.jpg" alt="">
+                <img src="/images/service3.jpg" alt="">
             </div>
         </div>
     </section>
@@ -98,7 +105,7 @@
     <section id="about-us" class="about-us">
         <h1 class="heading">About us</h1>
 
-        <div class="content">
+<div class="content">
             <div class="banner">
                 MANY BEAUTIFUL PLACES <br>
                 ARE WAITING FOR YOU TO SEE
@@ -152,7 +159,7 @@
         <h1 class="heading">Services</h1>
 
         <div class="service-item">
-            <div class="content">
+<div class="content">
                 <div class="box-content">
                     <div class="main-content">
                     <p>See more about our business</p>
@@ -177,11 +184,11 @@
                 </div>
             </div>
             <div class="image">
-                <img src="service1.jpg" alt="">
+                <img src="/images/service1.jpg" alt="">
             </div>
         </div>
         <div class="service-item">
-            <div class="content">
+<div class="content">
                 <div class="box-content">
                     <div class="main-content">
                     <p>Take a look at our projects</p>
@@ -206,12 +213,12 @@
                 </div>
             </div>
             <div class="image">
-                <img src="service2.jpg" alt="">
+                <img src="/images/service2.jpg" alt="">
             </div>
             
         </div>
        <div class="service-item">
-            <div class="content">
+<div class="content">
                 <div class="box-content">
                     <div class="main-content">
                     <p>Be confident to be one of our partner</p>
@@ -236,7 +243,7 @@
                 </div>
             </div>
             <div class="image">
-                <img src="service3_3.jpg" alt="">
+                <img src="/images/service3_3.jpg" alt="">
             </div>
         </div>
 
@@ -332,11 +339,12 @@
 <!-- pop up -->
 <div id="popup" class="popup">
   <div class="popup-content">
+    <span class="close-btn" onclick="closePopup()">&times;</span>
     <div class="title">
         LIVING ROOM DESIGN
     </div>
 
-    <div class="content">
+<div class="content">
         <div class="left">
             <div class="small-content" id="popup-small-content">
 
@@ -393,7 +401,20 @@
             </div>
         </div>
         <div class="right">
-            <img id="popup-image" src="" alt="">
+            <div class="popup-slider" id="popup-slider">
+                <div class="slider-container" id="slider-container">
+                    <!-- Images injected by JS -->
+                </div>
+                <button class="slider-btn prev" id="slider-prev" onclick="changeSlide(-1)">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button class="slider-btn next" id="slider-next" onclick="changeSlide(1)">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+                <div class="slider-thumbnails" id="slider-thumbnails">
+                    <!-- Thumbnails injected by JS -->
+                </div>
+            </div>
         </div>
     </div>
   </div>
@@ -401,10 +422,11 @@
 
 <div id="fill-popup" class="fill-popup">
     <div class="fill-popup-content">
-        <div class="content">
+        <span class="close-btn" onclick="closeFillPopup()">&times;</span>
+<div class="content">
             <div class="right">
                 <div class="image">
-                    <img src="fillinfo.jpg" alt="">
+                    <img src="/images/fillinfo.jpg" alt="">
                 </div>
             </div>
             <div class="left">
@@ -434,8 +456,7 @@
         </div>
     </div>
 </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/magnific-popup.js/1.1.0/jquery.magnific-popup.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
         // Load settings from database
         (async function loadSettings() {
@@ -443,10 +464,29 @@
                 const res = await fetch('/api/admin/settings');
                 const data = await res.json();
                 if (data.success && data.data) {
-                    document.getElementById('site-logo').textContent = data.data.logo || 'LOGO';
-                    document.getElementById('site-phone').textContent = data.data.phone || 'phone number';
+                    const logoVal = data.data.logo || '';
+                    if (logoVal) {
+                        const logoSrc = logoVal.startsWith('/') ? logoVal : '/' + logoVal;
+                        document.getElementById('site-logo-img').src = logoSrc;
+                        document.getElementById('site-logo-img').style.display = 'inline-block';
+                        document.getElementById('site-logo-text').style.display = 'none';
+                    } else {
+                        document.getElementById('site-logo-text').textContent = data.data.logo_text || 'LOGO';
+                        document.getElementById('site-logo-text').style.display = 'inline';
+                        document.getElementById('site-logo-img').style.display = 'none';
+                    }
+                    const phoneVal = data.data.phone || 'phone number';
+                    document.getElementById('site-phone').textContent = phoneVal;
+                    // Sync phone to mobile sidebar
+                    const mobilePhone = document.getElementById('mobile-site-phone');
+                    if (mobilePhone) mobilePhone.textContent = phoneVal;
+                    // Sync account name to mobile sidebar
+                    const mobileAcc = document.getElementById('mobile-account');
+                    const desktopAcc = document.getElementById('account');
+                    if (mobileAcc && desktopAcc) mobileAcc.textContent = desktopAcc.textContent;
                     if (data.data.main_image) {
-                        document.querySelector('.home-image img').src = data.data.main_image;
+                        const mainSrc = data.data.main_image.startsWith('/') ? data.data.main_image : '/' + data.data.main_image;
+                        document.querySelector('.home-image img').src = mainSrc;
                     }
                 }
             } catch (e) {
@@ -480,7 +520,7 @@
             const grid = document.getElementById('project-grid');
             if (!grid) return;
 
-            const filtered = allProjects.filter(p => p.area === area);
+            const filtered = allProjects.filter(p => p.area === area).slice(0, 6);
 
             if (filtered.length === 0) {
                 grid.innerHTML = '<p style="text-align:center; padding:2rem;">No projects in this area.</p>';
@@ -490,20 +530,38 @@
             grid.innerHTML = filtered.map(p => `
                 <div class="feature-item ${p.area}">
                     <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
-                        <img src="${p.image_path}" alt="${p.name}">
+                        ${p.image_path ? `<img src="${p.image_path}" alt="${p.name}">` : ''}
                         <div class="overlay-text"></div>
                     </div>
                 </div>
             `).join('');
 
+            // Fallback: fetch first image from tableimages for projects with empty image_path
+            filtered.filter(p => !p.image_path).forEach(p => {
+                fetch('/api/admin/projects/' + p.id)
+                    .then(res => res.json())
+                    .then(data => {
+                        if (data.success && data.data && data.data.images && data.data.images.length > 0) {
+                            const firstImg = data.data.images[0].image_path;
+                            const el = document.querySelector('.feature-image[data-id="' + p.id + '"]');
+                            if (el) {
+                                el.innerHTML = '<img src="' + firstImg + '" alt="' + p.name + '"><div class="overlay-text"></div>';
+                            }
+                        }
+                    });
+            });
+
             attachHoverEvents();
         }
+
+        // ===================== POPUP SLIDER STATE =====================
+        let currentSlide = 0;
+        let sliderImages = [];
 
         function openPopupFromDB(el) {
             const projectId = el.dataset.id;
             const img = el.querySelector('img');
 
-            // Find project data
             fetch('/api/admin/projects/' + projectId)
                 .then(res => res.json())
                 .then(data => {
@@ -515,10 +573,67 @@
                         document.getElementById('popup-right3').textContent = p.category || '-';
                         document.getElementById('popup-right4').textContent = p.year || '-';
                         document.getElementById('popup-right5').textContent = p.style || '-';
-                        document.getElementById('popup-image').src = p.image_path || img.src;
+
+                        // Build slider from tableimages (fallback to image_path for backward compat)
+                        const rawImages = p.images && p.images.length > 0
+                            ? p.images.map(img => img.image_path)
+                            : (p.image_path ? p.image_path.split(',').map(s => s.trim()).filter(Boolean) : []);
+                        sliderImages = rawImages.length > 0 ? rawImages : [img.src];
+
+                        currentSlide = 0;
+                        renderSlider();
+
                         document.getElementById('popup').style.display = 'flex';
                     }
                 });
+        }
+
+        function renderSlider() {
+            const container = document.getElementById('slider-container');
+            const thumbnails = document.getElementById('slider-thumbnails');
+            const prevBtn = document.getElementById('slider-prev');
+            const nextBtn = document.getElementById('slider-next');
+
+            // Render main images
+            container.innerHTML = sliderImages.map(src => `<img src="${src}" alt="">`).join('');
+
+            // Render thumbnails
+            thumbnails.innerHTML = sliderImages.map((src, i) =>
+                `<div class="thumb ${i === 0 ? 'active' : ''}" onclick="goToSlide(${i})">
+                    <img src="${src}" alt="" onerror="this.style.display='none'">
+                </div>`
+            ).join('');
+
+            // Show/hide nav buttons (hide if only 1 image)
+            const hideNav = sliderImages.length <= 1;
+            prevBtn.style.display = hideNav ? 'none' : 'flex';
+            nextBtn.style.display = hideNav ? 'none' : 'flex';
+
+            updateSliderPosition(false);
+        }
+
+        function changeSlide(direction) {
+            if (sliderImages.length <= 1) return;
+            currentSlide = (currentSlide + direction + sliderImages.length) % sliderImages.length;
+            updateSliderPosition(true);
+        }
+
+        function goToSlide(index) {
+            if (index === currentSlide) return;
+            currentSlide = index;
+            updateSliderPosition(true);
+        }
+
+        function updateSliderPosition(animate) {
+            const container = document.getElementById('slider-container');
+            const thumbs = document.querySelectorAll('.slider-thumbnails .thumb');
+
+            container.style.transition = animate ? 'transform 0.4s ease-in-out' : 'none';
+            container.style.transform = `translateX(-${currentSlide * 100}%)`;
+
+            thumbs.forEach((thumb, i) => {
+                thumb.classList.toggle('active', i === currentSlide);
+            });
         }
 
         function attachHoverEvents() {

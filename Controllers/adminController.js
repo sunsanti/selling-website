@@ -6,6 +6,7 @@ const accountModel = require('../Models/accountModel');
 const searchModel = require('../Models/searchModel');
 const uploadService = require('../Services/uploadService');
 const renumberService = require('../Services/renumberService');
+const tableimagesModel = require('../Models/tableimagesModel');
 
 // ===================== ADMIN PAGE =====================
 const getAdminPage = (req, res) => {
@@ -46,6 +47,12 @@ const getProjects = async (req, res) => {
         const projects = includeInactive
             ? await projectModel.getAllProjects(true)
             : await projectModel.getAllProjects();
+        // Normalize image_path with /images/ prefix
+        projects.forEach(p => {
+            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
+                p.image_path = '/images/' + p.image_path;
+            }
+        });
         res.json({ success: true, data: projects });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -67,7 +74,8 @@ const getProjectById = async (req, res) => {
         if (!project) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
         }
-        res.json({ success: true, data: project });
+        const images = await tableimagesModel.getImagesByProjectId(req.params.id);
+        res.json({ success: true, data: { ...project, images } });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
@@ -75,34 +83,47 @@ const getProjectById = async (req, res) => {
 
 const createProject = async (req, res) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path, display_order } = req.body;
+        const { name, area, square_meters, category, year, style, small_content, image_path } = req.body;
         if (!name || !area) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
         }
         const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
         const id = await projectModel.createProject({
             name, area, square_meters, category, year, style,
-            small_content, image_path: cleanImagePath, display_order
+            small_content, image_path: cleanImagePath
         });
         res.json({ success: true, message: 'Thêm dự án thành công', id });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        const message = error.message.includes('Maximum') ? error.message : 'Lỗi server';
+        res.status(400).json({ success: false, message });
     }
 };
 
 const updateProject = async (req, res) => {
     try {
         const { name, area, square_meters, category, year, style, small_content, image_path, display_order } = req.body;
-        const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
-        const success = await projectModel.updateProject(req.params.id, {
-            name, area, square_meters, category, year, style,
-            small_content, image_path: cleanImagePath, display_order
-        });
+
+        // Build fields to update (only defined values)
+        const fields = {};
+        if (name !== undefined) fields.name = name;
+        if (area !== undefined) fields.area = area;
+        if (square_meters !== undefined) fields.square_meters = square_meters;
+        if (category !== undefined) fields.category = category;
+        if (year !== undefined) fields.year = year;
+        if (style !== undefined) fields.style = style;
+        if (small_content !== undefined) fields.small_content = small_content;
+        if (image_path !== undefined) {
+            fields.image_path = image_path.replace(/^\/images\//, '');
+        }
+        if (display_order !== undefined) fields.display_order = display_order;
+
+        const success = await projectModel.updateProjectFields(req.params.id, fields);
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
         }
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (error) {
+        console.error('updateProject error:', error);
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
@@ -150,6 +171,12 @@ const searchProjects = async (req, res) => {
     try {
         const { keyword, status } = req.query;
         const projects = await searchModel.searchProjects(keyword || '', status || 'active');
+        // Normalize image_path with /images/ prefix
+        projects.forEach(p => {
+            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
+                p.image_path = '/images/' + p.image_path;
+            }
+        });
         res.json({ success: true, data: projects });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -249,6 +276,63 @@ const deleteAccount = async (req, res) => {
     }
 };
 
+// ===================== PROJECT IMAGES (tableimages) =====================
+const getProjectImages = async (req, res) => {
+    try {
+        const images = await tableimagesModel.getImagesByProjectId(req.params.projectId);
+        res.json({ success: true, data: images });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+const getAllProjectImages = async (req, res) => {
+    try {
+        const images = await tableimagesModel.getAllImages();
+        res.json({ success: true, data: images });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+const addProjectImage = async (req, res) => {
+    try {
+        const { project_id, image_path, display_order } = req.body;
+        if (!project_id || !image_path) {
+            return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
+        }
+        const id = await tableimagesModel.createImage({ project_id, image_path, display_order });
+        res.json({ success: true, message: 'Thêm ảnh thành công', id });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+const updateProjectImage = async (req, res) => {
+    try {
+        const { image_path, display_order } = req.body;
+        const success = await tableimagesModel.updateImage(req.params.id, { image_path, display_order });
+        if (!success) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy ảnh' });
+        }
+        res.json({ success: true, message: 'Cập nhật ảnh thành công' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+const deleteProjectImage = async (req, res) => {
+    try {
+        const success = await tableimagesModel.deleteImage(req.params.id);
+        if (!success) {
+            return res.status(404).json({ success: false, message: 'Không tìm thấy ảnh' });
+        }
+        res.json({ success: true, message: 'Xóa ảnh thành công' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
 // ===================== UPLOAD =====================
 const handleUpload = (req, res) => {
     if (!req.file) {
@@ -278,6 +362,11 @@ module.exports = {
     createAccount,
     updateAccount,
     deleteAccount,
+    getProjectImages,
+    getAllProjectImages,
+    addProjectImage,
+    updateProjectImage,
+    deleteProjectImage,
     handleUpload,
     uploadMiddleware: uploadService.upload
 };

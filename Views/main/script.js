@@ -8,7 +8,7 @@ const projects = {
         detail3: "LIVING ROOM",
         detail4: "2024",
         detail5: "MODERN",
-        imgSrc: "project1_1.jpg"
+        imgSrc: "/images/project1_1.jpg, /images/project1.jpg, /images/project3.jpg"
     },
     project2: {
         smallContent: "A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.",
@@ -17,7 +17,7 @@ const projects = {
         detail3: "BEDROOM ROOM",
         detail4: "2025",
         detail5: "MODERN",
-        imgSrc: "project2_2.jpg"
+        imgSrc: "/images/project2_2.jpg, /images/project2.jpg, /images/project4.jpg"
     },
     project3: {
         smallContent: "A modern living room connected to a small private garden, bringing natural light and fresh air into the home. This relaxing space blends indoor comfort with a touch of greenery, creating a calm and inviting atmosphere.",
@@ -26,7 +26,7 @@ const projects = {
         detail3: "LIVING ROOM",
         detail4: "2023",
         detail5: "MODERN",
-        imgSrc: "project3_3.jpg"
+        imgSrc: "/images/project3_3.jpg, /images/project1.jpg, /images/project2.jpg"
     },
     project4: {
         smallContent: "A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.",
@@ -35,7 +35,7 @@ const projects = {
         detail3: "BEDROOM ROOM",
         detail4: "2025",
         detail5: "MODERN",
-        imgSrc: "project4.jpg"
+        imgSrc: "/images/project4.jpg, /images/project3.jpg, /images/project1_1.jpg"
     }
 };
 
@@ -44,6 +44,9 @@ const adminBtn = document.getElementById("admin-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const accountName = document.getElementById("account");
 const leftSite = document.querySelector(".left-site");
+const mobileSitePhone = document.getElementById("mobile-site-phone");
+const mobileAccount = document.getElementById("mobile-account");
+const desktopSitePhone = document.getElementById("site-phone");
 
 
 fetch("/check-auth")
@@ -54,6 +57,8 @@ fetch("/check-auth")
             logoutBtn.style.display = "block";
             accountName.style.display = "block";
             leftSite.classList.remove("hide-line");
+            // Sync account name to mobile sidebar
+            mobileAccount.textContent = accountName.textContent;
         } else {
             adminBtn.style.display = "none";
             logoutBtn.style.display = "none";
@@ -105,16 +110,38 @@ function openPopup(type){
     document.getElementById("popup-right3").innerText = project.detail3;
     document.getElementById("popup-right4").innerText = project.detail4;
     document.getElementById("popup-right5").innerText = project.detail5;
-    document.getElementById("popup-image").src = project.imgSrc;
+
+    // Build slider from project image (comma-separated supported)
+    sliderImages = project.imgSrc.split(',').map(s => s.trim()).filter(Boolean);
+    if (sliderImages.length === 0) sliderImages = [project.imgSrc];
+    currentSlide = 0;
+    renderSlider();
 
     document.getElementById("popup").style.display = "flex";
+}
+
+function closePopup(){
+    document.getElementById("popup").style.display = "none";
 }
 
 window.onclick = function(event) {
     const popup = document.getElementById("popup");
     const fillpopup = document.getElementById("fill-popup");
+    const navbar = document.getElementById("main-navbar");
+    const mobileOverlay = document.getElementById("mobile-overlay");
+    const menuBtn = document.getElementById("menu-btn");
 
-    if (event.target === popup || event.target === fillpopup) {
+    // Close mobile menu when clicking outside
+    if (navbar && navbar.classList.contains("open")) {
+        if (event.target !== menuBtn && !menuBtn?.contains(event.target) &&
+            event.target !== navbar && !navbar.contains(event.target) &&
+            event.target !== mobileOverlay) {
+            closeMobileMenu();
+        }
+    }
+
+    // Close popups when clicking outside
+    if ((event.target === popup || event.target === fillpopup)) {
         popup.style.display = "none";
         fillpopup.style.display = "none";
     }
@@ -124,6 +151,95 @@ function fillInfoPopup(){
     document.getElementById("fill-popup").style.display = "flex";
 }
 
+function closeFillPopup(){
+    document.getElementById("fill-popup").style.display = "none";
+}
+
+// ===================== MOBILE MENU TOGGLE (Sidebar Drawer) =====================
+const menuBtn = document.getElementById("menu-btn");
+const navbar = document.getElementById("main-navbar");
+const mobileOverlay = document.getElementById("mobile-overlay");
+const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
+
+// Sync logout button visibility to mobile sidebar
+if (logoutBtn && mobileLogoutBtn) {
+    const syncLogout = () => {
+        const isLoggedIn = !leftSite.classList.contains("hide-line");
+        if (isLoggedIn) {
+            mobileLogoutBtn.style.display = "";
+            mobileAccount.style.display = "";
+        } else {
+            mobileLogoutBtn.style.display = "none";
+            mobileAccount.style.display = "none";
+        }
+    };
+    // Watch for changes on logoutBtn and accountName
+    const observer = new MutationObserver(syncLogout);
+    observer.observe(logoutBtn, { attributes: true, attributeFilter: ["style"] });
+    observer.observe(accountName, { attributes: true, attributeFilter: ["style"] });
+    syncLogout();
+}
+
+function openMobileMenu() {
+    navbar.classList.add("open");
+    mobileOverlay.classList.add("active");
+    document.body.style.overflow = "hidden";
+}
+
+function closeMobileMenu() {
+    navbar.classList.remove("open");
+    mobileOverlay.classList.remove("active");
+    setTimeout(() => {
+        if (!mobileOverlay.classList.contains("active")) {
+            mobileOverlay.style.display = "none";
+        }
+    }, 300);
+    document.body.style.overflow = "";
+}
+
+if (menuBtn && navbar) {
+    menuBtn.addEventListener("click", openMobileMenu);
+}
+
+if (mobileOverlay) {
+    mobileOverlay.addEventListener("click", closeMobileMenu);
+}
+
+// Close menu when clicking a nav link (tablet/mobile)
+document.querySelectorAll(".header .navbar a").forEach(link => {
+    link.addEventListener("click", () => {
+        if (window.innerWidth <= 1024) {
+            closeMobileMenu();
+        }
+    });
+});
+
+// ===================== SWIPE GESTURE - close sidebar by swiping right =====================
+let touchStartX = 0;
+let touchStartY = 0;
+let touchStartTime = 0;
+
+document.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+    touchStartTime = Date.now();
+}, { passive: true });
+
+document.addEventListener("touchend", (e) => {
+    if (window.innerWidth > 768) return; // Only on mobile
+    const touchEndX = e.changedTouches[0].clientX;
+    const touchEndY = e.changedTouches[0].clientY;
+    const touchEndTime = Date.now();
+    const deltaX = touchEndX - touchStartX;
+    const deltaY = touchEndY - touchStartY;
+    const deltaTime = touchEndTime - touchStartTime;
+
+    // Swipe right: deltaX > 50px, within 300ms, mostly horizontal
+    if (deltaX > 50 && deltaTime < 300 && Math.abs(deltaX) > Math.abs(deltaY)) {
+        closeMobileMenu();
+    }
+}, { passive: true });
+
 // ===================== JQUERY =====================
 $(document).ready(function(){
 
@@ -132,14 +248,6 @@ $(document).ready(function(){
         var filter = $(this).attr('data-filter');
         if (typeof filterProjects === 'function') {
             filterProjects(filter);
-        }
-    });
-
-    $('.feature-project').magnificPopup({
-        delegate:'div',
-        type:'feature-item',
-        gallery:{
-            enabled:true,
         }
     });
 

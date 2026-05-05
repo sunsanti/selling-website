@@ -51,7 +51,34 @@ CREATE TABLE IF NOT EXISTS projects (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert default projects (image_path: /photo.jpg → serve from root static)
+-- ----------------------------
+-- 3b. PROJECT IMAGES TABLE (one row per image, linked to project)
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS tableimages (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    project_id INT NOT NULL,
+    image_path VARCHAR(255) NOT NULL,
+    display_order INT DEFAULT 0,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
+);
+
+-- Insert default project images
+INSERT IGNORE INTO tableimages (project_id, image_path, display_order) VALUES
+(1, 'project1_1.jpg', 1),
+(1, 'project1.jpg', 2),
+(1, 'project3.jpg', 3),
+(2, 'project2_2.jpg', 1),
+(2, 'project2.jpg', 2),
+(2, 'project4.jpg', 3),
+(3, 'project3_3.jpg', 1),
+(3, 'project1.jpg', 2),
+(3, 'project2.jpg', 3),
+(4, 'project4.jpg', 1),
+(4, 'project3.jpg', 2),
+(4, 'project1_1.jpg', 3);
+
+-- Insert default projects (keep image_path for backward compatibility, tableimages has full data)
 INSERT IGNORE INTO projects (name, area, square_meters, category, year, style, small_content, image_path, status, display_order) VALUES
 ('QUANDUONG COMPLEX', 'sydney', 25, 'LIVING ROOM', 2024, 'MODERN', 'A 25m² house designed to maximize every inch of space, offering comfort and practicality in a compact layout. Despite its small size, it provides all the essential amenities for modern and convenient living.', 'project1_1.jpg', 'active', 1),
 ('NGUYENTHIEN COMPLEX', 'melbourne', 20, 'BEDROOM ROOM', 2025, 'MODERN', 'A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.', 'project2_2.jpg', 'active', 2),

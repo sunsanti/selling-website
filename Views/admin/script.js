@@ -4,12 +4,15 @@ let currentEditId = null;
 let currentAccountEditId = null;
 let projectSearchTimeout = null;
 let contactSearchTimeout = null;
+let currentProjectImages = []; // { id: dbId|null, image_path: string, isNew: bool }
+let imageUploadQueue = [];    // files to upload on form submit
 
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
     setupNavigation();
     setupForms();
+    setupSettingsUpload();
 
     // Realtime project search with debounce
     const searchInput = document.getElementById('project-search');
@@ -32,20 +35,18 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Media upload handlers
-    const uploadArea = document.getElementById('media-upload-area');
+    // Project images upload handler
+    const uploadTrigger = document.getElementById('image-upload-trigger');
     const fileInput = document.getElementById('project-media-file');
-    if (uploadArea && fileInput) {
-        uploadArea.addEventListener('click', () => fileInput.click());
-        uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('dragover'); });
-        uploadArea.addEventListener('dragleave', () => { uploadArea.classList.remove('dragover'); });
-        uploadArea.addEventListener('drop', (e) => {
-            e.preventDefault();
-            uploadArea.classList.remove('dragover');
-            if (e.dataTransfer.files.length > 0) handleMediaFile(e.dataTransfer.files[0]);
-        });
-        fileInput.addEventListener('change', (e) => {
-            if (e.target.files.length > 0) handleMediaFile(e.target.files[0]);
+    if (uploadTrigger && fileInput) {
+        uploadTrigger.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                for (const file of e.target.files) {
+                    await handleNewImageFile(file);
+                }
+                e.target.value = '';
+            }
         });
     }
 
@@ -92,6 +93,11 @@ function switchSection(section) {
 }
 
 // ===================== DASHBOARD =====================
+let currentLogoFile = null;   // File to upload for logo
+let currentMainImageFile = null; // File to upload for main image
+let currentLogoPath = '';     // Server path of current logo
+let currentMainImagePath = ''; // Server path of current main image
+
 async function loadDashboard() {
     try {
         const [projectsRes, contactsRes, accountsRes] = await Promise.all([
@@ -111,22 +117,141 @@ async function loadDashboard() {
         const settingsRes = await fetch('/api/admin/settings');
         const settingsData = await settingsRes.json();
         if (settingsData.success && settingsData.data) {
-            document.getElementById('setting-logo').value = settingsData.data.logo || '';
             document.getElementById('setting-phone').value = settingsData.data.phone || '';
-            document.getElementById('setting-main-image').value = settingsData.data.main_image || '';
+
+            // Logo: show current image if path exists
+            currentLogoPath = settingsData.data.logo || '';
+            if (currentLogoPath) {
+                const logoSrc = currentLogoPath.startsWith('/') ? currentLogoPath : '/' + currentLogoPath;
+                document.getElementById('current-logo-img').src = logoSrc;
+                document.getElementById('current-logo-img').style.display = 'block';
+                document.getElementById('logo-preview-placeholder').style.display = 'none';
+                document.getElementById('logo-remove-btn').style.display = 'inline-flex';
+            } else {
+                document.getElementById('current-logo-img').style.display = 'none';
+                document.getElementById('logo-preview-placeholder').style.display = 'flex';
+                document.getElementById('logo-remove-btn').style.display = 'none';
+            }
+            currentLogoFile = null;
+
+            // Main image: show current image if path exists
+            currentMainImagePath = settingsData.data.main_image || '';
+            if (currentMainImagePath) {
+                const mainSrc = currentMainImagePath.startsWith('/') ? currentMainImagePath : '/' + currentMainImagePath;
+                document.getElementById('current-main-image-img').src = mainSrc;
+                document.getElementById('current-main-image-img').style.display = 'block';
+                document.getElementById('main-image-preview-placeholder').style.display = 'none';
+                document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
+            } else {
+                document.getElementById('current-main-image-img').style.display = 'none';
+                document.getElementById('main-image-preview-placeholder').style.display = 'flex';
+                document.getElementById('main-image-remove-btn').style.display = 'none';
+            }
+            currentMainImageFile = null;
         }
     } catch (error) {
         console.error('Error loading dashboard:', error);
     }
 }
 
+// ===================== SETTINGS UPLOAD HELPERS =====================
+function setupSettingsUpload() {
+    // Logo upload
+    const logoBtn = document.getElementById('logo-upload-btn');
+    const logoInput = document.getElementById('logo-file-input');
+    if (logoBtn && logoInput) {
+        logoBtn.addEventListener('click', () => logoInput.click());
+        logoInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                currentLogoFile = e.target.files[0];
+                const previewUrl = URL.createObjectURL(currentLogoFile);
+                document.getElementById('current-logo-img').src = previewUrl;
+                document.getElementById('current-logo-img').style.display = 'block';
+                document.getElementById('logo-preview-placeholder').style.display = 'none';
+                document.getElementById('logo-remove-btn').style.display = 'inline-flex';
+            }
+        });
+    }
+
+    // Main image upload
+    const mainBtn = document.getElementById('main-image-upload-btn');
+    const mainInput = document.getElementById('main-image-file-input');
+    if (mainBtn && mainInput) {
+        mainBtn.addEventListener('click', () => mainInput.click());
+        mainInput.addEventListener('change', async (e) => {
+            if (e.target.files.length > 0) {
+                currentMainImageFile = e.target.files[0];
+                const previewUrl = URL.createObjectURL(currentMainImageFile);
+                document.getElementById('current-main-image-img').src = previewUrl;
+                document.getElementById('current-main-image-img').style.display = 'block';
+                document.getElementById('main-image-preview-placeholder').style.display = 'none';
+                document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
+            }
+        });
+    }
+}
+
+function removeLogoImage() {
+    currentLogoFile = null;
+    currentLogoPath = '';
+    document.getElementById('current-logo-img').style.display = 'none';
+    document.getElementById('logo-preview-placeholder').style.display = 'flex';
+    document.getElementById('logo-remove-btn').style.display = 'none';
+    document.getElementById('logo-file-input').value = '';
+}
+
+function removeMainImage() {
+    currentMainImageFile = null;
+    currentMainImagePath = '';
+    document.getElementById('current-main-image-img').style.display = 'none';
+    document.getElementById('main-image-preview-placeholder').style.display = 'flex';
+    document.getElementById('main-image-remove-btn').style.display = 'none';
+    document.getElementById('main-image-file-input').value = '';
+}
+
 // ===================== SETTINGS =====================
 document.getElementById('settings-form').addEventListener('submit', async (e) => {
     e.preventDefault();
+
+    let logoValue = currentLogoPath;
+    let mainImageValue = currentMainImagePath;
+
+    // Upload logo if new file selected
+    if (currentLogoFile) {
+        try {
+            const formData = new FormData();
+            formData.append('media', currentLogoFile);
+            const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.success) {
+                logoValue = result.path;
+            }
+        } catch (error) {
+            showToast('Error uploading logo', 'error');
+            return;
+        }
+    }
+
+    // Upload main image if new file selected
+    if (currentMainImageFile) {
+        try {
+            const formData = new FormData();
+            formData.append('media', currentMainImageFile);
+            const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: formData });
+            const result = await res.json();
+            if (result.success) {
+                mainImageValue = result.path.replace(/^\/images\//, '');
+            }
+        } catch (error) {
+            showToast('Error uploading main image', 'error');
+            return;
+        }
+    }
+
     const data = {
-        logo: document.getElementById('setting-logo').value,
+        logo: logoValue,
         phone: document.getElementById('setting-phone').value,
-        main_image: document.getElementById('setting-main-image').value
+        main_image: mainImageValue
     };
 
     try {
@@ -137,6 +262,11 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         });
         const result = await res.json();
         if (result.success) {
+            // Update state after successful save
+            if (currentLogoFile) currentLogoPath = logoValue;
+            if (currentMainImageFile) currentMainImagePath = mainImageValue;
+            currentLogoFile = null;
+            currentMainImageFile = null;
             showToast('Settings saved successfully!', 'success');
         } else {
             showToast(result.message || 'Error saving settings', 'error');
@@ -146,11 +276,10 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
     }
 });
 
-// ===================== PROJECTS =====================
-function handleMediaFile(file) {
-    const acceptTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp', 'video/mp4', 'video/webm'];
-    if (!acceptTypes.includes(file.type)) {
-        showToast('Only JPG, PNG, GIF, MP4, WEBM allowed', 'error');
+// ===================== PROJECT IMAGES (tableimages) =====================
+async function handleNewImageFile(file) {
+    if (!file.type.startsWith('image/')) {
+        showToast('Only image files are allowed', 'error');
         return;
     }
     if (file.size > 50 * 1024 * 1024) {
@@ -158,35 +287,69 @@ function handleMediaFile(file) {
         return;
     }
 
-    document.getElementById('project-media-path').value = '';
-    document.getElementById('media-placeholder').style.display = 'none';
-    document.getElementById('media-preview').style.display = 'block';
+    const tempId = 'new_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+    const previewUrl = URL.createObjectURL(file);
 
-    if (file.type.startsWith('image/')) {
-        document.getElementById('media-preview-img').style.display = 'block';
-        document.getElementById('media-preview-img').src = URL.createObjectURL(file);
-        document.getElementById('media-preview-video').style.display = 'none';
-    } else {
-        document.getElementById('media-preview-video').style.display = 'block';
-        document.getElementById('media-preview-video').src = URL.createObjectURL(file);
-        document.getElementById('media-preview-img').style.display = 'none';
+    // Add to state (pending upload)
+    currentProjectImages.push({
+        id: null,
+        image_path: previewUrl,
+        isNew: true,
+        isBlob: true,
+        order: currentProjectImages.length + 1
+    });
+
+    // Add to queue for upload on submit
+    imageUploadQueue.push({ tempId, file, order: currentProjectImages.length });
+
+    renderProjectImagesList();
+}
+
+function renderProjectImagesList() {
+    const container = document.getElementById('project-images-list');
+    if (!container) return;
+
+    container.innerHTML = currentProjectImages.map((img, index) => `
+        <div class="project-image-thumb" data-index="${index}">
+            <img src="${img.image_path}" alt="" onerror="this.src='https://via.placeholder.com/80?text=No+Img'">
+            <span class="img-order">${index + 1}</span>
+            <button type="button" class="img-remove-btn" onclick="removeProjectImage(${index})">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `).join('');
+}
+
+function removeProjectImage(index) {
+    const img = currentProjectImages[index];
+    // Remove from queue if it's a new pending upload
+    if (img.isNew && img.isBlob) {
+        imageUploadQueue = imageUploadQueue.filter(q => q.order !== index);
     }
-
-    const hiddenInput = document.getElementById('project-media-file');
-    const dt = new DataTransfer();
-    dt.items.add(file);
-    hiddenInput.files = dt.files;
+    currentProjectImages.splice(index, 1);
+    renderProjectImagesList();
 }
 
-function removeMediaPreview() {
-    document.getElementById('project-media-file').value = '';
-    document.getElementById('project-media-path').value = '';
-    document.getElementById('media-placeholder').style.display = 'block';
-    document.getElementById('media-preview').style.display = 'none';
-    document.getElementById('media-preview-img').src = '';
-    document.getElementById('media-preview-video').src = '';
+async function loadProjectImagesForEdit(projectId) {
+    try {
+        const res = await fetch(`/api/admin/project-images/${projectId}`);
+        const data = await res.json();
+        if (data.success && data.data) {
+            currentProjectImages = data.data.map((img, i) => ({
+                id: img.id,
+                image_path: img.image_path,
+                isNew: false,
+                order: img.display_order || i + 1
+            }));
+        } else {
+            currentProjectImages = [];
+        }
+    } catch (error) {
+        currentProjectImages = [];
+    }
 }
 
+// ===================== PROJECTS =====================
 function loadActiveProjects() {
     const keyword = currentProjectKeyword || '';
     fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=active`)
@@ -270,19 +433,12 @@ async function editProject(id) {
         document.getElementById('project-category').value = p.category || '';
         document.getElementById('project-year').value = p.year || '';
         document.getElementById('project-style').value = p.style || '';
-        document.getElementById('project-order').value = p.display_order || 0;
         document.getElementById('project-content').value = p.small_content || '';
-        document.getElementById('project-media-path').value = p.image_path || '';
 
-        if (p.image_path) {
-            document.getElementById('media-placeholder').style.display = 'none';
-            document.getElementById('media-preview').style.display = 'block';
-            document.getElementById('media-preview-img').style.display = 'block';
-            document.getElementById('media-preview-img').src = p.image_path;
-            document.getElementById('media-preview-video').style.display = 'none';
-        } else {
-            removeMediaPreview();
-        }
+        // Load images from tableimages
+        await loadProjectImagesForEdit(id);
+        renderProjectImagesList();
+        imageUploadQueue = [];
 
         document.getElementById('project-modal').style.display = 'flex';
     } catch (error) {
@@ -292,16 +448,20 @@ async function editProject(id) {
 
 function openProjectModal() {
     currentEditId = null;
+    currentProjectImages = [];
+    imageUploadQueue = [];
     document.getElementById('project-modal-title').textContent = 'Add Project';
     document.getElementById('project-form').reset();
     document.getElementById('project-id').value = '';
-    removeMediaPreview();
+    renderProjectImagesList();
     document.getElementById('project-modal').style.display = 'flex';
 }
 
 function closeProjectModal() {
     document.getElementById('project-modal').style.display = 'none';
     currentEditId = null;
+    currentProjectImages = [];
+    imageUploadQueue = [];
 }
 
 async function softDeleteProject(id) {
@@ -360,32 +520,30 @@ function resetProjectSearch() {
 
 document.getElementById('project-form').addEventListener('submit', async (e) => {
     e.preventDefault();
-    const fileInput = document.getElementById('project-media-file');
-    const mediaPath = document.getElementById('project-media-path').value;
-    let imagePath = mediaPath;
 
-    if (fileInput.files.length > 0) {
-        showToast('Uploading media...', 'info');
-        const formData = new FormData();
-        formData.append('media', fileInput.files[0]);
+    // Step 1: Upload all new images and collect server paths
+    for (const item of imageUploadQueue) {
         try {
-            const uploadRes = await fetch('/api/admin/projects/upload', {
-                method: 'POST',
-                body: formData
-            });
+            const formData = new FormData();
+            formData.append('media', item.file);
+            const uploadRes = await fetch('/api/admin/projects/upload', { method: 'POST', body: formData });
             const uploadData = await uploadRes.json();
             if (uploadData.success) {
-                imagePath = uploadData.path;
-            } else {
-                showToast(uploadData.message || 'Upload failed', 'error');
-                return;
+                // Update currentProjectImages with the real server path
+                const imgEntry = currentProjectImages.find(img => img.isNew && img.isBlob && img.order === item.order);
+                if (imgEntry) {
+                    imgEntry.image_path = uploadData.path;
+                    imgEntry.isBlob = false;
+                    console.log('Uploaded:', uploadData.path);
+                }
             }
         } catch (error) {
-            showToast('Upload error', 'error');
-            return;
+            console.error('Upload error:', error);
         }
     }
+    imageUploadQueue = []; // clear queue after upload
 
+    // Step 2: Save project
     const payload = {
         name: document.getElementById('project-name').value,
         area: document.getElementById('project-area').value,
@@ -393,31 +551,119 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
         category: document.getElementById('project-category').value,
         year: document.getElementById('project-year').value,
         style: document.getElementById('project-style').value,
-        display_order: document.getElementById('project-order').value,
-        image_path: imagePath,
         small_content: document.getElementById('project-content').value
     };
 
     try {
-        const url = currentEditId ? `/api/admin/projects/${currentEditId}` : '/api/admin/projects';
-        const method = currentEditId ? 'PUT' : 'POST';
-        const res = await fetch(url, {
-            method,
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
-        });
-        const result = await res.json();
-        if (result.success) {
-            showToast(currentEditId ? 'Project updated!' : 'Project added!', 'success');
-            closeProjectModal();
-            removeMediaPreview();
-            loadActiveProjects();
-            loadInactiveProjects();
+        let projectId = currentEditId;
+
+        if (currentEditId) {
+            // Update existing project
+            const res = await fetch(`/api/admin/projects/${currentEditId}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (!result.success) {
+                showToast(result.message || 'Error saving project', 'error');
+                return;
+            }
         } else {
-            showToast(result.message || 'Error', 'error');
+            // Create new project
+            const res = await fetch('/api/admin/projects', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload)
+            });
+            const result = await res.json();
+            if (!result.success) {
+                showToast(result.message || 'Error saving project', 'error');
+                return;
+            }
+            projectId = result.id;
         }
+
+        console.log('Project saved, id:', projectId);
+        console.log('currentProjectImages before sync:', JSON.parse(JSON.stringify(currentProjectImages)));
+
+        // Step 3: Sync images to tableimages
+        // Remove DB images that are no longer in currentProjectImages
+        if (currentEditId) {
+            const keepIds = currentProjectImages.filter(img => !img.isNew).map(img => String(img.id));
+            console.log('KeepIds:', keepIds);
+            try {
+                const allDbRes = await fetch(`/api/admin/project-images/${currentEditId}`);
+                const allDbData = await allDbRes.json();
+                console.log('DB images for project:', allDbData);
+                if (allDbData.success && allDbData.data) {
+                    for (const dbImg of allDbData.data) {
+                        if (!keepIds.includes(String(dbImg.id))) {
+                            await fetch(`/api/admin/project-images/${dbImg.id}`, { method: 'DELETE' });
+                            console.log('Deleted image:', dbImg.id);
+                        }
+                    }
+                }
+            } catch (e) {
+                console.error('Step 3 error:', e);
+            }
+        }
+
+        // Step 4: Insert/update images in tableimages
+        for (let i = 0; i < currentProjectImages.length; i++) {
+            const img = currentProjectImages[i];
+            const order = i + 1;
+            try {
+                if (img.isNew) {
+                    const postRes = await fetch('/api/admin/project-images', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ project_id: projectId, image_path: img.image_path, display_order: order })
+                    });
+                    const postData = await postRes.json();
+                    console.log('Insert image result:', postData);
+                } else {
+                    await fetch(`/api/admin/project-images/${img.id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ image_path: img.image_path, display_order: order })
+                    });
+                }
+            } catch (e) {
+                console.error('Step 4 error for image:', img, e);
+            }
+        }
+
+        // Step 5: Always sync projects.image_path = ảnh đầu tiên từ tableimages
+        try {
+            const firstImgRes = await fetch(`/api/admin/project-images/${projectId}`);
+            const firstImgData = await firstImgRes.json();
+            console.log('Step 5 - fetched images:', firstImgData);
+            if (firstImgData.success && firstImgData.data && firstImgData.data.length > 0) {
+                const firstImg = firstImgData.data[0];
+                const cleanPath = (firstImg.image_path || '').replace(/^\/images\//, '').replace(/^\/uploads\//, '');
+                console.log('Setting image_path to:', cleanPath);
+                await fetch(`/api/admin/projects/${projectId}`, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image_path: cleanPath })
+                });
+                console.log('image_path synced!');
+            } else {
+                console.log('No images found in tableimages for this project');
+            }
+        } catch (e) {
+            console.error('Step 5 error:', e);
+        }
+
+        showToast(currentEditId ? 'Project updated!' : 'Project added!', 'success');
+        closeProjectModal();
+        renderProjectImagesList();
+        loadActiveProjects();
+        loadInactiveProjects();
     } catch (error) {
         showToast('Error saving project', 'error');
+        console.error('Submit error:', error);
     }
 });
 

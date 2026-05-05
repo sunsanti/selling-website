@@ -62,6 +62,13 @@ app.post('/api/admin/accounts', adminController.createAccount);
 app.put('/api/admin/accounts/:id', adminController.updateAccount);
 app.delete('/api/admin/accounts/:id', adminController.deleteAccount);
 
+// API - Project Images (tableimages)
+app.get('/api/admin/project-images', adminController.getAllProjectImages);
+app.get('/api/admin/project-images/:projectId', adminController.getProjectImages);
+app.post('/api/admin/project-images', adminController.addProjectImage);
+app.put('/api/admin/project-images/:id', adminController.updateProjectImage);
+app.delete('/api/admin/project-images/:id', adminController.deleteProjectImage);
+
 // Public - Contact form
 app.post('/api/contact', contactController.submitContact);
 

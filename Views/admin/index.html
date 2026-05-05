@@ -82,16 +82,48 @@
                 <h2><i class="fas fa-cog"></i> Website Settings</h2>
                 <form id="settings-form" class="settings-form">
                     <div class="form-group">
-                        <label>Logo Text</label>
-                        <input type="text" id="setting-logo" placeholder="Enter logo text">
+                        <label>Logo Image</label>
+                        <div class="settings-image-area">
+                            <div class="settings-image-preview" id="logo-preview-area">
+                                <img id="current-logo-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                                <span id="logo-preview-placeholder" class="settings-preview-placeholder">
+                                    <i class="fas fa-image"></i> No logo uploaded
+                                </span>
+                            </div>
+                            <div class="settings-image-actions">
+                                <button type="button" class="btn-add" id="logo-upload-btn">
+                                    <i class="fas fa-upload"></i> Upload Logo
+                                </button>
+                                <input type="file" id="logo-file-input" accept="image/*" style="display:none">
+                                <button type="button" class="btn-cancel" id="logo-remove-btn" style="display:none" onclick="removeLogoImage()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-group">
                         <label>Phone Number</label>
                         <input type="text" id="setting-phone" placeholder="Enter phone number">
                     </div>
                     <div class="form-group">
-                        <label>Main Image Path</label>
-                        <input type="text" id="setting-main-image" placeholder="your-image.jpg">
+                        <label>Main Image</label>
+                        <div class="settings-image-area">
+                            <div class="settings-image-preview settings-main-image-preview" id="main-image-preview-area">
+                                <img id="current-main-image-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                                <span id="main-image-preview-placeholder" class="settings-preview-placeholder">
+                                    <i class="fas fa-image"></i> No main image uploaded
+                                </span>
+                            </div>
+                            <div class="settings-image-actions">
+                                <button type="button" class="btn-add" id="main-image-upload-btn">
+                                    <i class="fas fa-upload"></i> Upload Main Image
+                                </button>
+                                <input type="file" id="main-image-file-input" accept="image/*" style="display:none">
+                                <button type="button" class="btn-cancel" id="main-image-remove-btn" style="display:none" onclick="removeMainImage()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </div>
                     </div>
                     <div class="form-actions">
                         <button type="submit" class="btn-save">
@@ -265,27 +297,15 @@
                 </div>
             </div>
             <div class="form-group">
-                <label>Display Order</label>
-                <input type="number" id="project-order" min="0" value="0">
-            </div>
-            <div class="form-group">
-                <label>Media (Image / Video)</label>
-                <div class="media-upload-area" id="media-upload-area">
-                    <div class="media-upload-placeholder" id="media-placeholder">
-                        <i class="fas fa-cloud-upload-alt"></i>
-                        <p>Click to upload image or video</p>
-                        <span>Supports: JPG, PNG, GIF, MP4, WEBM</span>
-                    </div>
-                    <div class="media-preview" id="media-preview" style="display:none">
-                        <img id="media-preview-img" style="display:none">
-                        <video id="media-preview-video" controls style="display:none"></video>
-                        <button type="button" class="media-remove-btn" onclick="removeMediaPreview()">
-                            <i class="fas fa-times"></i>
-                        </button>
+                <label>Project Images</label>
+                <div class="project-images-area" id="project-images-area">
+                    <div class="project-images-list" id="project-images-list"></div>
+                    <div class="image-upload-trigger" id="image-upload-trigger">
+                        <i class="fas fa-plus"></i>
+                        <span>Add Images</span>
                     </div>
                 </div>
-                <input type="hidden" id="project-media-path">
-                <input type="file" id="project-media-file" accept="image/*,video/*" style="display:none">
+                <input type="file" id="project-media-file" accept="image/*" multiple style="display:none">
             </div>
             <div class="form-group">
                 <label>Small Content</label>
