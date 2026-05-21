@@ -483,7 +483,7 @@
                     // Sync account name to mobile sidebar
                     const mobileAcc = document.getElementById('mobile-account');
                     const desktopAcc = document.getElementById('account');
-                    if (mobileAcc && desktopAcc) mobileAcc.textContent = desktopAcc.textContent;
+                    if (mobileAcc && desktopAcc) mobileAcc.textContent = desktopAcc.textContent || 'User';
                     if (data.data.main_image) {
                         const mainSrc = data.data.main_image.startsWith('/') ? data.data.main_image : '/' + data.data.main_image;
                         document.querySelector('.home-image img').src = mainSrc;

@@ -69,6 +69,10 @@ app.post('/api/admin/project-images', adminController.addProjectImage);
 app.put('/api/admin/project-images/:id', adminController.updateProjectImage);
 app.delete('/api/admin/project-images/:id', adminController.deleteProjectImage);
 
+// API - Translation
+app.post('/api/admin/translate', adminController.translateText);
+app.post('/api/admin/detect-language', adminController.detectTextLanguage);
+
 // Public - Contact form
 app.post('/api/contact', contactController.submitContact);
 
@@ -85,7 +89,12 @@ app.post("/logout", (req, res) => {
 
 app.get("/check-auth", (req, res) => {
     if (req.session.user) {
-        res.json({ loggedIn: true });
+        res.json({
+            loggedIn: true,
+            name: req.session.user.name,
+            role: req.session.user.role,
+            username: req.session.user.username
+        });
     } else {
         res.json({ loggedIn: false });
     }

@@ -6,6 +6,7 @@ let projectSearchTimeout = null;
 let contactSearchTimeout = null;
 let currentProjectImages = []; // { id: dbId|null, image_path: string, isNew: bool }
 let imageUploadQueue = [];    // files to upload on form submit
+let translateLoadingEl = null;
 
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', () => {
@@ -766,7 +767,7 @@ async function loadAccounts() {
 function renderAccountsTable(accounts) {
     const tbody = document.getElementById('accounts-tbody');
     if (!accounts || accounts.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:#95a5a6;">No accounts found</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#95a5a6;">No accounts found</td></tr>';
         return;
     }
 
@@ -774,6 +775,8 @@ function renderAccountsTable(accounts) {
         <tr>
             <td>${a.id}</td>
             <td>${escapeHtml(a.username)}</td>
+            <td>${escapeHtml(a.name || 'User')}</td>
+            <td><span class="role-badge role-${a.role || 'employee'}">${a.role === 'admin' ? 'Admin' : 'Employee'}</span></td>
             <td>${formatDate(a.created_at)}</td>
             <td>
                 <div class="action-btns">
@@ -799,6 +802,8 @@ async function editAccount(id) {
         document.getElementById('account-modal-title').textContent = 'Edit Account';
         document.getElementById('account-id').value = id;
         document.getElementById('account-username').value = account.username;
+        document.getElementById('account-name').value = account.name || '';
+        document.getElementById('account-role').value = account.role || 'employee';
         document.getElementById('account-password').value = '';
         document.getElementById('account-modal').style.display = 'flex';
     } catch (error) {
@@ -823,6 +828,13 @@ document.getElementById('account-form').addEventListener('submit', async (e) => 
     e.preventDefault();
     const username = document.getElementById('account-username').value.trim();
     const password = document.getElementById('account-password').value;
+    const name = document.getElementById('account-name').value.trim();
+    const role = document.getElementById('account-role').value;
+
+    if (!name) {
+        showToast('Name is required', 'error');
+        return;
+    }
 
     if (!currentAccountEditId && !password) {
         showToast('Password is required', 'error');
@@ -832,7 +844,7 @@ document.getElementById('account-form').addEventListener('submit', async (e) => 
     try {
         let res, result;
         if (currentAccountEditId) {
-            const body = { username };
+            const body = { username, name, role };
             if (password) body.password = password;
             res = await fetch(`/api/admin/accounts/${currentAccountEditId}`, {
                 method: 'PUT',
@@ -843,7 +855,7 @@ document.getElementById('account-form').addEventListener('submit', async (e) => 
             res = await fetch('/api/admin/accounts', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password })
+                body: JSON.stringify({ username, password, name, role })
             });
         }
         result = await res.json();
@@ -926,6 +938,48 @@ function formatDate(dateStr) {
     if (!dateStr) return '-';
     const d = new Date(dateStr);
     return d.toLocaleDateString('en-GB', { day: '2-digit', month: '2-digit', year: 'numeric' });
+}
+
+// ===================== TRANSLATION =====================
+async function translateField(fieldId, targetLang, sourceLang) {
+    const field = document.getElementById(fieldId);
+    if (!field) return;
+
+    const originalText = field.value.trim();
+    if (!originalText) {
+        showToast('Please enter text to translate', 'error');
+        return;
+    }
+
+    // Show loading state
+    const originalValue = field.value;
+    field.disabled = true;
+    field.style.opacity = '0.5';
+
+    try {
+        const res = await fetch('/api/admin/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                text: originalText,
+                targetLang: targetLang,
+                sourceLang: sourceLang
+            })
+        });
+        const data = await res.json();
+
+        if (data.success) {
+            field.value = data.translated;
+            showToast('Translated successfully!', 'success');
+        } else {
+            showToast(data.message || 'Translation failed', 'error');
+        }
+    } catch (error) {
+        showToast('Error connecting to translation service', 'error');
+    } finally {
+        field.disabled = false;
+        field.style.opacity = '1';
+    }
 }
 
 // ===================== LOGOUT =====================

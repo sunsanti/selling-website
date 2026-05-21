@@ -239,6 +239,8 @@
                         <tr>
                             <th>ID</th>
                             <th>Username</th>
+                            <th>Name</th>
+                            <th>Role</th>
                             <th>Created At</th>
                             <th>Actions</th>
                         </tr>
@@ -261,10 +263,20 @@
         <form id="project-form" class="modal-form">
             <input type="hidden" id="project-id">
             <div class="form-row">
-                <div class="form-group">
-                    <label>Project Name *</label>
-                    <input type="text" id="project-name" required>
-                </div>
+            <div class="form-group">
+                <label>Project Name *
+                    <button type="button" class="btn-translate" onclick="translateField('project-name', 'vi', 'en')" title="Translate to English">
+                        <i class="fas fa-globe"></i> EN
+                    </button>
+                    <button type="button" class="btn-translate" onclick="translateField('project-name', 'zh-CN', 'en')" title="Translate to Chinese">
+                        <i class="fas fa-globe"></i> ZH
+                    </button>
+                    <button type="button" class="btn-translate" onclick="translateField('project-name', 'ja', 'en')" title="Translate to Japanese">
+                        <i class="fas fa-globe"></i> JA
+                    </button>
+                </label>
+                <input type="text" id="project-name" required>
+            </div>
                 <div class="form-group">
                     <label>Area *</label>
                     <select id="project-area" required>
@@ -308,7 +320,17 @@
                 <input type="file" id="project-media-file" accept="image/*" multiple style="display:none">
             </div>
             <div class="form-group">
-                <label>Small Content</label>
+                <label>Small Content
+                    <button type="button" class="btn-translate" onclick="translateField('project-content', 'vi', 'en')" title="Translate to English">
+                        <i class="fas fa-globe"></i> EN
+                    </button>
+                    <button type="button" class="btn-translate" onclick="translateField('project-content', 'zh-CN', 'en')" title="Translate to Chinese">
+                        <i class="fas fa-globe"></i> ZH
+                    </button>
+                    <button type="button" class="btn-translate" onclick="translateField('project-content', 'ja', 'en')" title="Translate to Japanese">
+                        <i class="fas fa-globe"></i> JA
+                    </button>
+                </label>
                 <textarea id="project-content" rows="3" placeholder="Brief description..."></textarea>
             </div>
             <div class="form-actions">
@@ -331,6 +353,17 @@
             <div class="form-group">
                 <label>Username *</label>
                 <input type="text" id="account-username" required>
+            </div>
+            <div class="form-group">
+                <label>Name *</label>
+                <input type="text" id="account-name" placeholder="Enter full name" required>
+            </div>
+            <div class="form-group">
+                <label>Role *</label>
+                <select id="account-role" required>
+                    <option value="employee">Employee</option>
+                    <option value="admin">Admin</option>
+                </select>
             </div>
             <div class="form-group">
                 <label>Password <span id="password-hint">(leave blank to keep current)</span></label>

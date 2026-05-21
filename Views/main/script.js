@@ -57,8 +57,10 @@ fetch("/check-auth")
             logoutBtn.style.display = "block";
             accountName.style.display = "block";
             leftSite.classList.remove("hide-line");
+            // Display account name from session
+            accountName.textContent = data.name || 'User';
             // Sync account name to mobile sidebar
-            mobileAccount.textContent = accountName.textContent;
+            mobileAccount.textContent = data.name || 'User';
         } else {
             adminBtn.style.display = "none";
             logoutBtn.style.display = "none";

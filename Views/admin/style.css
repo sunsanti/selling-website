@@ -421,6 +421,59 @@ body {
     color: #e74c3c;
 }
 
+.role-badge {
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: capitalize;
+}
+
+.role-admin {
+    background: rgba(155, 89, 182, 0.1);
+    color: #9b59b6;
+}
+
+.role-employee {
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+}
+
+/* ===================== TRANSLATE BUTTONS ===================== */
+.btn-translate {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    margin-left: 8px;
+    padding: 4px 10px;
+    font-size: 11px;
+    font-weight: 500;
+    color: #6c5ce7;
+    background: rgba(108, 92, 231, 0.1);
+    border: 1px solid rgba(108, 92, 231, 0.3);
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    vertical-align: middle;
+}
+
+.btn-translate:hover {
+    background: rgba(108, 92, 231, 0.2);
+    border-color: rgba(108, 92, 231, 0.5);
+    transform: translateY(-1px);
+}
+
+.btn-translate:active {
+    transform: translateY(0);
+}
+
+.form-group label {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
 .action-btns {
     display: flex;
     gap: 6px;

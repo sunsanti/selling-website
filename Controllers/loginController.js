@@ -23,7 +23,8 @@ const handleLogin = async (req, res) => {
             req.session.user = {
                 id: user.id,
                 name: user.name,
-                username: user.username
+                username: user.username,
+                role: user.role || 'employee'
             };
 
             console.log('SESSION SAU LOGIN:', req.session);

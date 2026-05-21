@@ -7,6 +7,7 @@ const searchModel = require('../Models/searchModel');
 const uploadService = require('../Services/uploadService');
 const renumberService = require('../Services/renumberService');
 const tableimagesModel = require('../Models/tableimagesModel');
+const translateService = require('../Services/translateService');
 
 // ===================== ADMIN PAGE =====================
 const getAdminPage = (req, res) => {
@@ -229,15 +230,15 @@ const getAccounts = async (req, res) => {
 
 const createAccount = async (req, res) => {
     try {
-        const { username, password } = req.body;
-        if (!username || !password) {
+        const { username, password, name, role } = req.body;
+        if (!username || !password || !name) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
         }
         const existing = await accountModel.getAccountByUsername(username);
         if (existing) {
             return res.status(400).json({ success: false, message: 'Tên đăng nhập đã tồn tại' });
         }
-        const id = await accountModel.createAccount(username, password);
+        const id = await accountModel.createAccount(username, password, name, role || 'employee');
         res.json({ success: true, message: 'Thêm tài khoản thành công', id });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -246,7 +247,7 @@ const createAccount = async (req, res) => {
 
 const updateAccount = async (req, res) => {
     try {
-        const { username, password } = req.body;
+        const { username, password, name, role } = req.body;
         const existing = await accountModel.getAccountById(req.params.id);
         if (!existing) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản' });
@@ -257,7 +258,13 @@ const updateAccount = async (req, res) => {
                 return res.status(400).json({ success: false, message: 'Tên đăng nhập đã tồn tại' });
             }
         }
-        const success = await accountModel.updateAccount(req.params.id, username, password);
+        const success = await accountModel.updateAccount(req.params.id, username, password, name, role);
+        // If updating own account, update session
+        if (req.session.user && req.session.user.id == req.params.id) {
+            req.session.user.name = name || req.session.user.name;
+            req.session.user.role = role || req.session.user.role;
+            req.session.user.username = username || req.session.user.username;
+        }
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -342,6 +349,66 @@ const handleUpload = (req, res) => {
     res.json({ success: true, path: fileUrl });
 };
 
+// ===================== TRANSLATION =====================
+const translateText = async (req, res) => {
+    try {
+        const { text, targetLang, sourceLang } = req.body;
+        if (!text) {
+            return res.status(400).json({ success: false, message: 'Text is required' });
+        }
+        if (!targetLang) {
+            return res.status(400).json({ success: false, message: 'Target language is required' });
+        }
+
+        const result = await translateService.translateText(text, targetLang, sourceLang || 'auto');
+
+        if (result.success) {
+            res.json({
+                success: true,
+                original: result.original,
+                translated: result.translated,
+                detectedSource: result.detectedSource || null
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: result.error || 'Translation failed',
+                original: text
+            });
+        }
+    } catch (error) {
+        console.error('Translation error:', error);
+        res.status(500).json({ success: false, message: 'Server error during translation' });
+    }
+};
+
+const detectTextLanguage = async (req, res) => {
+    try {
+        const { text } = req.body;
+        if (!text) {
+            return res.status(400).json({ success: false, message: 'Text is required' });
+        }
+
+        const result = await translateService.detectLanguage(text);
+
+        if (result.success) {
+            res.json({
+                success: true,
+                language: result.language,
+                confidence: result.confidence
+            });
+        } else {
+            res.status(400).json({
+                success: false,
+                message: result.error || 'Language detection failed'
+            });
+        }
+    } catch (error) {
+        console.error('Language detection error:', error);
+        res.status(500).json({ success: false, message: 'Server error during detection' });
+    }
+};
+
 module.exports = {
     getAdminPage,
     getSettings,
@@ -368,5 +435,7 @@ module.exports = {
     updateProjectImage,
     deleteProjectImage,
     handleUpload,
-    uploadMiddleware: uploadService.upload
+    uploadMiddleware: uploadService.upload,
+    translateText,
+    detectTextLanguage
 };
