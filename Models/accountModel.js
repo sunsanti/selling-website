@@ -2,7 +2,7 @@ const pool = require('../config/database');
 
 const getAllAccounts = async () => {
     try {
-        const [rows] = await pool.query('SELECT id, username, created_at FROM accounts ORDER BY created_at DESC');
+        const [rows] = await pool.query('SELECT id, username, name, role, created_at FROM accounts ORDER BY created_at DESC');
         return rows;
     } catch (error) {
         console.error('Lỗi getAllAccounts:', error);
@@ -12,7 +12,7 @@ const getAllAccounts = async () => {
 
 const getAccountById = async (id) => {
     try {
-        const [rows] = await pool.query('SELECT id, username, created_at FROM accounts WHERE id = ?', [id]);
+        const [rows] = await pool.query('SELECT id, username, name, role, created_at FROM accounts WHERE id = ?', [id]);
         return rows.length > 0 ? rows[0] : null;
     } catch (error) {
         console.error('Lỗi getAccountById:', error);
@@ -30,11 +30,11 @@ const getAccountByUsername = async (username) => {
     }
 };
 
-const createAccount = async (username, password) => {
+const createAccount = async (username, password, name, role = 'employee') => {
     try {
         const [result] = await pool.query(
-            'INSERT INTO accounts (username, password) VALUES (?, ?)',
-            [username, password]
+            'INSERT INTO accounts (username, password, name, role) VALUES (?, ?, ?, ?)',
+            [username, password, name, role]
         );
         return result.insertId;
     } catch (error) {
@@ -43,17 +43,37 @@ const createAccount = async (username, password) => {
     }
 };
 
-const updateAccount = async (id, username, password) => {
+const updateAccount = async (id, username, password, name, role) => {
     try {
         let query, params;
-        if (password) {
-            query = 'UPDATE accounts SET username = ?, password = ? WHERE id = ?';
-            params = [username, password, id];
-        } else {
-            query = 'UPDATE accounts SET username = ? WHERE id = ?';
-            params = [username, id];
+
+        // Build dynamic update based on what was provided
+        const fields = [];
+        const values = [];
+
+        if (username !== undefined) {
+            fields.push('username = ?');
+            values.push(username);
         }
-        const [result] = await pool.query(query, params);
+        if (password !== undefined && password !== '') {
+            fields.push('password = ?');
+            values.push(password);
+        }
+        if (name !== undefined) {
+            fields.push('name = ?');
+            values.push(name);
+        }
+        if (role !== undefined) {
+            fields.push('role = ?');
+            values.push(role);
+        }
+
+        if (fields.length === 0) return false;
+
+        values.push(id);
+        query = `UPDATE accounts SET ${fields.join(', ')} WHERE id = ?`;
+
+        const [result] = await pool.query(query, values);
         return result.affectedRows > 0;
     } catch (error) {
         console.error('Lỗi updateAccount:', error);

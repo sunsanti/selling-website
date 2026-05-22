@@ -220,6 +220,13 @@ async function searchProjects(keyword, status = 'active') {
         'SELECT * FROM projects ORDER BY display_order ASC, id DESC'
     );
 
+    // Normalize image_path
+    rows.forEach(p => {
+        if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
+            p.image_path = '/images/' + p.image_path;
+        }
+    });
+
     // Filter theo status trước
     let filtered = rows;
     if (status === 'active') {
