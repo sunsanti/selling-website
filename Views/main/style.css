@@ -1203,8 +1203,9 @@ body{
 
 .btn-get-in-touch,
 .btn-services {
-    padding: 10px 20px !important;
-    font-size: 1.1rem !important;
+    padding: 12px 22px !important;
+    font-size: 1.4rem !important;
+    min-height: 44px;
 }
 
 .btn-get-in-touch .btn-text,
@@ -1415,7 +1416,7 @@ img{
     }
 
     .fill-popup .fill-popup-content .content .left .title {
-        font-size: 0.9rem;
+        font-size: 1.6rem;
         margin-top: 0.8rem;
         margin-bottom: 0.8rem;
     }
@@ -1425,21 +1426,23 @@ img{
     }
 
     .name-box, .phone-box, .email-box span {
-        font-size: 8px;
+        font-size: 12px;
     }
 
     .fill-popup .fill-popup-content .left .fill-content input {
-        font-size: 8px;
-        margin-bottom: 0.6rem;
-        padding-bottom: 2px;
+        font-size: 14px;
+        margin-bottom: 0.8rem;
+        padding: 4px 0 6px;
+        min-height: 32px;
     }
 
     .submit-btn {
-        padding: 5px 12px;
-        font-size: 8px;
+        padding: 10px 18px;
+        font-size: 13px;
         width: 80%;
-        margin: 8px auto;
+        margin: 10px auto;
         box-sizing: border-box;
+        min-height: 40px;
     }
 
     .fill-popup .fill-popup-content .right .image {
@@ -1523,28 +1526,28 @@ img{
     }
 
     .slider-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 12px;
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
     }
 
     .slider-dots {
-        bottom: 4px;
-        gap: 4px;
+        bottom: 6px;
+        gap: 6px;
     }
 
     .slider-dots .dot {
-        width: 5px;
-        height: 5px;
+        width: 8px;
+        height: 8px;
     }
 
     .slider-thumbnails .thumb {
-        width: 28px;
-        height: 22px;
+        width: 44px;
+        height: 34px;
     }
 
     .slider-thumbnails {
-        padding: 4px;
+        padding: 6px;
     }
 
     /* fill-popup - gọn hơn */
