@@ -54,11 +54,17 @@ const loginController = require('./Controllers/loginController');
 const adminController = require('./Controllers/adminController');
 const contactController = require('./Controllers/contactController');
 
+app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
 app.post('/login', loginLimiter, loginController.handleLogin);
 app.get('/main', loginController.getMainPage);
 
 app.get('/admin', adminController.getAdminPage);
+
+// Public read-only API (no auth) - used by /main public page
+app.get('/api/public/settings', adminController.getSettings);
+app.get('/api/public/projects', adminController.getProjects);
+app.get('/api/public/projects/:id', adminController.getProjectById);
 
 app.use('/api/admin', requireAuth);
 
@@ -84,7 +90,7 @@ app.get('/api/admin/contacts', adminController.getContacts);
 app.get('/api/admin/contacts/search', adminController.searchContacts);
 app.delete('/api/admin/contacts/:id', requireAdmin, adminController.deleteContact);
 
-app.get('/api/admin/accounts', requireAdmin, adminController.getAccounts);
+app.get('/api/admin/accounts', adminController.getAccounts);
 app.post('/api/admin/accounts', requireAdmin, adminController.createAccount);
 app.put('/api/admin/accounts/:id', requireAdmin, adminController.updateAccount);
 app.delete('/api/admin/accounts/:id', requireAdmin, adminController.deleteAccount);
@@ -126,5 +132,6 @@ app.get("/check-auth", (req, res) => {
 const PORT = parseInt(process.env.PORT || '5500', 10);
 
 app.listen(PORT, () => {
-    console.log(`Server đang chạy tại http://localhost:${PORT}/login`);
+    console.log(`Server đang chạy tại http://localhost:${PORT}/`);
+    console.log(`Đăng nhập admin/employee tại http://localhost:${PORT}/login`);
 });

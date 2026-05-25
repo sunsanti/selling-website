@@ -461,7 +461,7 @@
         // Load settings from database
         (async function loadSettings() {
             try {
-                const res = await fetch('/api/admin/settings');
+                const res = await fetch('/api/public/settings');
                 const data = await res.json();
                 if (data.success && data.data) {
                     const logoVal = data.data.logo || '';
@@ -497,7 +497,7 @@
         // Load projects from database and render
         async function loadProjectsFromDB() {
             try {
-                const res = await fetch('/api/admin/projects');
+                const res = await fetch('/api/public/projects');
                 const data = await res.json();
                 if (data.success && data.data && data.data.length > 0) {
                     renderProjects(data.data);
@@ -538,7 +538,7 @@
 
             // Fallback: fetch first image from tableimages for projects with empty image_path
             filtered.filter(p => !p.image_path).forEach(p => {
-                fetch('/api/admin/projects/' + p.id)
+                fetch('/api/public/projects/' +p.id)
                     .then(res => res.json())
                     .then(data => {
                         if (data.success && data.data && data.data.images && data.data.images.length > 0) {
@@ -562,7 +562,7 @@
             const projectId = el.dataset.id;
             const img = el.querySelector('img');
 
-            fetch('/api/admin/projects/' + projectId)
+            fetch('/api/public/projects/' +projectId)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.data) {
