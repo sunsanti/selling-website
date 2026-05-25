@@ -108,6 +108,8 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin account
+-- Insert default admin account (password 'admin123' hashed with bcrypt rounds=10).
+-- Change this hash if you change BCRYPT_ROUNDS in code, or run config/migrate_hash_passwords.js
+-- after seeding with a different value.
 INSERT IGNORE INTO accounts (username, password, name, role) VALUES
-('admin', 'admin123', 'Administrator', 'admin');
+('admin', '$2b$10$yfdejtIDbvDGhuudguCFVOZTBz.U1EC0vDNZ1LNmsURHW7vEutvQa', 'Administrator', 'admin');

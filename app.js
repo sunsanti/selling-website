@@ -1,46 +1,70 @@
+require('dotenv').config();
 const express = require('express');
 const session = require('express-session');
+const rateLimit = require('express-rate-limit');
 const path = require('path');
 const app = express();
+
+const { requireAuth, requireAdmin } = require('./Controllers/authMiddleware');
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-// Serve root folder: so /photo.jpg maps to /photo.jpg at root
-app.use(express.static(path.join(__dirname, '.')));
-
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));
 app.use('/admin', express.static(path.join(__dirname, 'Views/admin')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
-// session
+const SESSION_SECRET = process.env.SESSION_SECRET;
+if (!SESSION_SECRET) {
+    console.error('❌ SESSION_SECRET không được khai báo trong .env');
+    process.exit(1);
+}
+
 app.use(session({
-    secret: 'secret-key',
+    secret: SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
-        secure: false,
+        secure: process.env.NODE_ENV === 'production',
+        httpOnly: true,
+        sameSite: 'lax',
         maxAge: 1000 * 60 * 60 * 5
     }
 }));
+
+const loginLimiter = rateLimit({
+    windowMs: 15 * 60 * 1000,
+    max: 10,
+    message: { success: false, message: 'Thử quá nhiều lần. Vui lòng đợi 15 phút.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
+
+const contactLimiter = rateLimit({
+    windowMs: 60 * 1000,
+    max: 3,
+    message: { success: false, message: 'Gửi liên hệ quá nhanh. Vui lòng đợi 1 phút.' },
+    standardHeaders: true,
+    legacyHeaders: false
+});
 
 const loginController = require('./Controllers/loginController');
 const adminController = require('./Controllers/adminController');
 const contactController = require('./Controllers/contactController');
 
 app.get('/login', loginController.getLoginPage);
-app.post('/login', loginController.handleLogin);
+app.post('/login', loginLimiter, loginController.handleLogin);
 app.get('/main', loginController.getMainPage);
 
-// Admin routes
 app.get('/admin', adminController.getAdminPage);
 
-// API - Settings
+app.use('/api/admin', requireAuth);
+
 app.get('/api/admin/settings', adminController.getSettings);
 app.put('/api/admin/settings', adminController.updateSettings);
 
-// API - Projects
 app.get('/api/admin/projects', adminController.getProjects);
 app.get('/api/admin/projects/search', adminController.searchProjects);
 app.get('/api/admin/projects/:id', adminController.getProjectById);
@@ -48,33 +72,33 @@ app.post('/api/admin/projects', adminController.createProject);
 app.put('/api/admin/projects/:id', adminController.updateProject);
 app.put('/api/admin/projects/:id/soft-delete', adminController.softDeleteProject);
 app.put('/api/admin/projects/:id/restore', adminController.restoreProject);
-app.delete('/api/admin/projects/:id', adminController.deleteProject);
-app.post('/api/admin/projects/upload', adminController.uploadMiddleware.single('media'), adminController.handleUpload);
+app.delete('/api/admin/projects/:id', requireAdmin, adminController.deleteProject);
+app.post('/api/admin/projects/upload', (req, res, next) => {
+    adminController.uploadMiddleware.single('media')(req, res, (err) => {
+        if (err) return res.status(400).json({ success: false, message: err.message });
+        next();
+    });
+}, adminController.handleUpload);
 
-// API - Contacts
 app.get('/api/admin/contacts', adminController.getContacts);
 app.get('/api/admin/contacts/search', adminController.searchContacts);
-app.delete('/api/admin/contacts/:id', adminController.deleteContact);
+app.delete('/api/admin/contacts/:id', requireAdmin, adminController.deleteContact);
 
-// API - Accounts
-app.get('/api/admin/accounts', adminController.getAccounts);
-app.post('/api/admin/accounts', adminController.createAccount);
-app.put('/api/admin/accounts/:id', adminController.updateAccount);
-app.delete('/api/admin/accounts/:id', adminController.deleteAccount);
+app.get('/api/admin/accounts', requireAdmin, adminController.getAccounts);
+app.post('/api/admin/accounts', requireAdmin, adminController.createAccount);
+app.put('/api/admin/accounts/:id', requireAdmin, adminController.updateAccount);
+app.delete('/api/admin/accounts/:id', requireAdmin, adminController.deleteAccount);
 
-// API - Project Images (tableimages)
 app.get('/api/admin/project-images', adminController.getAllProjectImages);
 app.get('/api/admin/project-images/:projectId', adminController.getProjectImages);
 app.post('/api/admin/project-images', adminController.addProjectImage);
 app.put('/api/admin/project-images/:id', adminController.updateProjectImage);
 app.delete('/api/admin/project-images/:id', adminController.deleteProjectImage);
 
-// API - Translation
 app.post('/api/admin/translate', adminController.translateText);
 app.post('/api/admin/detect-language', adminController.detectTextLanguage);
 
-// Public - Contact form
-app.post('/api/contact', contactController.submitContact);
+app.post('/api/contact', contactLimiter, contactController.submitContact);
 
 app.post("/logout", (req, res) => {
     req.session.destroy((err) => {
@@ -83,7 +107,6 @@ app.post("/logout", (req, res) => {
         }
         res.clearCookie("connect.sid");
         res.send("Logged out");
-        console.log("logout success");
     });
 });
 
@@ -100,7 +123,7 @@ app.get("/check-auth", (req, res) => {
     }
 });
 
-const PORT = 5500;
+const PORT = parseInt(process.env.PORT || '5500', 10);
 
 app.listen(PORT, () => {
     console.log(`Server đang chạy tại http://localhost:${PORT}/login`);

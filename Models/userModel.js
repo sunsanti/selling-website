@@ -1,3 +1,4 @@
+const bcrypt = require('bcrypt');
 const pool = require('../config/database');
 
 const checkCredentials = async (username, password) => {
@@ -7,11 +8,15 @@ const checkCredentials = async (username, password) => {
         }
 
         const [rows] = await pool.query(
-            'SELECT * FROM accounts WHERE username = ? AND password = ?',
-            [username, password]
+            'SELECT * FROM accounts WHERE username = ?',
+            [username]
         );
 
-        return rows.length > 0 ? rows[0] : null;
+        if (rows.length === 0) return null;
+
+        const user = rows[0];
+        const match = await bcrypt.compare(password, user.password);
+        return match ? user : null;
 
     } catch (error) {
         console.error("Lỗi khi truy vấn dữ liệu:", error);

@@ -1,107 +1,102 @@
 # Selling Website - Setup Guide
 
-## Database Setup
+## 1. Cài Đặt Dependencies
 
-### 1. Create Database Schema
+```bash
+npm install
+```
 
-Run the SQL file in MySQL:
+## 2. Tạo `.env`
+
+```bash
+cp .env.example .env
+```
+
+Mở `.env` và điền:
+- `DB_USER`, `DB_PASSWORD`, `DB_NAME` — credential MySQL
+- `SESSION_SECRET` — chuỗi random ≥ 64 ký tự. Sinh:
+  ```bash
+  node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+  ```
+- `GOOGLE_TRANSLATE_API_KEY` — (tuỳ chọn) cho nút dịch trong admin
+- `NODE_ENV` — `development` hoặc `production`. Production bật `cookie.secure`
+
+## 3. Database
+
+### DB mới hoàn toàn
 
 ```bash
 mysql -u root -p < config/schema.sql
 ```
 
-Or import `config/schema.sql` via phpMyAdmin / MySQL Workbench.
+Tài khoản mặc định: `admin / admin123` (password đã hash bcrypt sẵn trong schema).
 
-### 2. Migration for Existing Database
-
-If you already have a database and just need to add the new columns:
+### DB cũ — cần migrate
 
 ```bash
+# Thêm cột name + role (nếu chưa có)
 mysql -u root -p sellingweb < config/migrate_account_name_role.sql
+
+# Hash các password plain-text đang lưu trong DB
+node config/migrate_hash_passwords.js
 ```
 
-This will:
-- Add `name` column to accounts table
-- Add `role` column to accounts table
-- Update existing admin account with name "Administrator" and role "admin"
+Script `migrate_hash_passwords.js` chạy 1 lần, hash tất cả password chưa hash. Idempotent — chạy lại nhiều lần không sao.
 
----
-
-## Google Translate API Setup (Optional)
-
-### 1. Get a Google Cloud API Key
-
-1. Go to [Google Cloud Console](https://console.cloud.google.com/)
-2. Create a new project or select existing
-3. Navigate to **APIs & Services > Library**
-4. Search for and enable **Cloud Translation API**
-5. Go to **APIs & Services > Credentials**
-6. Click **Create Credentials > API Key**
-7. Copy the generated API key
-
-### 2. Set Environment Variable
-
-Set the API key as an environment variable before starting the server:
-
-**Windows (PowerShell):**
-```powershell
-$env:GOOGLE_TRANSLATE_API_KEY="your-api-key-here"
-node app.js
-```
-
-**Windows (CMD):**
-```cmd
-set GOOGLE_TRANSLATE_API_KEY=your-api-key-here
-node app.js
-```
-
-**Or create a `.env` file (optional - install dotenv package):**
-```
-GOOGLE_TRANSLATE_API_KEY=your-api-key-here
-```
-
-### 3. Free Tier Limits
-
-- 500,000 characters/month **free**
-- Supports: English, Vietnamese, Chinese, Japanese, Korean, French, German, Spanish, Thai, and more
-
-### 4. How Translation Works in Admin Panel
-
-When editing a project in the admin panel, each text field (Name, Small Content) has **translate buttons**:
-- **EN** - Translate to English
-- **ZH** - Translate to Chinese (Simplified)
-- **JA** - Translate to Japanese
-
-Click a button to translate the field content using Google Translate API.
-
----
-
-## Running the Project
+## 4. Chạy
 
 ```bash
-# Install dependencies (if not already)
-npm install
-
-# Start the server
 node app.js
-
-# Server runs at http://localhost:5500/login
 ```
 
-### Default Admin Account
-- **Username:** `admin`
-- **Password:** `admin123`
-- **Name:** `Administrator`
-- **Role:** `admin`
+→ `http://localhost:5500/login` (cổng đọc từ `PORT` trong `.env`, mặc định 5500)
 
----
+## 5. Đăng Nhập Mặc Định
 
-## Features Overview
+- Username: `admin`
+- Password: `admin123`
+- Role: `admin`
 
-| Feature | Status |
-|---------|--------|
-| Add name to Account | ✅ Done |
-| Role-based accounts (admin/employee) | ✅ Done |
-| Google Translate API | ✅ Done |
-| Responsive design improvements | ✅ Done |
-| Footer design improvements | ✅ Done |
+> Nên đổi password ngay sau khi đăng nhập đầu tiên (trong tab Accounts của admin panel).
+
+## Google Translate (tuỳ chọn)
+
+1. https://console.cloud.google.com/ → tạo project → enable Cloud Translation API
+2. Credentials → Create API Key
+3. Paste key vào `.env` ở `GOOGLE_TRANSLATE_API_KEY`
+4. Restart server
+
+Free tier: 500,000 ký tự/tháng.
+
+## Bảo Mật Đã Áp Dụng
+
+| # | Vấn đề | Cách giải quyết |
+|---|--------|-----------------|
+| 1 | Password plain-text | bcrypt rounds=10, hash khi create/update; `bcrypt.compare` khi login |
+| 2 | API admin không auth | `requireAuth` cho toàn bộ `/api/admin/*`; `requireAdmin` cho DELETE và Accounts |
+| 3 | Secrets hardcode | Chuyển sang `.env` (`dotenv`) — DB, session secret, Google API |
+| 4 | Cookie yếu | `httpOnly: true`, `sameSite: 'lax'`, `secure` bật ở production |
+| 5 | Upload không filter | `fileFilter` chỉ chấp nhận MIME `image/{jpeg,png,webp,gif}` + extension |
+| 6 | `express.static('.')` | Đã bỏ; mount riêng `/images`, `/uploads`, `/login`, `/main`, `/admin` |
+| 7 | Brute force / spam | `express-rate-limit`: 10 login/15min, 3 contact/min |
+| 8 | Log password | Đã bỏ `console.log` thông tin nhạy cảm trong `loginController` |
+| 9 | Renumber race | Bọc transaction trong `renumberService` (rollback nếu lỗi) |
+
+Tham khảo chi tiết: [wiki/09-bao-mat.md](wiki/09-bao-mat.md).
+
+## Trouble-shooting
+
+### ❌ `SESSION_SECRET không được khai báo trong .env`
+→ Chưa tạo `.env`. Quay lại bước 2.
+
+### ❌ Login đúng `admin/admin123` mà vẫn báo sai
+→ DB của bạn còn password plain-text. Chạy `node config/migrate_hash_passwords.js`.
+
+### ❌ Upload báo "Chỉ chấp nhận ảnh: jpg, jpeg, png, webp, gif"
+→ Bạn đang upload file không phải ảnh. Đổi format ảnh.
+
+### ❌ "Bạn cần đăng nhập" khi gọi API admin
+→ Cookie session hết hạn hoặc chưa login. Đăng nhập lại tại `/login`.
+
+### ❌ Quá nhiều lần đăng nhập sai → bị chặn
+→ Đợi 15 phút hoặc đổi IP. Đây là rate-limit chống brute-force.
