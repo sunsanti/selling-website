@@ -129,6 +129,19 @@ app.get("/check-auth", (req, res) => {
     }
 });
 
+// Global error handler — last in chain. Catches uncaught async errors.
+// eslint-disable-next-line no-unused-vars
+app.use((err, req, res, next) => {
+    console.error('Unhandled error:', err.message, err.stack);
+    if (res.headersSent) return next(err);
+    const isApi = req.path.startsWith('/api/');
+    if (isApi) {
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    } else {
+        res.status(500).send('Đã xảy ra lỗi máy chủ');
+    }
+});
+
 const PORT = parseInt(process.env.PORT || '5500', 10);
 
 app.listen(PORT, () => {

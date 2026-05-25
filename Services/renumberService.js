@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { AREAS } = require('../config/constants');
 
 /**
  * Renumber contact IDs sequentially after deletion.
@@ -45,9 +46,7 @@ async function renumberProjectDisplayOrder() {
     try {
         await conn.beginTransaction();
 
-        const areas = ['sydney', 'melbourne', 'brisbane', 'goldcoast'];
-
-        for (const area of areas) {
+        for (const area of AREAS) {
             const [projects] = await conn.query(
                 'SELECT id, display_order FROM projects WHERE area = ? AND status = "active" ORDER BY display_order ASC, id ASC',
                 [area]

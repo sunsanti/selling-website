@@ -1,7 +1,6 @@
 const bcrypt = require('bcrypt');
 const pool = require('../config/database');
-
-const BCRYPT_ROUNDS = 10;
+const { BCRYPT_ROUNDS } = require('../config/constants');
 
 const getAllAccounts = async () => {
     try {

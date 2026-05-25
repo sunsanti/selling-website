@@ -60,15 +60,6 @@ const getProjects = async (req, res) => {
     }
 };
 
-const getInactiveProjects = async (req, res) => {
-    try {
-        const projects = await projectModel.getInactiveProjects();
-        res.json({ success: true, data: projects });
-    } catch (error) {
-        res.status(500).json({ success: false, message: 'Lỗi server' });
-    }
-};
-
 const getProjectById = async (req, res) => {
     try {
         const project = await projectModel.getProjectById(req.params.id);
@@ -414,7 +405,6 @@ module.exports = {
     getSettings,
     updateSettings,
     getProjects,
-    getInactiveProjects,
     getProjectById,
     createProject,
     updateProject,
