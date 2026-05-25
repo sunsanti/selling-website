@@ -365,10 +365,6 @@ body {
 }
 
 .data-table {
-    min-width: 720px;
-}
-
-.data-table {
     width: 100%;
     border-collapse: collapse;
 }
@@ -698,6 +694,72 @@ body {
 }
 
 /* ================ RESPONSIVE ================ */
+/* Tablet (iPad): hide low-priority columns to fit without scroll */
+@media (max-width: 1024px) {
+    /* Projects: hide Image (2), m² (5), Category (6), Year (7). Keep #, Name, Area, Actions */
+    #active-projects-table th:nth-child(2),
+    #active-projects-table td:nth-child(2),
+    #active-projects-table th:nth-child(5),
+    #active-projects-table td:nth-child(5),
+    #active-projects-table th:nth-child(6),
+    #active-projects-table td:nth-child(6),
+    #inactive-projects-table th:nth-child(2),
+    #inactive-projects-table td:nth-child(2),
+    #inactive-projects-table th:nth-child(5),
+    #inactive-projects-table td:nth-child(5),
+    #inactive-projects-table th:nth-child(6),
+    #inactive-projects-table td:nth-child(6) {
+        display: none;
+    }
+
+    /* Contacts: hide Date (5). Keep ID, Name, Phone, Email, Actions */
+    #contacts-table th:nth-child(5),
+    #contacts-table td:nth-child(5) {
+        display: none;
+    }
+
+    /* Accounts: hide Created At (5). Keep ID, Username, Name, Role, Actions */
+    #accounts-table th:nth-child(5),
+    #accounts-table td:nth-child(5) {
+        display: none;
+    }
+}
+
+/* Mobile: hide more columns + show small image inline */
+@media (max-width: 768px) {
+    /* Projects: also hide Year (7), keep only #, Name, Area, Actions */
+    #active-projects-table th:nth-child(7),
+    #active-projects-table td:nth-child(7),
+    #inactive-projects-table th:nth-child(7),
+    #inactive-projects-table td:nth-child(7) {
+        display: none;
+    }
+
+    /* Contacts: also hide Email (4), keep ID, Name, Phone, Actions */
+    #contacts-table th:nth-child(4),
+    #contacts-table td:nth-child(4) {
+        display: none;
+    }
+
+    /* Accounts: also hide Role (4), keep ID, Username, Name, Actions */
+    #accounts-table th:nth-child(4),
+    #accounts-table td:nth-child(4) {
+        display: none;
+    }
+
+    /* Compact table cells */
+    .data-table th,
+    .data-table td {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+
+    .data-table img {
+        width: 40px;
+        height: 30px;
+    }
+}
+
 @media (max-width: 768px) {
     .sidebar {
         width: 60px;

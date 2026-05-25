@@ -10,12 +10,6 @@ const { requireAuth, requireAdmin } = require('./Controllers/authMiddleware');
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
-app.use('/login', express.static(path.join(__dirname, 'Views/login')));
-app.use('/main', express.static(path.join(__dirname, 'Views/main')));
-app.use('/admin', express.static(path.join(__dirname, 'Views/admin')));
-
 const SESSION_SECRET = process.env.SESSION_SECRET;
 if (!SESSION_SECRET) {
     console.error('❌ SESSION_SECRET không được khai báo trong .env');
@@ -33,6 +27,22 @@ app.use(session({
         maxAge: 1000 * 60 * 60 * 5
     }
 }));
+
+app.use('/images', express.static(path.join(__dirname, 'images')));
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/login', express.static(path.join(__dirname, 'Views/login')));
+app.use('/main', express.static(path.join(__dirname, 'Views/main')));
+
+// Admin: gate the HTML entry behind login; static assets (CSS/JS) pass through
+// so the page can load styles after redirect bounce. API endpoints have their
+// own auth middleware further down.
+const ADMIN_ENTRY_PATHS = new Set(['/', '/index.html', '']);
+app.use('/admin', (req, res, next) => {
+    if (ADMIN_ENTRY_PATHS.has(req.path) && !req.session.user) {
+        return res.redirect('/login');
+    }
+    next();
+}, express.static(path.join(__dirname, 'Views/admin')));
 
 const loginLimiter = rateLimit({
     windowMs: 15 * 60 * 1000,
@@ -58,8 +68,6 @@ app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
 app.post('/login', loginLimiter, loginController.handleLogin);
 app.get('/main', loginController.getMainPage);
-
-app.get('/admin', adminController.getAdminPage);
 
 // Public read-only API (no auth) - used by /main public page
 app.get('/api/public/settings', adminController.getSettings);

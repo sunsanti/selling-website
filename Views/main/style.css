@@ -387,6 +387,7 @@ section{
     width: 100%;
     max-width: 1200px;
     margin: auto;
+    line-height: 0.95;
 }
 
 .home .content .left{
@@ -395,6 +396,7 @@ section{
 
 .home .content .right{
     text-align: right;
+    margin-top: -0.2em;
 }
 .home .sub-content{
     font-size: 2rem;
@@ -915,15 +917,17 @@ html{
 }
 
 .home .content{
-    font-size:10rem;
+    font-size: 8rem;
+    line-height: 0.95;
 }
 
 .home .content .left{
-    margin-left:2rem;
+    margin-left: 2rem;
 }
 
 .home .content .right{
-    display: none;
+    margin-right: 2rem;
+    margin-top: -0.15em;
 }
 
 .content-header-right {
@@ -1177,14 +1181,19 @@ body{
 }
 
 .home .content{
-    font-size:6rem;
-    text-align:center;
+    font-size: 5rem;
+    text-align: center;
+    line-height: 0.95;
 }
 
 .home .content .left,
 .home .content .right{
-    margin:0;
-    text-align:center;
+    margin: 0;
+    text-align: center;
+}
+
+.home .content .right{
+    margin-top: -0.1em;
 }
 
 .home .sub-content{
@@ -1289,13 +1298,25 @@ body{
 .services .service-item{
     display: flex;
     flex-direction: column;
+    margin-left: 0;
+    margin-right: 0;
     margin-bottom: 3rem;
+    overflow: hidden;
+    border-radius: 8px;
 }
 
 .services .service-item .content{
     background-color: #d4d4c9;
     padding: 1.5rem;
     margin-bottom: 0;
+    width: 100%;
+}
+
+.services .service-item .image,
+.services .service-item .image img{
+    display: block;
+    width: 100%;
+    margin: 0;
 }
 
 .services .service-item .content .box-content{
@@ -1389,60 +1410,63 @@ img{
 
 /* ========== FILL POPUP MOBILE ========== */
 @media (max-width: 768px) {
-    /* fill-popup - mobile: ảnh trái, form phải */
+    /* fill-popup - mobile: form full width, image hidden on small screens */
     .fill-popup .fill-popup-content {
-        width: 88%;
-        height: 65%;
-        padding: 6px;
+        width: 92%;
+        height: auto;
+        max-height: 90vh;
+        padding: 18px 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     }
 
     .fill-popup .fill-popup-content .content {
         display: flex;
-        flex-direction: row;
-        gap: 6px;
+        flex-direction: column;
+        gap: 12px;
+        height: auto;
     }
 
-    .fill-popup .fill-popup-content .content .left {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        overflow: visible;
-        min-height: 0;
+    .fill-popup .fill-popup-content .content .left,
+    .fill-popup .fill-popup-content .content .right {
+        width: 100%;
+        order: initial;
     }
 
     .fill-popup .fill-popup-content .content .right {
-        width: 50%;
+        display: none;
     }
 
     .fill-popup .fill-popup-content .content .left .title {
-        font-size: 1.6rem;
-        margin-top: 0.8rem;
-        margin-bottom: 0.8rem;
+        font-size: 2rem;
+        margin: 0.5rem auto 1rem;
+        width: 100%;
+        line-height: 1.2;
     }
 
     .fill-content {
-        margin: 0 0.15rem;
+        margin: 0;
     }
 
     .name-box, .phone-box, .email-box span {
-        font-size: 12px;
+        font-size: 13px;
     }
 
     .fill-popup .fill-popup-content .left .fill-content input {
-        font-size: 14px;
-        margin-bottom: 0.8rem;
-        padding: 4px 0 6px;
-        min-height: 32px;
+        font-size: 15px;
+        margin-bottom: 1rem;
+        padding: 6px 0 8px;
+        min-height: 36px;
     }
 
     .submit-btn {
-        padding: 10px 18px;
-        font-size: 13px;
-        width: 80%;
-        margin: 10px auto;
+        padding: 12px 22px;
+        font-size: 14px;
+        width: 60%;
+        margin: 12px auto 0;
         box-sizing: border-box;
-        min-height: 40px;
+        min-height: 44px;
     }
 
     .fill-popup .fill-popup-content .right .image {
@@ -1548,63 +1572,6 @@ img{
 
     .slider-thumbnails {
         padding: 6px;
-    }
-
-    /* fill-popup - gọn hơn */
-    .fill-popup .fill-popup-content {
-        width: 95%;
-        height: 82%;
-        padding: 10px;
-    }
-
-    .fill-popup .fill-popup-content .content {
-        gap: 10px;
-    }
-
-    .fill-popup .fill-popup-content .content .left {
-        width: 50%;
-    }
-
-    .fill-popup .fill-popup-content .content .right {
-        width: 50%;
-    }
-
-    .fill-popup .fill-popup-content .content .left .title {
-        font-size: 1.8rem;
-        width: 100%;
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .fill-content {
-        margin: 0 0.3rem;
-    }
-
-    .name-box, .phone-box, .email-box span {
-        font-size: 12px;
-    }
-
-    .fill-popup .fill-popup-content .left .fill-content input {
-        font-size: 12px;
-        margin-bottom: 1.2rem;
-        padding-bottom: 3px;
-    }
-
-    .submit-btn {
-        padding: 8px 18px;
-        font-size: 12px;
-        width: 70%;
-    }
-
-    .fill-popup .fill-popup-content .right .image {
-        width: 100%;
-        height: 100%;
-    }
-
-    .fill-popup .fill-popup-content .right .image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
     }
 
     /* close button nhỏ lại */
