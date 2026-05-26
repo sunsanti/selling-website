@@ -1,11 +1,60 @@
 {
     "plan": "docs/superpowers/plans/2026-05-26-media-library",
     "started_at": "2026-05-26T00:00:00Z",
-    "current_feature": "F01",
+    "completed_at": "2026-05-26T00:00:00Z",
+    "current_feature": null,
     "features": {
-        "F01": { "status": "in_progress", "fix_attempts": 0 },
-        "F02": { "status": "pending" },
-        "F03": { "status": "pending" }
+        "F01": {
+            "status": "completed",
+            "commit": "2b65beb",
+            "smoke_results": {
+                "moved_files": 26,
+                "idempotent_rerun": "0 moves, 0 rewrites",
+                "images_404": true,
+                "uploads_main_image_200": true,
+                "uploads_subfolder_flattened_200": true
+            },
+            "fix_attempts": 0
+        },
+        "F02": {
+            "status": "completed",
+            "commit": "6d02d00",
+            "smoke_results": {
+                "unauth_401": true,
+                "auth_200_with_data": "44 files sorted newest first",
+                "modal_elements_present": 4,
+                "openMediaLibrary_defined": true
+            },
+            "fix_attempts": 0
+        },
+        "F03": {
+            "status": "completed",
+            "commit": null,
+            "smoke_results": {
+                "openMediaLibrary_callsites": 6,
+                "file_inputs_removed": ["logo-file-input", "main-image-file-input", "svc-file-input", "fp-file-input", "project-media-file"],
+                "wire_sites_completed": 5
+            },
+            "fix_attempts": 0
+        }
     },
-    "gate_results": {}
+    "gate_results": {
+        "after_F01": {
+            "migration_first_run": "26 files moved + 5 DB updates",
+            "migration_idempotent": "0 changes on re-run",
+            "url_404_check": "/images/x.jpg → 404 (mount removed)",
+            "url_200_check": "/uploads/* → 200 (canonical paths)"
+        },
+        "after_F02": {
+            "syntax_check": "pass",
+            "unauth_endpoint": "401",
+            "auth_endpoint": "200 with 44-file array",
+            "frontend_elements": "modal HTML + CSS + JS all loaded"
+        },
+        "after_F03": {
+            "syntax_check": "pass",
+            "callsites": "6 openMediaLibrary calls",
+            "dead_code_cleanup": "removed 5 file inputs + 2 stale removeImage refs"
+        }
+    }
 }

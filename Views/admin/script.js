@@ -36,18 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Project images upload handler
+    // Project images picker — open media library (multi-select)
     const uploadTrigger = document.getElementById('image-upload-trigger');
-    const fileInput = document.getElementById('project-media-file');
-    if (uploadTrigger && fileInput) {
-        uploadTrigger.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                for (const file of e.target.files) {
-                    await handleNewImageFile(file);
+    if (uploadTrigger) {
+        uploadTrigger.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'multi',
+                onSelect: (urls) => {
+                    urls.forEach(url => {
+                        currentProjectImages.push({
+                            id: null,
+                            image_path: url,
+                            isNew: true,
+                            isBlob: false,
+                            order: currentProjectImages.length + 1
+                        });
+                    });
+                    renderProjectImagesList();
+                    showToast('Đã thêm ' + urls.length + ' ảnh', 'success');
                 }
-                e.target.value = '';
-            }
+            });
         });
     }
 
@@ -161,49 +169,42 @@ async function loadDashboard() {
 // ===================== SETTINGS UPLOAD HELPERS =====================
 function setupSettingsUpload() {
     // Logo upload
-    const logoBtn = document.getElementById('logo-upload-btn');
-    const logoInput = document.getElementById('logo-file-input');
-    if (logoBtn && logoInput) {
-        logoBtn.addEventListener('click', () => logoInput.click());
-        logoInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                currentLogoFile = e.target.files[0];
-                const previewUrl = URL.createObjectURL(currentLogoFile);
-                document.getElementById('current-logo-img').src = previewUrl;
-                document.getElementById('current-logo-img').style.display = 'block';
-                document.getElementById('logo-preview-placeholder').style.display = 'none';
-                document.getElementById('logo-remove-btn').style.display = 'inline-flex';
-                // For iframe preview (cross-document), use dataURL
-                const reader = new FileReader();
-                reader.onload = () => {
-                    window._pendingLogoDataUrl = reader.result;
+    const logoBtn = document.getElementById('logo-pick-btn');
+    if (logoBtn) {
+        logoBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    currentLogoFile = null;
+                    currentLogoPath = url;
+                    window._pendingLogoDataUrl = null;
+                    document.getElementById('current-logo-img').src = url;
+                    document.getElementById('current-logo-img').style.display = 'block';
+                    document.getElementById('logo-preview-placeholder').style.display = 'none';
+                    document.getElementById('logo-remove-btn').style.display = 'inline-flex';
                     postPreviewData('settings');
-                };
-                reader.readAsDataURL(currentLogoFile);
-            }
+                }
+            });
         });
     }
 
-    // Main image upload
-    const mainBtn = document.getElementById('main-image-upload-btn');
-    const mainInput = document.getElementById('main-image-file-input');
-    if (mainBtn && mainInput) {
-        mainBtn.addEventListener('click', () => mainInput.click());
-        mainInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                currentMainImageFile = e.target.files[0];
-                const previewUrl = URL.createObjectURL(currentMainImageFile);
-                document.getElementById('current-main-image-img').src = previewUrl;
-                document.getElementById('current-main-image-img').style.display = 'block';
-                document.getElementById('main-image-preview-placeholder').style.display = 'none';
-                document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
-                const reader = new FileReader();
-                reader.onload = () => {
-                    window._pendingMainImageDataUrl = reader.result;
+    // Main image picker
+    const mainBtn = document.getElementById('main-image-pick-btn');
+    if (mainBtn) {
+        mainBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    currentMainImageFile = null;
+                    currentMainImagePath = url;
+                    window._pendingMainImageDataUrl = null;
+                    document.getElementById('current-main-image-img').src = url;
+                    document.getElementById('current-main-image-img').style.display = 'block';
+                    document.getElementById('main-image-preview-placeholder').style.display = 'none';
+                    document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
                     postPreviewData('settings');
-                };
-                reader.readAsDataURL(currentMainImageFile);
-            }
+                }
+            });
         });
     }
 }
@@ -214,7 +215,6 @@ function removeLogoImage() {
     document.getElementById('current-logo-img').style.display = 'none';
     document.getElementById('logo-preview-placeholder').style.display = 'flex';
     document.getElementById('logo-remove-btn').style.display = 'none';
-    document.getElementById('logo-file-input').value = '';
 }
 
 function removeMainImage() {
@@ -223,7 +223,6 @@ function removeMainImage() {
     document.getElementById('current-main-image-img').style.display = 'none';
     document.getElementById('main-image-preview-placeholder').style.display = 'flex';
     document.getElementById('main-image-remove-btn').style.display = 'none';
-    document.getElementById('main-image-file-input').value = '';
 }
 
 // ===================== SETTINGS =====================
@@ -1279,8 +1278,7 @@ async function loadHomeServices() {
                 + '        <i class="fas fa-image"></i> No image</span>'
                 + '    </div>'
                 + '    <div class="settings-image-actions">'
-                + '      <button type="button" class="btn-add svc-upload-btn"><i class="fas fa-upload"></i> Upload</button>'
-                + '      <input type="file" class="svc-file-input" accept="image/*" style="display:none">'
+                + '      <button type="button" class="btn-add svc-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
                 + '    </div>'
                 + '  </div></div>'
                 + '<div class="form-actions">'
@@ -1299,22 +1297,18 @@ async function loadHomeServices() {
             }
             card.dataset.imagePath = svc.image_path || '';
 
-            const fileInput = card.querySelector('.svc-file-input');
-            card.querySelector('.svc-upload-btn').addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', async () => {
-                const file = fileInput.files[0];
-                if (!file) return;
-                try {
-                    const path = await uploadHomeImage(file);
-                    imgEl.src = path;
-                    imgEl.style.display = 'block';
-                    placeholderEl.style.display = 'none';
-                    card.dataset.imagePath = path;
-                    postPreviewData('services');
-                    showToast('Image uploaded — click Save to persist', 'success');
-                } catch (err) {
-                    showToast('Upload error: ' + err.message, 'error');
-                }
+            card.querySelector('.svc-pick-btn').addEventListener('click', () => {
+                openMediaLibrary({
+                    mode: 'single',
+                    onSelect: ([url]) => {
+                        imgEl.src = url;
+                        imgEl.style.display = 'block';
+                        placeholderEl.style.display = 'none';
+                        card.dataset.imagePath = url;
+                        postPreviewData('services');
+                        showToast('Đã chọn ảnh — bấm Save để lưu', 'success');
+                    }
+                });
             });
 
             card.querySelector('.svc-save-btn').addEventListener('click', async () => {
@@ -1375,8 +1369,7 @@ async function loadHomeFooter() {
                 + '        <i class="fas fa-user"></i> No avatar</span>'
                 + '    </div>'
                 + '    <div class="settings-image-actions">'
-                + '      <button type="button" class="btn-add fp-upload-btn"><i class="fas fa-upload"></i> Upload</button>'
-                + '      <input type="file" class="fp-file-input" accept="image/*" style="display:none">'
+                + '      <button type="button" class="btn-add fp-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
                 + '    </div>'
                 + '  </div></div>'
                 + '<div class="form-row">'
@@ -1413,22 +1406,18 @@ async function loadHomeFooter() {
             }
             card.dataset.avatarPath = person.avatar_path || '';
 
-            const fileInput = card.querySelector('.fp-file-input');
-            card.querySelector('.fp-upload-btn').addEventListener('click', () => fileInput.click());
-            fileInput.addEventListener('change', async () => {
-                const file = fileInput.files[0];
-                if (!file) return;
-                try {
-                    const path = await uploadHomeImage(file);
-                    imgEl.src = path;
-                    imgEl.style.display = 'block';
-                    placeholderEl.style.display = 'none';
-                    card.dataset.avatarPath = path;
-                    postPreviewData('footer');
-                    showToast('Avatar uploaded — click Save to persist', 'success');
-                } catch (err) {
-                    showToast('Upload error: ' + err.message, 'error');
-                }
+            card.querySelector('.fp-pick-btn').addEventListener('click', () => {
+                openMediaLibrary({
+                    mode: 'single',
+                    onSelect: ([url]) => {
+                        imgEl.src = url;
+                        imgEl.style.display = 'block';
+                        placeholderEl.style.display = 'none';
+                        card.dataset.avatarPath = url;
+                        postPreviewData('footer');
+                        showToast('Đã chọn avatar — bấm Save để lưu', 'success');
+                    }
+                });
             });
 
             card.querySelector('.fp-save-btn').addEventListener('click', async () => {
