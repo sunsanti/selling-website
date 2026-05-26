@@ -100,3 +100,19 @@ Tham khảo chi tiết: [wiki/09-bao-mat.md](wiki/09-bao-mat.md).
 
 ### ❌ Quá nhiều lần đăng nhập sai → bị chặn
 → Đợi 15 phút hoặc đổi IP. Đây là rate-limit chống brute-force.
+
+---
+
+## Upgrading From The Two-Folder Layout (`images/` + `uploads/`)
+
+Phiên bản trước media-library feature dùng 2 folder ảnh riêng (`images/` cho seed assets, `uploads/` cho admin uploads). Để nâng cấp:
+
+1. **Dừng server**: `pkill -f "node app"` hoặc Ctrl+C.
+2. **Backup DB**: `mysqldump -u root -p sellingweb > backup.sql`
+3. **Chạy migration**: `node config/migrate_to_uploads.js`
+   - Script move toàn bộ file từ `images/` sang `uploads/` (subfolder được flatten với prefix)
+   - UPDATE 5 bảng (`settings`, `services`, `footer_persons`, `projects`, `tableimages`) — mọi path `/images/x` thành `/uploads/x`, mọi bare filename `x.jpg` thành `/uploads/x.jpg`
+4. **Pull/deploy code mới** (đã drop `/images` static mount khỏi `app.js`)
+5. **Start server**: `node app.js`
+
+Migration **idempotent** — chạy lại nhiều lần OK (skip files đã move, skip rows đã `/uploads/`).

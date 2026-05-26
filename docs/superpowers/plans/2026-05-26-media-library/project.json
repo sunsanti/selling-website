@@ -1,0 +1,63 @@
+{
+    "slug": "2026-05-26-media-library",
+    "features": [
+        {
+            "id": "F01",
+            "name": "Migration to single uploads/ folder + drop /images mount",
+            "scope": "Full-stack (filesystem + DB + server)"
+        },
+        {
+            "id": "F02",
+            "name": "Media library backend + reusable popup component",
+            "scope": "Full-stack (API + UI)"
+        },
+        {
+            "id": "F03",
+            "name": "Wire 6 admin image fields to openMediaLibrary()",
+            "scope": "UI (admin)"
+        }
+    ],
+    "dependencies": {
+        "F02": ["F01"],
+        "F03": ["F02"]
+    },
+    "phase_gates": [
+        {
+            "after": "F01",
+            "checks": [
+                "node --check config/migrate_to_uploads.js",
+                "node --check app.js",
+                "ls images/ 2>/dev/null | wc -l   # expect 0 after run (or N legitimate collisions logged)",
+                "mysql -e 'SELECT COUNT(*) FROM services WHERE image_path LIKE \"/images/%\" OR (image_path != \"\" AND image_path NOT LIKE \"/uploads/%\" AND image_path NOT LIKE \"data:%\" AND image_path NOT LIKE \"http%\")' sellingweb   # expect 0",
+                "test $(curl -s -o /dev/null -w '%{http_code}' http://localhost:5500/images/anything.jpg) -eq 404",
+                "test $(curl -s -o /dev/null -w '%{http_code}' http://localhost:5500/uploads/main.jpg) -eq 200",
+                "Manual: re-run migration → all moves and rewrites = 0"
+            ]
+        },
+        {
+            "after": "F02",
+            "checks": [
+                "node --check Controllers/mediaController.js",
+                "node --check Views/admin/script.js",
+                "test $(curl -s -o /dev/null -w '%{http_code}' http://localhost:5500/api/admin/media) -eq 401",
+                "Login + curl -b cookie http://localhost:5500/api/admin/media → success:true, data array sorted by mtime desc",
+                "Manual: open admin → DevTools → openMediaLibrary({mode:'single', onSelect: u => console.log(u)}) → modal visible with grid",
+                "Manual: search 'service' in popup → grid filters",
+                "Manual: click thumb → highlighted; Confirm enabled → click → console logs URL",
+                "Manual: Upload new image via popup → appears at top of grid; cleared search; in multi-mode auto-selected"
+            ]
+        },
+        {
+            "after": "F03",
+            "checks": [
+                "grep -c 'openMediaLibrary(' Views/admin/script.js   # >= 6",
+                "grep -c 'logo-file-input\\|main-image-file-input\\|svc-file-input\\|fp-file-input\\|project-media-input' Views/admin/index.html Views/admin/script.js   # 0 (or close to 0)",
+                "grep -c 'URL.createObjectURL' Views/admin/script.js   # 0",
+                "Manual: Settings logo → Chọn ảnh logo → pick → preview updates → live-preview iframe refreshes → Save → reload persists",
+                "Manual: Project edit → Add Image (multi) → pick 3 → 3 thumbs added to project → Save → reload → 3 tableimages rows in DB",
+                "Manual: Same image picked twice across Settings + Services → uploads/ file count unchanged → both DB rows point at same /uploads/x.jpg URL"
+            ]
+        }
+    ],
+    "executor": "feature-build"
+}

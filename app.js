@@ -28,7 +28,6 @@ app.use(session({
     }
 }));
 
-app.use('/images', express.static(path.join(__dirname, 'images')));
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));

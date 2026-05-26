@@ -1,0 +1,11 @@
+{
+    "plan": "docs/superpowers/plans/2026-05-26-media-library",
+    "started_at": "2026-05-26T00:00:00Z",
+    "current_feature": "F01",
+    "features": {
+        "F01": { "status": "in_progress", "fix_attempts": 0 },
+        "F02": { "status": "pending" },
+        "F03": { "status": "pending" }
+    },
+    "gate_results": {}
+}
