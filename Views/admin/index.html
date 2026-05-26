@@ -486,6 +486,39 @@
     </div>
 </div>
 
+<!-- Media Library Modal -->
+<div id="media-modal" class="modal">
+    <div class="modal-content media-modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-images"></i> Thư viện ảnh</h2>
+            <button class="modal-close" onclick="closeMediaLibrary()">&times;</button>
+        </div>
+        <div class="media-toolbar">
+            <button type="button" class="btn-add" onclick="document.getElementById('media-upload-input').click()">
+                <i class="fas fa-upload"></i> Upload
+            </button>
+            <input type="file" id="media-upload-input" accept="image/*" style="display:none">
+            <input type="text" id="media-search-input" class="media-search" placeholder="Tìm theo tên file...">
+            <span class="media-count" id="media-count"></span>
+        </div>
+        <div class="modal-body media-body">
+            <div id="media-grid" class="media-grid"></div>
+            <div id="media-empty" class="media-empty" style="display:none">
+                <i class="fas fa-image"></i>
+                <p>Chưa có ảnh — bấm Upload để thêm</p>
+            </div>
+        </div>
+        <div class="form-actions media-actions">
+            <button type="button" class="btn-cancel" onclick="closeMediaLibrary()">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button type="button" class="btn-save" id="media-confirm-btn" onclick="confirmMediaSelection()" disabled>
+                <i class="fas fa-check"></i> Chọn <span id="media-selected-count">(0)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Confirm Modal -->
 <div id="confirm-modal" class="modal">
     <div class="modal-content modal-small">

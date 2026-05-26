@@ -63,6 +63,7 @@ const loginController = require('./Controllers/loginController');
 const adminController = require('./Controllers/adminController');
 const contactController = require('./Controllers/contactController');
 const homeContentController = require('./Controllers/homeContentController');
+const mediaController = require('./Controllers/mediaController');
 
 app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
@@ -122,6 +123,8 @@ app.put('/api/admin/services/:slot', homeContentController.updateService);
 app.get('/api/admin/footer-persons', homeContentController.getFooterPersons);
 app.get('/api/admin/footer-persons/:slot', homeContentController.getFooterPersonBySlot);
 app.put('/api/admin/footer-persons/:slot', homeContentController.updateFooterPerson);
+
+app.get('/api/admin/media', mediaController.getMedia);
 
 app.post('/api/admin/translate', adminController.translateText);
 app.post('/api/admin/detect-language', adminController.detectTextLanguage);

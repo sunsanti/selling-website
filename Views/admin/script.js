@@ -1470,3 +1470,186 @@ async function loadHomeFooter() {
         showToast('Error loading Footer: ' + err.message, 'error');
     }
 }
+
+// ===================== MEDIA LIBRARY =====================
+// One global modal that any image picker can open.
+//
+//   openMediaLibrary({
+//       mode: 'single' | 'multi',
+//       onSelect: (urls) => { /* urls is always an array */ }
+//   });
+//
+// Single-mode: clicking a thumb selects it (replacing prior selection).
+// Multi-mode: each thumb toggles in/out of a Set. After successful upload
+// in multi-mode the new file is auto-added to the selection. Search is
+// case-insensitive substring on filename.
+
+let _mediaState = {
+    allMedia: [],
+    filteredMedia: [],
+    selectedUrls: new Set(),
+    mode: 'single',
+    onSelect: null,
+    query: ''
+};
+
+function openMediaLibrary({ mode = 'single', onSelect = null } = {}) {
+    _mediaState.mode = mode;
+    _mediaState.onSelect = onSelect;
+    _mediaState.selectedUrls = new Set();
+    _mediaState.query = '';
+    const searchInp = document.getElementById('media-search-input');
+    if (searchInp) searchInp.value = '';
+    document.getElementById('media-modal').style.display = 'flex';
+    updateMediaSelectedCount();
+    loadMediaGrid();
+}
+
+function closeMediaLibrary() {
+    document.getElementById('media-modal').style.display = 'none';
+    _mediaState.onSelect = null;
+    _mediaState.selectedUrls.clear();
+}
+
+async function loadMediaGrid() {
+    const grid = document.getElementById('media-grid');
+    const empty = document.getElementById('media-empty');
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:#95a5a6">Đang tải...</div>';
+    empty.style.display = 'none';
+    try {
+        const res = await fetch('/api/admin/media');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || 'Failed');
+        _mediaState.allMedia = json.data || [];
+        applyMediaFilter();
+    } catch (err) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        empty.querySelector('p').textContent = 'Lỗi tải thư viện: ' + err.message;
+        showToast('Lỗi tải thư viện ảnh', 'error');
+    }
+}
+
+function applyMediaFilter() {
+    const q = (_mediaState.query || '').toLowerCase();
+    _mediaState.filteredMedia = q
+        ? _mediaState.allMedia.filter(m => m.name.toLowerCase().includes(q))
+        : _mediaState.allMedia.slice();
+    renderMediaGrid();
+}
+
+function renderMediaGrid() {
+    const grid = document.getElementById('media-grid');
+    const empty = document.getElementById('media-empty');
+    const count = document.getElementById('media-count');
+    grid.innerHTML = '';
+
+    if (_mediaState.allMedia.length === 0) {
+        empty.style.display = 'block';
+        count.textContent = '';
+        return;
+    }
+    empty.style.display = 'none';
+    count.textContent = _mediaState.filteredMedia.length + ' / ' + _mediaState.allMedia.length;
+
+    _mediaState.filteredMedia.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'media-item';
+        if (_mediaState.selectedUrls.has(m.url)) item.classList.add('selected');
+        item.dataset.url = m.url;
+
+        const img = document.createElement('img');
+        img.src = m.url;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onerror = function () { this.style.display = 'none'; };
+        item.appendChild(img);
+
+        const check = document.createElement('div');
+        check.className = 'media-check';
+        check.innerHTML = '<i class="fas fa-check"></i>';
+        item.appendChild(check);
+
+        const name = document.createElement('div');
+        name.className = 'media-name';
+        name.textContent = m.name;
+        item.appendChild(name);
+
+        item.addEventListener('click', () => toggleMediaSelection(m.url));
+        grid.appendChild(item);
+    });
+}
+
+function toggleMediaSelection(url) {
+    if (_mediaState.mode === 'single') {
+        _mediaState.selectedUrls.clear();
+        _mediaState.selectedUrls.add(url);
+    } else {
+        if (_mediaState.selectedUrls.has(url)) _mediaState.selectedUrls.delete(url);
+        else _mediaState.selectedUrls.add(url);
+    }
+    renderMediaGrid();
+    updateMediaSelectedCount();
+}
+
+function updateMediaSelectedCount() {
+    const n = _mediaState.selectedUrls.size;
+    const countEl = document.getElementById('media-selected-count');
+    const btnEl = document.getElementById('media-confirm-btn');
+    if (countEl) countEl.textContent = '(' + n + ')';
+    if (btnEl) btnEl.disabled = n === 0;
+}
+
+function confirmMediaSelection() {
+    const urls = Array.from(_mediaState.selectedUrls);
+    const cb = _mediaState.onSelect;
+    closeMediaLibrary();
+    if (cb && urls.length > 0) cb(urls);
+}
+
+// Wire static listeners on DOMContentLoaded (modal elements always present in HTML)
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInp = document.getElementById('media-search-input');
+    if (searchInp) {
+        searchInp.addEventListener('input', (e) => {
+            _mediaState.query = e.target.value;
+            applyMediaFilter();
+        });
+    }
+
+    const uploadInp = document.getElementById('media-upload-input');
+    if (uploadInp) {
+        uploadInp.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const fd = new FormData();
+                fd.append('media', file);
+                const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: fd });
+                const json = await res.json();
+                if (!json.success) throw new Error(json.message || 'Upload failed');
+                // Optimistically prepend the new file
+                const newItem = {
+                    url: json.path,
+                    name: json.path.split('/').pop(),
+                    size: 0,
+                    mtime: Date.now()
+                };
+                _mediaState.allMedia.unshift(newItem);
+                _mediaState.query = '';
+                if (searchInp) searchInp.value = '';
+                // D6: multi-mode auto-adds to selection; D7: single-mode does NOT
+                if (_mediaState.mode === 'multi') {
+                    _mediaState.selectedUrls.add(newItem.url);
+                }
+                applyMediaFilter();
+                updateMediaSelectedCount();
+                showToast('Upload thành công', 'success');
+            } catch (err) {
+                showToast('Lỗi upload: ' + err.message, 'error');
+            } finally {
+                e.target.value = '';
+            }
+        });
+    }
+});
