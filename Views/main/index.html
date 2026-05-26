@@ -63,7 +63,7 @@
                 <!-- <h3 class="content1">SOMETHING &<br></h3>
                 <h3 class="content2">REAL ESTATE</h3> -->
                 <div class="left">
-                    <p>SOMETHING &</p>
+                    <p>LANDSCAPE &</p>
                 </div>
                 <div class="right">
                     <p>REAL ESTATE</p>
@@ -732,8 +732,26 @@
             });
             document.body.classList.add('preview-mode');
             document.body.style.paddingTop = '80px';   // keep room for fixed header
-            // Disable interactions in preview
-            document.body.style.pointerEvents = 'none';
+
+            // Disable click/hover interactions but KEEP scroll working. Putting
+            // pointer-events:none on the body itself blocks scroll too, which
+            // makes the iframe unusable on tall sections like services.
+            const style = document.createElement('style');
+            style.textContent = `
+                body.preview-mode a,
+                body.preview-mode button,
+                body.preview-mode [onclick],
+                body.preview-mode .btn-get-in-touch,
+                body.preview-mode .btn-services,
+                body.preview-mode .menu-btn,
+                body.preview-mode .feature-image,
+                body.preview-mode .region {
+                    pointer-events: none !important;
+                    cursor: default !important;
+                }
+                body.preview-mode { cursor: default; }
+            `;
+            document.head.appendChild(style);
         }
 
         function postPreviewHeight() {

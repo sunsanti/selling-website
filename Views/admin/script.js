@@ -406,7 +406,7 @@ function renderActiveProjects(projects) {
             <td>
                 <div class="action-btns">
                     <button class="action-btn edit" onclick="editProject(${p.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete" onclick="confirmAction('Stop this project?', () => softDeleteProject(${p.id}))" title="Stop"><i class="fas fa-ban"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Ngừng kinh doanh dự án này?', () => softDeleteProject(${p.id}))" title="Stop"><i class="fas fa-ban"></i></button>
                 </div>
             </td>
         </tr>
@@ -431,7 +431,7 @@ function renderInactiveProjects(projects) {
             <td>
                 <div class="action-btns">
                     <button class="action-btn restore" onclick="restoreProject(${p.id})" title="Restore"><i class="fas fa-undo"></i> Restore</button>
-                    <button class="action-btn delete" onclick="confirmAction('Permanently delete this project?', () => permanentlyDeleteProject(${p.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Xóa vĩnh viễn dự án này?', () => permanentlyDeleteProject(${p.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -726,7 +726,7 @@ function renderContactsTable(contacts) {
             <td>${formatDate(c.created_at)}</td>
             <td>
                 <div class="action-btns">
-                    <button class="action-btn delete" onclick="confirmAction('Delete this contact?', () => deleteContact(${c.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Xóa liên hệ này?', () => deleteContact(${c.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -800,7 +800,7 @@ function renderAccountsTable(accounts) {
             <td>
                 <div class="action-btns">
                     <button class="action-btn edit" onclick="editAccount(${a.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete" onclick="confirmAction('Delete this account?', () => deleteAccount(${a.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Xóa tài khoản này?', () => deleteAccount(${a.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>

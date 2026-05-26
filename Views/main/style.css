@@ -930,8 +930,16 @@ html{
     margin-top: -0.15em;
 }
 
+/* iPad: keep phone/account/logout visible but shrink + tuck before the hamburger */
 .content-header-right {
-    display: none;
+    font-size: 1.2rem;
+    gap: 1rem;
+}
+.content-header-right hr {
+    margin: 0 0.6rem;
+}
+.header-right {
+    margin-right: 4.5rem;  /* leave room for the hamburger on the right edge */
 }
 
 .home .sub-content{
@@ -1261,6 +1269,12 @@ body{
     overflow-x: hidden;
 }
 
+/* On mobile the vertical line on the right of each stat block reads as a
+   scrollbar — hide it; keep the horizontal top line for visual separation. */
+.info .block-num::after {
+    display: none;
+}
+
 .info .block-num{
     margin-right:0;
     overflow-x: hidden;
@@ -1272,8 +1286,13 @@ body{
     overflow-x: hidden;
 }
 .feature-project .select {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0 1rem;
+}
+.feature-project .select .region {
+    font-size: 12px;
+    padding: 0.45rem 1.1rem;
 }
 .feature-project .project-grid {
     grid-template-columns:1fr;
