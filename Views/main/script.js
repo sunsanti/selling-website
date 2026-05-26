@@ -78,10 +78,14 @@ const navbar = document.getElementById("main-navbar");
 const mobileOverlay = document.getElementById("mobile-overlay");
 const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
 
-// Sync logout button visibility to mobile sidebar
+// Sync logout button visibility to mobile sidebar.
+// We toggle body.logged-in so CSS can gate the drawer's phone/account/logout
+// blocks (they have display:flex !important when the drawer is open, which
+// would otherwise override the inline display:none set here).
 if (logoutBtn && mobileLogoutBtn) {
     const syncLogout = () => {
         const isLoggedIn = !leftSite.classList.contains("hide-line");
+        document.body.classList.toggle("logged-in", isLoggedIn);
         if (isLoggedIn) {
             mobileLogoutBtn.style.display = "";
             mobileAccount.style.display = "";

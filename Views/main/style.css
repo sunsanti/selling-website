@@ -939,9 +939,10 @@ html{
     display: none;
 }
 
-/* Tablet drawer: when open, reveal phone/account at top + logout at bottom */
-.header .navbar.open .mobile-nav-header,
-.header .navbar.open .mobile-logout-btn {
+/* Tablet drawer: only reveal phone/account/logout when the user is logged in.
+   The body.logged-in class is toggled by main/script.js after /check-auth. */
+body.logged-in .header .navbar.open .mobile-nav-header,
+body.logged-in .header .navbar.open .mobile-logout-btn {
     display: flex !important;
 }
 
@@ -1114,9 +1115,9 @@ body{
     transform: none !important;
 }
 
-/* Mobile: show phone/name/logout in navbar when open */
-.header .navbar.open .mobile-nav-header,
-.header .navbar.open .mobile-logout-btn {
+/* Mobile: show phone/name/logout in navbar when open AND logged in */
+body.logged-in .header .navbar.open .mobile-nav-header,
+body.logged-in .header .navbar.open .mobile-logout-btn {
     display: flex !important;
 }
 
