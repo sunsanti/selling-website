@@ -1149,6 +1149,22 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const fooWrap = document.getElementById('home-footer-cards');
     if (fooWrap) fooWrap.addEventListener('input', pushPreviewDebounced.footer);
+
+    // Auto-init live preview for whichever section is active on first load.
+    // switchSection only fires on click, so a browser refresh that lands on
+    // the default-active Dashboard would otherwise leave the iframe blank
+    // (or worse, show full /main if its initial src didn't say about:blank).
+    const SECTION_TO_PREVIEW = {
+        'dashboard': 'settings',
+        'home-about': 'about',
+        'home-services': 'services',
+        'home-footer': 'footer'
+    };
+    const active = document.querySelector('.content-section.active');
+    if (active) {
+        const target = SECTION_TO_PREVIEW[active.id];
+        if (target) ensurePreviewLoaded(target);
+    }
 });
 
 // ===================== HOME CONTENT — shared helpers =====================
