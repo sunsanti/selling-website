@@ -28,6 +28,15 @@ async function hasIndex(table, indexName) {
     return rows.length > 0;
 }
 
+async function hasTable(table) {
+    const [rows] = await pool.query(
+        `SELECT 1 FROM information_schema.TABLES
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? LIMIT 1`,
+        [table]
+    );
+    return rows.length > 0;
+}
+
 (async () => {
     try {
         if (!(await hasColumn('accounts', 'name'))) {
@@ -71,6 +80,13 @@ async function hasIndex(table, indexName) {
             }
             await pool.query(`CREATE INDEX ${name} ON ${table} ${cols}`);
             console.log(`✅ Created index ${name} on ${table}${cols}`);
+        }
+
+        if (await hasTable('users')) {
+            await pool.query('DROP TABLE users');
+            console.log('✅ Dropped legacy table `users` (login moved to `accounts`)');
+        } else {
+            console.log('⏭️  Legacy table `users` already absent');
         }
 
         console.log('\n🎉 Migration hoàn tất.');

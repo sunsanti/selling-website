@@ -7,17 +7,7 @@ CREATE DATABASE IF NOT EXISTS sellingweb;
 USE sellingweb;
 
 -- ----------------------------
--- 1. USERS TABLE (existing)
--- ----------------------------
-CREATE TABLE IF NOT EXISTS users (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    username VARCHAR(50) NOT NULL UNIQUE,
-    password VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
--- ----------------------------
--- 2. SETTINGS TABLE (logo, phone, main image)
+-- 1. SETTINGS TABLE (logo, phone, main image)
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS settings (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -33,7 +23,7 @@ INSERT IGNORE INTO settings (setting_key, setting_value) VALUES
 ('main_image', 'service3.jpg');
 
 -- ----------------------------
--- 3. PROJECTS TABLE
+-- 2. PROJECTS TABLE
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -52,7 +42,7 @@ CREATE TABLE IF NOT EXISTS projects (
 );
 
 -- ----------------------------
--- 3b. PROJECT IMAGES TABLE (one row per image, linked to project)
+-- 2b. PROJECT IMAGES TABLE (one row per image, linked to project)
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tableimages (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -86,7 +76,7 @@ INSERT IGNORE INTO projects (name, area, square_meters, category, year, style, s
 ('PHONG COMPLEX', 'goldcoast', 25, 'BEDROOM ROOM', 2025, 'MODERN', 'A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.', 'project4.jpg', 'active', 4);
 
 -- ----------------------------
--- 4. CONTACTS TABLE (from contact form)
+-- 3. CONTACTS TABLE (from contact form)
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS contacts (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -97,7 +87,7 @@ CREATE TABLE IF NOT EXISTS contacts (
 );
 
 -- ----------------------------
--- 5. ACCOUNTS TABLE (employees)
+-- 4. ACCOUNTS TABLE (employees)
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
