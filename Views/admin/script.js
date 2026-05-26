@@ -90,6 +90,9 @@ function switchSection(section) {
         case 'projects': loadProjects(); break;
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
+        case 'home-about': loadHomeAbout(); break;
+        case 'home-services': loadHomeServices(); break;
+        case 'home-footer': loadHomeFooter(); break;
     }
 }
 
@@ -987,4 +990,318 @@ function logoutAdmin() {
     fetch('/logout', { method: 'POST' })
         .then(() => window.location.href = '/login')
         .catch(() => window.location.href = '/login');
+}
+
+// ===================== HOME CONTENT — shared helpers =====================
+async function uploadHomeImage(file) {
+    const fd = new FormData();
+    fd.append('media', file);
+    const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Upload failed');
+    return json.path;
+}
+
+// ===================== HOME — ABOUT =====================
+async function loadHomeAbout() {
+    try {
+        const res = await fetch('/api/admin/about');
+        if (!res.ok) {
+            showToast('Failed to load About', 'error');
+            return;
+        }
+        const { data } = await res.json();
+        if (!data) return;
+
+        document.getElementById('about-input-banner').value = data.banner || '';
+        document.getElementById('about-input-left').value = data.paragraph_left || '';
+        document.getElementById('about-input-right').value = data.paragraph_right || '';
+
+        const grid = document.getElementById('about-stats-grid');
+        grid.innerHTML = '';
+        (data.stats || []).forEach(s => {
+            const wrap = document.createElement('div');
+            wrap.className = 'form-group';
+
+            const title = document.createElement('label');
+            title.textContent = 'Stat ' + s.slot;
+            wrap.appendChild(title);
+
+            const num = document.createElement('input');
+            num.type = 'text';
+            num.placeholder = 'e.g. 20+';
+            num.maxLength = 20;
+            num.dataset.slot = s.slot;
+            num.dataset.field = 'num';
+            num.value = s.num || '';
+            wrap.appendChild(num);
+
+            const lbl = document.createElement('input');
+            lbl.type = 'text';
+            lbl.placeholder = 'e.g. years of experience';
+            lbl.maxLength = 255;
+            lbl.dataset.slot = s.slot;
+            lbl.dataset.field = 'label';
+            lbl.value = s.label || '';
+            lbl.style.marginTop = '6px';
+            wrap.appendChild(lbl);
+
+            grid.appendChild(wrap);
+        });
+    } catch (err) {
+        console.error('loadHomeAbout:', err);
+        showToast('Error loading About: ' + err.message, 'error');
+    }
+}
+
+document.getElementById('home-about-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-save');
+    btn.disabled = true;
+    try {
+        const stats = [];
+        document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
+            const slot = parseInt(inp.dataset.slot, 10);
+            const field = inp.dataset.field;
+            let entry = stats.find(s => s.slot === slot);
+            if (!entry) { entry = { slot }; stats.push(entry); }
+            entry[field] = inp.value;
+        });
+        const payload = {
+            banner: document.getElementById('about-input-banner').value,
+            paragraph_left: document.getElementById('about-input-left').value,
+            paragraph_right: document.getElementById('about-input-right').value,
+            stats
+        };
+        const res = await fetch('/api/admin/about', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+// ===================== HOME — SERVICES =====================
+async function loadHomeServices() {
+    try {
+        const res = await fetch('/api/admin/services');
+        if (!res.ok) {
+            showToast('Failed to load Services', 'error');
+            return;
+        }
+        const { data } = await res.json();
+        const wrap = document.getElementById('home-services-cards');
+        wrap.innerHTML = '';
+
+        (data || []).forEach(svc => {
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '20px';
+            card.dataset.slot = svc.slot;
+            card.innerHTML = ''
+                + '<h2><i class="fas fa-concierge-bell"></i> Service ' + svc.slot + '</h2>'
+                + '<div class="form-group"><label>Title</label>'
+                + '  <input type="text" class="svc-title" maxlength="255"></div>'
+                + '<div class="form-group"><label>Description</label>'
+                + '  <textarea class="svc-desc" rows="4" maxlength="2000"></textarea></div>'
+                + '<div class="form-group"><label>Image</label>'
+                + '  <div class="settings-image-area">'
+                + '    <div class="settings-image-preview">'
+                + '      <img class="svc-img-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
+                + '      <span class="settings-preview-placeholder svc-img-placeholder">'
+                + '        <i class="fas fa-image"></i> No image</span>'
+                + '    </div>'
+                + '    <div class="settings-image-actions">'
+                + '      <button type="button" class="btn-add svc-upload-btn"><i class="fas fa-upload"></i> Upload</button>'
+                + '      <input type="file" class="svc-file-input" accept="image/*" style="display:none">'
+                + '    </div>'
+                + '  </div></div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save svc-save-btn"><i class="fas fa-save"></i> Save Service ' + svc.slot + '</button>'
+                + '</div>';
+            wrap.appendChild(card);
+
+            card.querySelector('.svc-title').value = svc.title || '';
+            card.querySelector('.svc-desc').value = svc.description || '';
+            const imgEl = card.querySelector('.svc-img-preview');
+            const placeholderEl = card.querySelector('.svc-img-placeholder');
+            if (svc.image_path) {
+                imgEl.src = svc.image_path;
+                imgEl.style.display = 'block';
+                placeholderEl.style.display = 'none';
+            }
+            card.dataset.imagePath = svc.image_path || '';
+
+            const fileInput = card.querySelector('.svc-file-input');
+            card.querySelector('.svc-upload-btn').addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                try {
+                    const path = await uploadHomeImage(file);
+                    imgEl.src = path;
+                    imgEl.style.display = 'block';
+                    placeholderEl.style.display = 'none';
+                    card.dataset.imagePath = path;
+                    showToast('Image uploaded — click Save to persist', 'success');
+                } catch (err) {
+                    showToast('Upload error: ' + err.message, 'error');
+                }
+            });
+
+            card.querySelector('.svc-save-btn').addEventListener('click', async () => {
+                const btn = card.querySelector('.svc-save-btn');
+                btn.disabled = true;
+                try {
+                    const payload = {
+                        title: card.querySelector('.svc-title').value,
+                        description: card.querySelector('.svc-desc').value
+                    };
+                    const currentPath = card.dataset.imagePath;
+                    if (currentPath) payload.image_path = currentPath;
+                    const res = await fetch('/api/admin/services/' + svc.slot, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+    } catch (err) {
+        console.error('loadHomeServices:', err);
+        showToast('Error loading Services: ' + err.message, 'error');
+    }
+}
+
+// ===================== HOME — FOOTER PERSONS =====================
+async function loadHomeFooter() {
+    try {
+        const res = await fetch('/api/admin/footer-persons');
+        if (!res.ok) {
+            showToast('Failed to load Footer', 'error');
+            return;
+        }
+        const { data } = await res.json();
+        const wrap = document.getElementById('home-footer-cards');
+        wrap.innerHTML = '';
+
+        (data || []).forEach(person => {
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '20px';
+            card.dataset.slot = person.slot;
+            card.innerHTML = ''
+                + '<h2><i class="fas fa-id-card"></i> Person ' + person.slot + '</h2>'
+                + '<div class="form-group"><label>Avatar</label>'
+                + '  <div class="settings-image-area">'
+                + '    <div class="settings-image-preview">'
+                + '      <img class="fp-avatar-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
+                + '      <span class="settings-preview-placeholder fp-avatar-placeholder">'
+                + '        <i class="fas fa-user"></i> No avatar</span>'
+                + '    </div>'
+                + '    <div class="settings-image-actions">'
+                + '      <button type="button" class="btn-add fp-upload-btn"><i class="fas fa-upload"></i> Upload</button>'
+                + '      <input type="file" class="fp-file-input" accept="image/*" style="display:none">'
+                + '    </div>'
+                + '  </div></div>'
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Name</label>'
+                + '    <input type="text" class="fp-name" maxlength="255"></div>'
+                + '  <div class="form-group"><label>Email</label>'
+                + '    <input type="email" class="fp-email" maxlength="255"></div>'
+                + '</div>'
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Phone 1</label>'
+                + '    <input type="text" class="fp-phone1" maxlength="50"></div>'
+                + '  <div class="form-group"><label>Phone 2</label>'
+                + '    <input type="text" class="fp-phone2" maxlength="50"></div>'
+                + '</div>'
+                + '<div class="form-group"><label>Facebook URL (https:// only)</label>'
+                + '  <input type="url" class="fp-fb" maxlength="500" pattern="https://.*"></div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save fp-save-btn"><i class="fas fa-save"></i> Save Person ' + person.slot + '</button>'
+                + '</div>';
+            wrap.appendChild(card);
+
+            card.querySelector('.fp-name').value = person.name || '';
+            card.querySelector('.fp-email').value = person.email || '';
+            card.querySelector('.fp-phone1').value = person.phone1 || '';
+            card.querySelector('.fp-phone2').value = person.phone2 || '';
+            card.querySelector('.fp-fb').value = person.facebook_url || '';
+
+            const imgEl = card.querySelector('.fp-avatar-preview');
+            const placeholderEl = card.querySelector('.fp-avatar-placeholder');
+            if (person.avatar_path) {
+                imgEl.src = person.avatar_path;
+                imgEl.style.display = 'block';
+                placeholderEl.style.display = 'none';
+            }
+            card.dataset.avatarPath = person.avatar_path || '';
+
+            const fileInput = card.querySelector('.fp-file-input');
+            card.querySelector('.fp-upload-btn').addEventListener('click', () => fileInput.click());
+            fileInput.addEventListener('change', async () => {
+                const file = fileInput.files[0];
+                if (!file) return;
+                try {
+                    const path = await uploadHomeImage(file);
+                    imgEl.src = path;
+                    imgEl.style.display = 'block';
+                    placeholderEl.style.display = 'none';
+                    card.dataset.avatarPath = path;
+                    showToast('Avatar uploaded — click Save to persist', 'success');
+                } catch (err) {
+                    showToast('Upload error: ' + err.message, 'error');
+                }
+            });
+
+            card.querySelector('.fp-save-btn').addEventListener('click', async () => {
+                const btn = card.querySelector('.fp-save-btn');
+                btn.disabled = true;
+                try {
+                    const fb = card.querySelector('.fp-fb').value.trim();
+                    if (fb && !/^https:\/\//i.test(fb)) {
+                        showToast('Facebook URL phải bắt đầu https://', 'error');
+                        btn.disabled = false;
+                        return;
+                    }
+                    const payload = {
+                        name: card.querySelector('.fp-name').value,
+                        email: card.querySelector('.fp-email').value,
+                        phone1: card.querySelector('.fp-phone1').value,
+                        phone2: card.querySelector('.fp-phone2').value,
+                        facebook_url: fb
+                    };
+                    const currentPath = card.dataset.avatarPath;
+                    if (currentPath) payload.avatar_path = currentPath;
+                    const res = await fetch('/api/admin/footer-persons/' + person.slot, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+    } catch (err) {
+        console.error('loadHomeFooter:', err);
+        showToast('Error loading Footer: ' + err.message, 'error');
+    }
 }
