@@ -63,6 +63,7 @@ const contactLimiter = rateLimit({
 const loginController = require('./Controllers/loginController');
 const adminController = require('./Controllers/adminController');
 const contactController = require('./Controllers/contactController');
+const homeContentController = require('./Controllers/homeContentController');
 
 app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
@@ -73,6 +74,9 @@ app.get('/main', loginController.getMainPage);
 app.get('/api/public/settings', adminController.getSettings);
 app.get('/api/public/projects', adminController.getProjects);
 app.get('/api/public/projects/:id', adminController.getProjectById);
+app.get('/api/public/about', homeContentController.getAbout);
+app.get('/api/public/services', homeContentController.getServices);
+app.get('/api/public/footer-persons', homeContentController.getFooterPersons);
 
 app.use('/api/admin', requireAuth);
 
@@ -108,6 +112,17 @@ app.get('/api/admin/project-images/:projectId', adminController.getProjectImages
 app.post('/api/admin/project-images', adminController.addProjectImage);
 app.put('/api/admin/project-images/:id', adminController.updateProjectImage);
 app.delete('/api/admin/project-images/:id', adminController.deleteProjectImage);
+
+app.get('/api/admin/about', homeContentController.getAbout);
+app.put('/api/admin/about', homeContentController.updateAbout);
+
+app.get('/api/admin/services', homeContentController.getServices);
+app.get('/api/admin/services/:slot', homeContentController.getServiceBySlot);
+app.put('/api/admin/services/:slot', homeContentController.updateService);
+
+app.get('/api/admin/footer-persons', homeContentController.getFooterPersons);
+app.get('/api/admin/footer-persons/:slot', homeContentController.getFooterPersonBySlot);
+app.put('/api/admin/footer-persons/:slot', homeContentController.updateFooterPerson);
 
 app.post('/api/admin/translate', adminController.translateText);
 app.post('/api/admin/detect-language', adminController.detectTextLanguage);
