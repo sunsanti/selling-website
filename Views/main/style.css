@@ -939,9 +939,12 @@ html{
     display: none;
 }
 
-/* Tablet drawer: only reveal phone/account/logout when the user is logged in.
-   The body.logged-in class is toggled by main/script.js after /check-auth. */
-body.logged-in .header .navbar.open .mobile-nav-header,
+/* Tablet drawer: phone number is always shown (header block);
+   logout button only when logged in. Account name visibility is
+   controlled inline by main/script.js syncLogout(). */
+.header .navbar.open .mobile-nav-header {
+    display: flex !important;
+}
 body.logged-in .header .navbar.open .mobile-logout-btn {
     display: flex !important;
 }
@@ -1115,8 +1118,10 @@ body{
     transform: none !important;
 }
 
-/* Mobile: show phone/name/logout in navbar when open AND logged in */
-body.logged-in .header .navbar.open .mobile-nav-header,
+/* Mobile: phone block always shown when drawer open; logout requires login */
+.header .navbar.open .mobile-nav-header {
+    display: flex !important;
+}
 body.logged-in .header .navbar.open .mobile-logout-btn {
     display: flex !important;
 }
