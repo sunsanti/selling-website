@@ -918,12 +918,33 @@ body {
 
 @media (max-width: 480px) {
     .sidebar {
-        width: 50px;
+        width: 48px;
+    }
+
+    /* Tighter sidebar items so icons feel centered, not crammed */
+    .sidebar-header {
+        padding: 16px 0;
+    }
+    .sidebar .nav-item {
+        padding: 12px 0;
+    }
+    .sidebar .nav-item i {
+        width: 100%;
+        font-size: 15px;
+        text-align: center;
+    }
+    .sidebar-footer {
+        padding: 10px 4px;
+    }
+    .sidebar-footer a,
+    .sidebar-footer button {
+        padding: 8px 0;
+        justify-content: center;
     }
 
     .main-content {
-        margin-left: 50px;
-        padding: 12px;
+        margin-left: 48px;
+        padding: 10px;
     }
 
     .stat-card {
@@ -939,6 +960,28 @@ body {
 
     .stat-number {
         font-size: 22px;
+    }
+
+    /* Account / Contacts / Projects tables — keep Actions visible without scroll */
+    .data-table th,
+    .data-table td {
+        padding: 8px 6px;
+        font-size: 12px;
+    }
+    .action-btns {
+        gap: 4px;
+        flex-wrap: nowrap;
+    }
+    .action-btn {
+        width: 28px;
+        height: 28px;
+        font-size: 11px;
+        border-radius: 5px;
+    }
+    /* Section header stacks vertically already; tighten Add button */
+    .section-header .btn-add {
+        padding: 8px 14px;
+        font-size: 13px;
     }
 }
 

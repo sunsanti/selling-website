@@ -1353,7 +1353,7 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     height: 200px;
 }
 
-/* services - mobile design */
+/* services - mobile design (content card above, image below) */
 .services .heading{
     margin: 1rem 0;
 }
@@ -1361,16 +1361,14 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 .services .service-item{
     display: flex;
     flex-direction: column;
-    margin-left: 0;
-    margin-right: 0;
-    margin-bottom: 3rem;
+    margin: 0 0 3rem 0;
     overflow: hidden;
     border-radius: 8px;
 }
 
 .services .service-item .content{
     background-color: #d4d4c9;
-    padding: 1.5rem;
+    padding: 2.4rem 2rem;
     margin-bottom: 0;
     width: 100%;
 }
@@ -1384,26 +1382,31 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 
 .services .service-item .content .box-content{
     text-align: center;
+    width: 100%;
 }
 
 .services .service-item .content .box-content .main-content{
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 2.8rem;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
 }
 
 .services .service-item .content .box-content .main-content p{
     margin: 0;
-    line-height: 1.3;
+    line-height: 1.25;
+    text-align: center;
 }
 
 .services .service-item .content .box-content .sub-content{
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
+    font-size: 1.55rem;
+    margin: 0 0 1.6rem 0;
+    padding: 0 0.5rem;
 }
 
 .services .service-item .content .box-content .sub-content p{
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.55;
+    text-align: center;
 }
 
 .services .service-item .content .box-content .btn-get-in-touch{
