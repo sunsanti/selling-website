@@ -1361,6 +1361,8 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 .services .service-item{
     display: flex;
     flex-direction: column;
+    justify-content: flex-start;   /* override desktop space-between which pushed image to bottom */
+    min-height: 0;                 /* override desktop min-height: 480px that left a gap */
     margin: 0 0 3rem 0;
     overflow: hidden;
     border-radius: 8px;
@@ -1369,8 +1371,9 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 .services .service-item .content{
     background-color: #d4d4c9;
     padding: 2.4rem 2rem;
-    margin-bottom: 0;
+    margin: 0;                     /* desktop sets margin-bottom: 11rem — kill it */
     width: 100%;
+    display: block;                /* desktop has display: flex which we don't need in mobile single-column */
 }
 
 .services .service-item .image,
