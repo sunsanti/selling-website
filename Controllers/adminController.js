@@ -264,7 +264,12 @@ const updateAccount = async (req, res) => {
 
 const deleteAccount = async (req, res) => {
     try {
-        const success = await accountModel.deleteAccount(req.params.id);
+        const targetId = parseInt(req.params.id, 10);
+        const sessionId = req.session.user ? parseInt(req.session.user.id, 10) : null;
+        if (sessionId !== null && targetId === sessionId) {
+            return res.status(400).json({ success: false, message: 'Không thể xóa tài khoản đang đăng nhập' });
+        }
+        const success = await accountModel.deleteAccount(targetId);
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản' });
         }
