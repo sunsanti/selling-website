@@ -1186,16 +1186,25 @@ body {
 
 .live-preview-iframe {
     width: 100%;
-    height: 600px;
+    height: 400px;
     border: none;
     display: block;
     background: #fff;
+    pointer-events: none;
+    user-select: none;
 }
 
+/* Per-scope default height — overridden by JS auto-resize when iframe reports its scrollHeight */
+#preview-iframe-settings { height: 160px; }
+#preview-iframe-about    { height: 500px; }
+#preview-iframe-services { height: 700px; }
+#preview-iframe-footer   { height: 360px; }
+
 @media (max-width: 768px) {
-    .live-preview-iframe {
-        height: 400px;
-    }
+    #preview-iframe-settings { height: 120px; }
+    #preview-iframe-about    { height: 380px; }
+    #preview-iframe-services { height: 500px; }
+    #preview-iframe-footer   { height: 280px; }
     .live-preview-header {
         padding: 12px 14px;
     }

@@ -284,39 +284,53 @@
             if (!anyValue) el.style.display = 'none';
         }
 
+        // ========== Settings render (shared by fetch + preview postMessage) ==========
+        function normalizeImageUrl(v) {
+            if (!v) return '';
+            if (v.startsWith('data:') || v.startsWith('/') || v.startsWith('http')) return v;
+            return '/' + v;
+        }
+
+        function renderSettings(s) {
+            if (!s) return;
+            if (s.logo !== undefined) {
+                const v = s.logo;
+                const imgEl = document.getElementById('site-logo-img');
+                const textEl = document.getElementById('site-logo-text');
+                if (v) {
+                    if (imgEl) { imgEl.src = normalizeImageUrl(v); imgEl.style.display = 'inline-block'; }
+                    if (textEl) textEl.style.display = 'none';
+                } else {
+                    if (textEl) { textEl.textContent = (s.logo_text || 'LOGO'); textEl.style.display = 'inline'; }
+                    if (imgEl) imgEl.style.display = 'none';
+                }
+            }
+            if (s.phone !== undefined) {
+                const phoneVal = s.phone || 'phone number';
+                const desktopPhone = document.getElementById('site-phone');
+                if (desktopPhone) desktopPhone.textContent = phoneVal;
+                const mobilePhone = document.getElementById('mobile-site-phone');
+                if (mobilePhone) mobilePhone.textContent = phoneVal;
+            }
+            if (s.main_image !== undefined && s.main_image) {
+                const homeImg = document.querySelector('.home-image img');
+                if (homeImg) homeImg.src = normalizeImageUrl(s.main_image);
+            }
+        }
+
         // Load settings from database
         (async function loadSettings() {
             try {
                 const res = await fetch('/api/public/settings');
                 const data = await res.json();
                 if (data.success && data.data) {
-                    const logoVal = data.data.logo || '';
-                    if (logoVal) {
-                        const logoSrc = logoVal.startsWith('/') ? logoVal : '/' + logoVal;
-                        document.getElementById('site-logo-img').src = logoSrc;
-                        document.getElementById('site-logo-img').style.display = 'inline-block';
-                        document.getElementById('site-logo-text').style.display = 'none';
-                    } else {
-                        document.getElementById('site-logo-text').textContent = data.data.logo_text || 'LOGO';
-                        document.getElementById('site-logo-text').style.display = 'inline';
-                        document.getElementById('site-logo-img').style.display = 'none';
-                    }
-                    const phoneVal = data.data.phone || 'phone number';
-                    document.getElementById('site-phone').textContent = phoneVal;
-                    // Sync phone to mobile sidebar
-                    const mobilePhone = document.getElementById('mobile-site-phone');
-                    if (mobilePhone) mobilePhone.textContent = phoneVal;
-                    // Sync account name to mobile sidebar
+                    renderSettings(data.data);
                     const mobileAcc = document.getElementById('mobile-account');
                     const desktopAcc = document.getElementById('account');
                     if (mobileAcc && desktopAcc) mobileAcc.textContent = desktopAcc.textContent || 'User';
-                    if (data.data.main_image) {
-                        const mainSrc = data.data.main_image.startsWith('/') ? data.data.main_image : '/' + data.data.main_image;
-                        document.querySelector('.home-image img').src = mainSrc;
-                    }
                 }
             } catch (e) {
-                console.log('Settings not loaded:', e);
+                console.error('Settings not loaded:', e);
             }
         })();
 
@@ -476,213 +490,292 @@
         }
 
         // ========== ABOUT SECTION (F03) ==========
+        function renderAbout(d) {
+            if (!d) return;
+            const content = document.getElementById('about-content');
+            if (content) content.style.display = '';
+            setText('about-banner', d.banner);
+            setText('about-paragraph-left', d.paragraph_left);
+            setText('about-paragraph-right', d.paragraph_right);
+            hideIfEmpty('about-content', d.banner, d.paragraph_left, d.paragraph_right);
+
+            const info = document.getElementById('about-stats-info');
+            if (!info) return;
+            info.innerHTML = '';
+            info.style.display = '';
+            (d.stats || []).forEach(s => {
+                const block = document.createElement('div');
+                block.className = 'block-num';
+
+                const num = document.createElement('div');
+                num.className = 'content-num1';
+                num.textContent = s.num || '';
+
+                const lbl = document.createElement('div');
+                lbl.className = 'detail-content';
+                lbl.textContent = s.label || '';
+
+                block.appendChild(num);
+                block.appendChild(lbl);
+                info.appendChild(block);
+            });
+
+            if ((d.stats || []).every(s => !s.num && !s.label)) {
+                info.style.display = 'none';
+            }
+        }
+
         async function loadAboutSection() {
             try {
                 const res = await fetch('/api/public/about');
                 const json = await res.json();
                 if (!json.success || !json.data) return;
-                const d = json.data;
-
-                setText('about-banner', d.banner);
-                setText('about-paragraph-left', d.paragraph_left);
-                setText('about-paragraph-right', d.paragraph_right);
-                hideIfEmpty('about-content', d.banner, d.paragraph_left, d.paragraph_right);
-
-                const info = document.getElementById('about-stats-info');
-                info.innerHTML = '';
-                (d.stats || []).forEach(s => {
-                    const block = document.createElement('div');
-                    block.className = 'block-num';
-
-                    const num = document.createElement('div');
-                    num.className = 'content-num1';
-                    num.textContent = s.num || '';
-
-                    const lbl = document.createElement('div');
-                    lbl.className = 'detail-content';
-                    lbl.textContent = s.label || '';
-
-                    block.appendChild(num);
-                    block.appendChild(lbl);
-                    info.appendChild(block);
-                });
-
-                if ((d.stats || []).every(s => !s.num && !s.label)) {
-                    info.style.display = 'none';
-                }
+                renderAbout(json.data);
             } catch (e) {
                 console.error('loadAboutSection:', e);
             }
         }
 
         // ========== SERVICES (F03) ==========
+        function renderServices(items) {
+            const wrap = document.getElementById('services-list');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+
+            (items || []).forEach(svc => {
+                const item = document.createElement('div');
+                item.className = 'service-item';
+
+                const content = document.createElement('div');
+                content.className = 'content';
+                const box = document.createElement('div');
+                box.className = 'box-content';
+
+                const main = document.createElement('div');
+                main.className = 'main-content';
+                const mainP = document.createElement('p');
+                mainP.textContent = svc.title || '';
+                main.appendChild(mainP);
+                box.appendChild(main);
+
+                const sub = document.createElement('div');
+                sub.className = 'sub-content';
+                const subP = document.createElement('p');
+                subP.textContent = svc.description || '';
+                sub.appendChild(subP);
+                box.appendChild(sub);
+
+                const btnWrap = document.createElement('div');
+                btnWrap.innerHTML = ''
+                    + '<a onclick="fillInfoPopup()" class="btn-get-in-touch">'
+                    + '  <span class="btn-text">click here</span>'
+                    + '  <span class="btn-icon">'
+                    + '    <span class="dot"></span>'
+                    + '    <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                    + '      <line x1="7" y1="17" x2="17" y2="7"></line>'
+                    + '      <polyline points="7 7 17 7 17 17"></polyline>'
+                    + '    </svg>'
+                    + '  </span>'
+                    + '</a>';
+                box.appendChild(btnWrap);
+                content.appendChild(box);
+                item.appendChild(content);
+
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'image';
+                const img = document.createElement('img');
+                img.alt = '';
+                img.onerror = function () { this.style.display = 'none'; };
+                if (svc.image_path) img.src = normalizeImageUrl(svc.image_path);
+                imgWrap.appendChild(img);
+                item.appendChild(imgWrap);
+
+                wrap.appendChild(item);
+            });
+        }
+
         async function loadServices() {
             try {
                 const res = await fetch('/api/public/services');
                 const json = await res.json();
                 if (!json.success) return;
-
-                const wrap = document.getElementById('services-list');
-                wrap.innerHTML = '';
-
-                (json.data || []).forEach(svc => {
-                    const item = document.createElement('div');
-                    item.className = 'service-item';
-
-                    const content = document.createElement('div');
-                    content.className = 'content';
-                    const box = document.createElement('div');
-                    box.className = 'box-content';
-
-                    const main = document.createElement('div');
-                    main.className = 'main-content';
-                    const mainP = document.createElement('p');
-                    mainP.textContent = svc.title || '';
-                    main.appendChild(mainP);
-                    box.appendChild(main);
-
-                    const sub = document.createElement('div');
-                    sub.className = 'sub-content';
-                    const subP = document.createElement('p');
-                    subP.textContent = svc.description || '';
-                    sub.appendChild(subP);
-                    box.appendChild(sub);
-
-                    const btnWrap = document.createElement('div');
-                    btnWrap.innerHTML = ''
-                        + '<a onclick="fillInfoPopup()" class="btn-get-in-touch">'
-                        + '  <span class="btn-text">click here</span>'
-                        + '  <span class="btn-icon">'
-                        + '    <span class="dot"></span>'
-                        + '    <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-                        + '      <line x1="7" y1="17" x2="17" y2="7"></line>'
-                        + '      <polyline points="7 7 17 7 17 17"></polyline>'
-                        + '    </svg>'
-                        + '  </span>'
-                        + '</a>';
-                    box.appendChild(btnWrap);
-                    content.appendChild(box);
-                    item.appendChild(content);
-
-                    const imgWrap = document.createElement('div');
-                    imgWrap.className = 'image';
-                    const img = document.createElement('img');
-                    img.alt = '';
-                    img.onerror = function () { this.style.display = 'none'; };
-                    if (svc.image_path) img.src = svc.image_path;
-                    imgWrap.appendChild(img);
-                    item.appendChild(imgWrap);
-
-                    wrap.appendChild(item);
-                });
+                renderServices(json.data);
             } catch (e) {
                 console.error('loadServices:', e);
             }
         }
 
         // ========== FOOTER PERSONS (F03) ==========
+        function renderFooterPersons(items) {
+            const container = document.getElementById('footer-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            (items || []).forEach(p => {
+                const block = document.createElement('div');
+                block.className = 'footer-person';
+
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'img-footer';
+                const img = document.createElement('img');
+                img.alt = p.name || 'footer person';
+                img.onerror = function () { this.style.display = 'none'; };
+                if (p.avatar_path) img.src = normalizeImageUrl(p.avatar_path);
+                imgWrap.appendChild(img);
+                block.appendChild(imgWrap);
+
+                const line = document.createElement('div');
+                line.className = 'line';
+                block.appendChild(line);
+
+                const fc = document.createElement('div');
+                fc.className = 'footer-content';
+
+                const name = document.createElement('div');
+                name.className = 'name';
+                name.textContent = p.name || '';
+                fc.appendChild(name);
+
+                const detail = document.createElement('div');
+                detail.className = 'footer-detail';
+
+                if (p.email) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-solid fa-envelope';
+                    const a = document.createElement('a');
+                    a.href = 'mailto:' + p.email;
+                    a.textContent = p.email;
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+                if (p.phone1) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-solid fa-phone';
+                    const a = document.createElement('a');
+                    a.href = 'tel:' + p.phone1.replace(/\s+/g, '');
+                    a.textContent = p.phone1;
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+                if (p.phone2) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-solid fa-phone';
+                    const a = document.createElement('a');
+                    a.href = 'tel:' + p.phone2.replace(/\s+/g, '');
+                    a.textContent = p.phone2;
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+                if (p.facebook_url && /^https:\/\//i.test(p.facebook_url)) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-brands fa-facebook';
+                    const a = document.createElement('a');
+                    a.href = p.facebook_url;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = p.name || 'Facebook';
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+
+                fc.appendChild(detail);
+                block.appendChild(fc);
+                container.appendChild(block);
+            });
+        }
+
         async function loadFooterPersons() {
             try {
                 const res = await fetch('/api/public/footer-persons');
                 const json = await res.json();
                 if (!json.success) return;
-
-                const container = document.getElementById('footer-container');
-                container.innerHTML = '';
-
-                (json.data || []).forEach(p => {
-                    const block = document.createElement('div');
-                    block.className = 'footer-person';
-
-                    const imgWrap = document.createElement('div');
-                    imgWrap.className = 'img-footer';
-                    const img = document.createElement('img');
-                    img.alt = p.name || 'footer person';
-                    img.onerror = function () { this.style.display = 'none'; };
-                    if (p.avatar_path) img.src = p.avatar_path;
-                    imgWrap.appendChild(img);
-                    block.appendChild(imgWrap);
-
-                    const line = document.createElement('div');
-                    line.className = 'line';
-                    block.appendChild(line);
-
-                    const fc = document.createElement('div');
-                    fc.className = 'footer-content';
-
-                    const name = document.createElement('div');
-                    name.className = 'name';
-                    name.textContent = p.name || '';
-                    fc.appendChild(name);
-
-                    const detail = document.createElement('div');
-                    detail.className = 'footer-detail';
-
-                    if (p.email) {
-                        const row = document.createElement('div');
-                        row.className = 'contact-row';
-                        const ic = document.createElement('i');
-                        ic.className = 'fa-solid fa-envelope';
-                        const a = document.createElement('a');
-                        a.href = 'mailto:' + p.email;
-                        a.textContent = p.email;
-                        row.appendChild(ic);
-                        row.appendChild(a);
-                        detail.appendChild(row);
-                    }
-                    if (p.phone1) {
-                        const row = document.createElement('div');
-                        row.className = 'contact-row';
-                        const ic = document.createElement('i');
-                        ic.className = 'fa-solid fa-phone';
-                        const a = document.createElement('a');
-                        a.href = 'tel:' + p.phone1.replace(/\s+/g, '');
-                        a.textContent = p.phone1;
-                        row.appendChild(ic);
-                        row.appendChild(a);
-                        detail.appendChild(row);
-                    }
-                    if (p.phone2) {
-                        const row = document.createElement('div');
-                        row.className = 'contact-row';
-                        const ic = document.createElement('i');
-                        ic.className = 'fa-solid fa-phone';
-                        const a = document.createElement('a');
-                        a.href = 'tel:' + p.phone2.replace(/\s+/g, '');
-                        a.textContent = p.phone2;
-                        row.appendChild(ic);
-                        row.appendChild(a);
-                        detail.appendChild(row);
-                    }
-                    if (p.facebook_url && /^https:\/\//i.test(p.facebook_url)) {
-                        const row = document.createElement('div');
-                        row.className = 'contact-row';
-                        const ic = document.createElement('i');
-                        ic.className = 'fa-brands fa-facebook';
-                        const a = document.createElement('a');
-                        a.href = p.facebook_url;
-                        a.target = '_blank';
-                        a.rel = 'noopener noreferrer';
-                        a.textContent = p.name || 'Facebook';
-                        row.appendChild(ic);
-                        row.appendChild(a);
-                        detail.appendChild(row);
-                    }
-
-                    fc.appendChild(detail);
-                    block.appendChild(fc);
-                    container.appendChild(block);
-                });
+                renderFooterPersons(json.data);
             } catch (e) {
                 console.error('loadFooterPersons:', e);
             }
         }
+
+        // ========== PREVIEW MODE (admin iframe with ?preview=1&scope=X) ==========
+        // When loaded inside the admin's live-preview iframe, /main hides every
+        // section except the one being edited and listens for postMessage from
+        // the parent so admin form changes show up before they're saved.
+        const PREVIEW_PARAMS = new URLSearchParams(window.location.search);
+        const PREVIEW_MODE = PREVIEW_PARAMS.get('preview') === '1';
+        const PREVIEW_SCOPE = PREVIEW_PARAMS.get('scope') || '';
+
+        function applyPreviewMode(scope) {
+            const keepSelectorsByScope = {
+                settings: [],
+                about: ['#about-us'],
+                services: ['#services'],
+                footer: ['#footer']
+            };
+            const keep = new Set(keepSelectorsByScope[scope] || []);
+            document.querySelectorAll('body > section').forEach(s => {
+                if (s.id && keep.has('#' + s.id)) {
+                    s.style.display = '';
+                } else {
+                    s.style.display = 'none';
+                }
+            });
+            document.body.classList.add('preview-mode');
+            document.body.style.paddingTop = '80px';   // keep room for fixed header
+            // Disable interactions in preview
+            document.body.style.pointerEvents = 'none';
+        }
+
+        function postPreviewHeight() {
+            if (!window.parent || window.parent === window) return;
+            const h = Math.max(
+                document.documentElement.scrollHeight,
+                document.body.scrollHeight
+            );
+            window.parent.postMessage({ type: 'preview-height', height: h }, window.location.origin);
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.origin !== window.location.origin) return;
+            const msg = event.data || {};
+            if (msg.type === 'preview-data') {
+                const { target, data } = msg;
+                if (!data) return;
+                if (target === 'settings') renderSettings(data);
+                else if (target === 'about') renderAbout(data);
+                else if (target === 'services') renderServices(data.services || []);
+                else if (target === 'footer') renderFooterPersons(data.footer_persons || []);
+                // Resize after content change
+                setTimeout(postPreviewHeight, 50);
+            }
+        });
 
         // Init
         loadProjectsFromDB();
         loadAboutSection();
         loadServices();
         loadFooterPersons();
+
+        if (PREVIEW_MODE) {
+            applyPreviewMode(PREVIEW_SCOPE);
+            // Signal ready so parent can push initial data
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'preview-ready', scope: PREVIEW_SCOPE }, window.location.origin);
+            }
+            // Auto-resize observer
+            window.addEventListener('load', postPreviewHeight);
+            window.addEventListener('resize', postPreviewHeight);
+        }
 
         // Contact form submission
         document.getElementById('contact-submit').addEventListener('click', async (e) => {

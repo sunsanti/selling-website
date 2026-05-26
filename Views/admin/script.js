@@ -173,6 +173,13 @@ function setupSettingsUpload() {
                 document.getElementById('current-logo-img').style.display = 'block';
                 document.getElementById('logo-preview-placeholder').style.display = 'none';
                 document.getElementById('logo-remove-btn').style.display = 'inline-flex';
+                // For iframe preview (cross-document), use dataURL
+                const reader = new FileReader();
+                reader.onload = () => {
+                    window._pendingLogoDataUrl = reader.result;
+                    postPreviewData('settings');
+                };
+                reader.readAsDataURL(currentLogoFile);
             }
         });
     }
@@ -190,6 +197,12 @@ function setupSettingsUpload() {
                 document.getElementById('current-main-image-img').style.display = 'block';
                 document.getElementById('main-image-preview-placeholder').style.display = 'none';
                 document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
+                const reader = new FileReader();
+                reader.onload = () => {
+                    window._pendingMainImageDataUrl = reader.result;
+                    postPreviewData('settings');
+                };
+                reader.readAsDataURL(currentMainImageFile);
             }
         });
     }
@@ -271,6 +284,8 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
             if (currentMainImageFile) currentMainImagePath = mainImageValue;
             currentLogoFile = null;
             currentMainImageFile = null;
+            window._pendingLogoDataUrl = null;
+            window._pendingMainImageDataUrl = null;
             showToast('Settings saved successfully!', 'success');
             refreshPreview('settings');
         } else {
@@ -995,30 +1010,147 @@ function logoutAdmin() {
 
 // ===================== LIVE PREVIEW =====================
 // Each editable section in admin (settings, about, services, footer) has an
-// iframe pointing to /main with the matching anchor. After save we cache-bust
-// to force a fresh fetch — the iframe re-runs loadSettings/loadAboutSection/etc
-// so the preview reflects what the public page will look like.
-const PREVIEW_TARGETS = {
-    settings: '',
-    about: '#about-us',
-    services: '#services',
-    footer: '#footer'
-};
+// iframe loading /main?preview=1&scope=X. The iframe hides other sections,
+// disables interaction, and listens for postMessage('preview-data') so admin
+// form input updates the preview live — no save needed.
+//
+// Flow:
+//   1. admin loads section → ensurePreviewLoaded(target) sets iframe.src
+//   2. iframe finishes loading → posts 'preview-ready' back
+//   3. admin posts 'preview-data' with current form state
+//   4. user types/uploads → debounced pushPreviewData → iframe re-renders
+//   5. iframe posts 'preview-height' → admin resizes iframe to fit content
+const PREVIEW_READY = new Set();
 
 function refreshPreview(target) {
     const iframe = document.getElementById('preview-iframe-' + target);
     if (!iframe) return;
-    const anchor = PREVIEW_TARGETS[target] || '';
-    iframe.src = '/main?t=' + Date.now() + anchor;
+    PREVIEW_READY.delete(target);
+    iframe.src = '/main?preview=1&scope=' + target + '&t=' + Date.now();
 }
 
-// Lazy-load when a section becomes visible (avoid loading all 4 iframes at admin boot)
 function ensurePreviewLoaded(target) {
     const iframe = document.getElementById('preview-iframe-' + target);
     if (!iframe) return;
-    if (iframe.src && iframe.src !== 'about:blank' && !iframe.src.endsWith('about:blank')) return;
+    const src = iframe.getAttribute('src') || '';
+    if (src && src !== 'about:blank' && src.includes('preview=1')) return;
     refreshPreview(target);
 }
+
+function postPreviewData(target) {
+    const iframe = document.getElementById('preview-iframe-' + target);
+    if (!iframe || !iframe.contentWindow) return;
+    if (!PREVIEW_READY.has(target)) return;   // iframe not loaded yet
+    const data = gatherPreviewData(target);
+    iframe.contentWindow.postMessage({ type: 'preview-data', target, data }, window.location.origin);
+}
+
+function gatherPreviewData(target) {
+    if (target === 'settings') {
+        return {
+            logo: window._pendingLogoDataUrl || currentLogoPath || '',
+            phone: (document.getElementById('setting-phone') || {}).value || '',
+            main_image: window._pendingMainImageDataUrl || currentMainImagePath || ''
+        };
+    }
+    if (target === 'about') {
+        const stats = [];
+        document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
+            const slot = parseInt(inp.dataset.slot, 10);
+            const field = inp.dataset.field;
+            let entry = stats.find(s => s.slot === slot);
+            if (!entry) { entry = { slot }; stats.push(entry); }
+            entry[field] = inp.value;
+        });
+        return {
+            banner: (document.getElementById('about-input-banner') || {}).value || '',
+            paragraph_left: (document.getElementById('about-input-left') || {}).value || '',
+            paragraph_right: (document.getElementById('about-input-right') || {}).value || '',
+            stats
+        };
+    }
+    if (target === 'services') {
+        const services = [];
+        document.querySelectorAll('#home-services-cards .settings-panel').forEach(card => {
+            services.push({
+                slot: parseInt(card.dataset.slot, 10),
+                title: (card.querySelector('.svc-title') || {}).value || '',
+                description: (card.querySelector('.svc-desc') || {}).value || '',
+                image_path: card.dataset.imagePath || ''
+            });
+        });
+        return { services };
+    }
+    if (target === 'footer') {
+        const footer_persons = [];
+        document.querySelectorAll('#home-footer-cards .settings-panel').forEach(card => {
+            footer_persons.push({
+                slot: parseInt(card.dataset.slot, 10),
+                name: (card.querySelector('.fp-name') || {}).value || '',
+                email: (card.querySelector('.fp-email') || {}).value || '',
+                phone1: (card.querySelector('.fp-phone1') || {}).value || '',
+                phone2: (card.querySelector('.fp-phone2') || {}).value || '',
+                facebook_url: (card.querySelector('.fp-fb') || {}).value || '',
+                avatar_path: card.dataset.avatarPath || ''
+            });
+        });
+        return { footer_persons };
+    }
+    return {};
+}
+
+// Debounced wrapper for input events
+function debounce(fn, ms) {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+const pushPreviewDebounced = {
+    settings: debounce(() => postPreviewData('settings'), 200),
+    about: debounce(() => postPreviewData('about'), 200),
+    services: debounce(() => postPreviewData('services'), 200),
+    footer: debounce(() => postPreviewData('footer'), 200)
+};
+
+// Listen for iframe messages (ready + auto-resize)
+window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin) return;
+    const msg = event.data || {};
+    if (msg.type === 'preview-ready') {
+        PREVIEW_READY.add(msg.scope);
+        postPreviewData(msg.scope);   // push initial state
+    } else if (msg.type === 'preview-height') {
+        // Auto-resize all 4 iframes by matching the source frame
+        ['settings', 'about', 'services', 'footer'].forEach(t => {
+            const ifr = document.getElementById('preview-iframe-' + t);
+            if (ifr && ifr.contentWindow === event.source && msg.height) {
+                ifr.style.height = Math.min(msg.height, 1200) + 'px';
+            }
+        });
+    }
+});
+
+// Wire input listeners on form fields → debounced postMessage
+// Static fields (settings + about): wire once on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    const phone = document.getElementById('setting-phone');
+    if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
+
+    ['about-input-banner', 'about-input-left', 'about-input-right'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', pushPreviewDebounced.about);
+    });
+
+    // about stat inputs are dynamic — use event delegation on the grid
+    const statsGrid = document.getElementById('about-stats-grid');
+    if (statsGrid) statsGrid.addEventListener('input', pushPreviewDebounced.about);
+
+    // services/footer cards are dynamic — delegate at container
+    const svcWrap = document.getElementById('home-services-cards');
+    if (svcWrap) svcWrap.addEventListener('input', pushPreviewDebounced.services);
+
+    const fooWrap = document.getElementById('home-footer-cards');
+    if (fooWrap) fooWrap.addEventListener('input', pushPreviewDebounced.footer);
+});
 
 // ===================== HOME CONTENT — shared helpers =====================
 async function uploadHomeImage(file) {
@@ -1178,6 +1310,7 @@ async function loadHomeServices() {
                     imgEl.style.display = 'block';
                     placeholderEl.style.display = 'none';
                     card.dataset.imagePath = path;
+                    postPreviewData('services');
                     showToast('Image uploaded — click Save to persist', 'success');
                 } catch (err) {
                     showToast('Upload error: ' + err.message, 'error');
@@ -1291,6 +1424,7 @@ async function loadHomeFooter() {
                     imgEl.style.display = 'block';
                     placeholderEl.style.display = 'none';
                     card.dataset.avatarPath = path;
+                    postPreviewData('footer');
                     showToast('Avatar uploaded — click Save to persist', 'success');
                 } catch (err) {
                     showToast('Upload error: ' + err.message, 'error');
