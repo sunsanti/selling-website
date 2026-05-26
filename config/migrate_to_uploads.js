@@ -92,7 +92,14 @@ async function rewriteColumn(conn, table, column) {
         `AND ${column} NOT LIKE 'data:%' ` +
         `AND ${column} NOT LIKE 'http%'`
     );
-    console.log(`✅ ${table}.${column}: ${r1.affectedRows} prefix-rewrites, ${r2.affectedRows} bare-rewrites`);
+    // Files were flattened during move (uploads/footer/Long.jpg → uploads/Long.jpg)
+    // so strip any subfolder remnant from the URL too. Matches '/uploads/<sub>/<name>'
+    // and rewrites to '/uploads/<name>'. Idempotent (skips if already flat).
+    const [r3] = await conn.query(
+        `UPDATE ${table} SET ${column} = CONCAT('/uploads/', SUBSTRING_INDEX(${column}, '/', -1)) ` +
+        `WHERE ${column} LIKE '/uploads/%/%'`
+    );
+    console.log(`✅ ${table}.${column}: ${r1.affectedRows} prefix-rewrites, ${r2.affectedRows} bare-rewrites, ${r3.affectedRows} subfolder-flatten`);
 }
 
 (async () => {
