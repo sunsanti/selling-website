@@ -325,11 +325,10 @@
             try {
                 const res = await fetch('/api/public/projects');
                 const data = await res.json();
-                if (data.success && data.data && data.data.length > 0) {
-                    renderProjects(data.data);
-                }
+                renderProjects((data && data.success && Array.isArray(data.data)) ? data.data : []);
             } catch (e) {
-                console.log('Projects not loaded:', e);
+                console.error('Projects not loaded:', e);
+                renderProjects([]);
             }
         }
 

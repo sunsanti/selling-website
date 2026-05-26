@@ -86,13 +86,13 @@ function switchSection(section) {
     document.getElementById(section).classList.add('active');
 
     switch (section) {
-        case 'dashboard': loadDashboard(); break;
+        case 'dashboard': loadDashboard(); ensurePreviewLoaded('settings'); break;
         case 'projects': loadProjects(); break;
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
-        case 'home-about': loadHomeAbout(); break;
-        case 'home-services': loadHomeServices(); break;
-        case 'home-footer': loadHomeFooter(); break;
+        case 'home-about': loadHomeAbout(); ensurePreviewLoaded('about'); break;
+        case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
+        case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
     }
 }
 
@@ -272,6 +272,7 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
             currentLogoFile = null;
             currentMainImageFile = null;
             showToast('Settings saved successfully!', 'success');
+            refreshPreview('settings');
         } else {
             showToast(result.message || 'Error saving settings', 'error');
         }
@@ -992,6 +993,33 @@ function logoutAdmin() {
         .catch(() => window.location.href = '/login');
 }
 
+// ===================== LIVE PREVIEW =====================
+// Each editable section in admin (settings, about, services, footer) has an
+// iframe pointing to /main with the matching anchor. After save we cache-bust
+// to force a fresh fetch — the iframe re-runs loadSettings/loadAboutSection/etc
+// so the preview reflects what the public page will look like.
+const PREVIEW_TARGETS = {
+    settings: '',
+    about: '#about-us',
+    services: '#services',
+    footer: '#footer'
+};
+
+function refreshPreview(target) {
+    const iframe = document.getElementById('preview-iframe-' + target);
+    if (!iframe) return;
+    const anchor = PREVIEW_TARGETS[target] || '';
+    iframe.src = '/main?t=' + Date.now() + anchor;
+}
+
+// Lazy-load when a section becomes visible (avoid loading all 4 iframes at admin boot)
+function ensurePreviewLoaded(target) {
+    const iframe = document.getElementById('preview-iframe-' + target);
+    if (!iframe) return;
+    if (iframe.src && iframe.src !== 'about:blank' && !iframe.src.endsWith('about:blank')) return;
+    refreshPreview(target);
+}
+
 // ===================== HOME CONTENT — shared helpers =====================
 async function uploadHomeImage(file) {
     const fd = new FormData();
@@ -1080,6 +1108,7 @@ document.getElementById('home-about-form').addEventListener('submit', async e =>
         });
         const json = await res.json();
         showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+        if (json.success) refreshPreview('about');
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     } finally {
@@ -1172,6 +1201,7 @@ async function loadHomeServices() {
                     });
                     const json = await res.json();
                     showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+                    if (json.success) refreshPreview('services');
                 } catch (err) {
                     showToast('Error: ' + err.message, 'error');
                 } finally {
@@ -1293,6 +1323,7 @@ async function loadHomeFooter() {
                     });
                     const json = await res.json();
                     showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+                    if (json.success) refreshPreview('footer');
                 } catch (err) {
                     showToast('Error: ' + err.message, 'error');
                 } finally {

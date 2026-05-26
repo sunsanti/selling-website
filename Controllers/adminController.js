@@ -140,7 +140,8 @@ const restoreProject = async (req, res) => {
         }
         res.json({ success: true, message: 'Đã khôi phục dự án' });
     } catch (error) {
-        res.status(500).json({ success: false, message: 'Lỗi server' });
+        const message = error.message.includes('Maximum') ? error.message : 'Lỗi server';
+        res.status(message === 'Lỗi server' ? 500 : 400).json({ success: false, message });
     }
 };
 

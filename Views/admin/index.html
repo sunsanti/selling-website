@@ -144,6 +144,18 @@
                     </div>
                 </form>
             </div>
+
+            <!-- Live Preview (settings) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — Public Page</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('settings')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-settings" class="live-preview-iframe" src="/main" loading="lazy"></iframe>
+            </div>
         </section>
 
         <!-- Projects Section -->
@@ -292,6 +304,18 @@
                     <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save About</button>
                 </div>
             </form>
+
+            <!-- Live Preview (about) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — About Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('about')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#about-us" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-about" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
+            </div>
         </section>
 
         <!-- Services Section -->
@@ -301,6 +325,18 @@
             </div>
             <div id="home-services-cards">
             </div>
+
+            <!-- Live Preview (services) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — Services Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('services')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#services" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-services" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
+            </div>
         </section>
 
         <!-- Footer Section -->
@@ -309,6 +345,18 @@
                 <h1>Footer (2 slots)</h1>
             </div>
             <div id="home-footer-cards">
+            </div>
+
+            <!-- Live Preview (footer) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — Footer Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('footer')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#footer" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-footer" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
             </div>
         </section>
     </main>
