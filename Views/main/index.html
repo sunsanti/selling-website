@@ -57,7 +57,7 @@
 
 
     <!-- home -->
-    <section>
+    <section id="home-section">
         <div class="home" id="home">
 <div class="content">
                 <!-- <h3 class="content1">SOMETHING &<br></h3>
@@ -717,7 +717,7 @@
 
         function applyPreviewMode(scope) {
             const keepSelectorsByScope = {
-                settings: [],
+                settings: ['#home-section'],   // header + home (logo, phone in header; main_image in home)
                 about: ['#about-us'],
                 services: ['#services'],
                 footer: ['#footer']

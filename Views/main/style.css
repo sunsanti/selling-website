@@ -930,16 +930,19 @@ html{
     margin-top: -0.15em;
 }
 
-/* iPad: keep phone/account/logout visible but shrink + tuck before the hamburger */
+/* iPad: phone/account/logout live in the drawer (mobile-nav-header) — not in
+   the header bar — matching the mobile pattern. Hide entire desktop right block. */
 .content-header-right {
-    font-size: 1.2rem;
-    gap: 1rem;
-}
-.content-header-right hr {
-    margin: 0 0.6rem;
+    display: none;
 }
 .header-right {
-    margin-right: 4.5rem;  /* leave room for the hamburger on the right edge */
+    display: none;
+}
+
+/* Tablet drawer: when open, reveal phone/account at top + logout at bottom */
+.header .navbar.open .mobile-nav-header,
+.header .navbar.open .mobile-logout-btn {
+    display: flex !important;
 }
 
 .home .sub-content{
