@@ -22,12 +22,8 @@ body {
     display: flex;
     flex-direction: column;
     position: fixed;
-    top: 0;
-    bottom: 0;          /* stretch full viewport without 100vh URL-bar quirk on mobile */
-    left: 0;
-    height: 100vh;      /* fallback for browsers that don't honour top+bottom on a flex column */
-    max-height: 100dvh; /* dynamic viewport — cap to actual visible area on mobile */
-    overflow-y: auto;   /* if items + footer exceed viewport, scroll inside sidebar (footer stays reachable) */
+    inset: 0 auto 0 0;       /* shorthand for top:0; right:auto; bottom:0; left:0 — stretches full viewport */
+    height: 100vh;           /* fallback for older browsers that don't compute height from top+bottom */
     z-index: 100;
 }
 
