@@ -4,6 +4,7 @@
 
 # Documentation (local-only)
 wiki/
+docs/
 
 # Dependencies
 node_modules/

@@ -98,6 +98,7 @@ function switchSection(section) {
         case 'projects': loadProjects(); break;
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
+        case 'audit-log': loadAuditLog(); break;
         case 'home-about': loadHomeAbout(); ensurePreviewLoaded('about'); break;
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
         case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
@@ -1658,3 +1659,114 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 });
+
+// ===================== AUDIT LOG =====================
+let _auditActionsLoaded = false;
+
+async function loadAuditLog() {
+    try {
+        if (!_auditActionsLoaded) {
+            try {
+                const ar = await fetch('/api/admin/audit-log/actions');
+                if (ar.ok) {
+                    const aj = await ar.json();
+                    const sel = document.getElementById('audit-action-filter');
+                    sel.innerHTML = '<option value="">All actions</option>';
+                    (aj.data || []).forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a;
+                        opt.textContent = a;
+                        sel.appendChild(opt);
+                    });
+                }
+                _auditActionsLoaded = true;
+            } catch {}
+        }
+
+        const q = (document.getElementById('audit-search') || {}).value || '';
+        const action = (document.getElementById('audit-action-filter') || {}).value || '';
+        const params = new URLSearchParams();
+        if (q) params.set('q', q);
+        if (action) params.set('action', action);
+        params.set('limit', '200');
+
+        const res = await fetch('/api/admin/audit-log?' + params.toString());
+        if (res.status === 403) {
+            showToast('Chỉ admin được xem audit log', 'error');
+            return;
+        }
+        const j = await res.json();
+        const tbody = document.getElementById('audit-log-tbody');
+        tbody.innerHTML = '';
+
+        if (!j.success || !j.data || j.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#95a5a6">Không có dữ liệu</td></tr>';
+            return;
+        }
+
+        j.data.forEach(row => {
+            const tr = document.createElement('tr');
+
+            const tdTime = document.createElement('td');
+            tdTime.textContent = new Date(row.created_at).toLocaleString('vi-VN');
+            tdTime.style.fontSize = '11px';
+            tdTime.style.whiteSpace = 'nowrap';
+            tr.appendChild(tdTime);
+
+            const tdUser = document.createElement('td');
+            tdUser.textContent = row.username || '(anonymous)';
+            tr.appendChild(tdUser);
+
+            const tdAction = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'audit-badge';
+            badge.dataset.action = row.action;
+            badge.textContent = row.action;
+            tdAction.appendChild(badge);
+            tr.appendChild(tdAction);
+
+            const tdTarget = document.createElement('td');
+            tdTarget.textContent = row.target_type
+                ? (row.target_type + (row.target_id ? ' #' + row.target_id : ''))
+                : '-';
+            tr.appendChild(tdTarget);
+
+            const tdDetails = document.createElement('td');
+            tdDetails.style.fontSize = '11px';
+            tdDetails.style.maxWidth = '300px';
+            tdDetails.style.overflow = 'hidden';
+            tdDetails.style.textOverflow = 'ellipsis';
+            tdDetails.style.whiteSpace = 'nowrap';
+            if (row.details) {
+                try {
+                    const obj = typeof row.details === 'string' ? JSON.parse(row.details) : row.details;
+                    tdDetails.textContent = JSON.stringify(obj);
+                    tdDetails.title = JSON.stringify(obj, null, 2);
+                } catch {
+                    tdDetails.textContent = row.details;
+                }
+            } else {
+                tdDetails.textContent = '-';
+            }
+            tr.appendChild(tdDetails);
+
+            const tdIp = document.createElement('td');
+            tdIp.textContent = row.ip_address || '-';
+            tdIp.style.fontSize = '11px';
+            tr.appendChild(tdIp);
+
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error('loadAuditLog:', err);
+        showToast('Lỗi tải audit log: ' + err.message, 'error');
+    }
+}
+
+function resetAuditSearch() {
+    const s = document.getElementById('audit-search');
+    if (s) s.value = '';
+    const a = document.getElementById('audit-action-filter');
+    if (a) a.value = '';
+    loadAuditLog();
+}

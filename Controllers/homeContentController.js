@@ -1,6 +1,7 @@
 const aboutModel = require('../Models/aboutSectionModel');
 const serviceModel = require('../Models/serviceModel');
 const footerPersonModel = require('../Models/footerPersonModel');
+const auditLogModel = require('../Models/auditLogModel');
 
 const URL_HTTPS_RE = /^https:\/\/[^\s<>"']+$/i;
 
@@ -20,6 +21,10 @@ const updateAbout = async (req, res) => {
     try {
         const { banner, paragraph_left, paragraph_right, stats } = req.body;
         await aboutModel.updateAbout({ banner, paragraph_left, paragraph_right, stats });
+        auditLogModel.log({
+            req, action: 'ABOUT_UPDATE', target_type: 'about_section', target_id: 1,
+            details: { stats_count: Array.isArray(stats) ? stats.length : 0 }
+        });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (err) {
         console.error('updateAbout:', err.message);
@@ -56,6 +61,9 @@ const updateService = async (req, res) => {
         const { title, description, image_path } = req.body;
         const ok = await serviceModel.updateService(slot, { title, description, image_path });
         if (!ok) return res.status(400).json({ success: false, message: 'Không có thay đổi nào' });
+        auditLogModel.log({
+            req, action: 'SERVICE_UPDATE', target_type: 'service', target_id: slot
+        });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (err) {
         console.error('updateService:', err.message);
@@ -100,6 +108,9 @@ const updateFooterPerson = async (req, res) => {
             name, avatar_path, email, phone1, phone2, facebook_url
         });
         if (!ok) return res.status(400).json({ success: false, message: 'Không có thay đổi nào' });
+        auditLogModel.log({
+            req, action: 'FOOTER_PERSON_UPDATE', target_type: 'footer_person', target_id: slot
+        });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (err) {
         console.error('updateFooterPerson:', err.message);

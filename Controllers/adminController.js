@@ -8,6 +8,7 @@ const uploadService = require('../Services/uploadService');
 const renumberService = require('../Services/renumberService');
 const tableimagesModel = require('../Models/tableimagesModel');
 const translateService = require('../Services/translateService');
+const auditLogModel = require('../Models/auditLogModel');
 
 // ===================== ADMIN PAGE =====================
 const getAdminPage = (req, res) => {
@@ -35,6 +36,12 @@ const updateSettings = async (req, res) => {
         if (main_image !== undefined) {
             await settingModel.updateSetting('main_image', main_image.replace(/^\/images\//, ''));
         }
+        auditLogModel.log({
+            req,
+            action: 'SETTINGS_UPDATE',
+            target_type: 'settings',
+            details: { fields: Object.keys(req.body) }
+        });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -84,6 +91,10 @@ const createProject = async (req, res) => {
             name, area, square_meters, category, year, style,
             small_content, image_path: cleanImagePath
         });
+        auditLogModel.log({
+            req, action: 'PROJECT_CREATE', target_type: 'project', target_id: id,
+            details: { name, area }
+        });
         res.json({ success: true, message: 'Thêm dự án thành công', id });
     } catch (error) {
         const message = error.message.includes('Maximum') ? error.message : 'Lỗi server';
@@ -113,6 +124,10 @@ const updateProject = async (req, res) => {
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
         }
+        auditLogModel.log({
+            req, action: 'PROJECT_UPDATE', target_type: 'project', target_id: parseInt(req.params.id, 10),
+            details: { fields: Object.keys(fields) }
+        });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (error) {
         console.error('updateProject error:', error);
@@ -126,6 +141,9 @@ const softDeleteProject = async (req, res) => {
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
         }
+        auditLogModel.log({
+            req, action: 'PROJECT_SOFTDELETE', target_type: 'project', target_id: parseInt(req.params.id, 10)
+        });
         res.json({ success: true, message: 'Đã ngừng kinh doanh dự án' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -138,6 +156,9 @@ const restoreProject = async (req, res) => {
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy dự án' });
         }
+        auditLogModel.log({
+            req, action: 'PROJECT_RESTORE', target_type: 'project', target_id: parseInt(req.params.id, 10)
+        });
         res.json({ success: true, message: 'Đã khôi phục dự án' });
     } catch (error) {
         const message = error.message.includes('Maximum') ? error.message : 'Lỗi server';
@@ -153,6 +174,9 @@ const deleteProject = async (req, res) => {
         }
         // Renumber display_order after deletion
         await renumberService.renumberProjectDisplayOrder();
+        auditLogModel.log({
+            req, action: 'PROJECT_DELETE', target_type: 'project', target_id: parseInt(req.params.id, 10)
+        });
         res.json({ success: true, message: 'Đã xóa vĩnh viễn dự án' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -204,6 +228,9 @@ const deleteContact = async (req, res) => {
         }
         // Renumber IDs after deletion
         await renumberService.renumberContactIds();
+        auditLogModel.log({
+            req, action: 'CONTACT_DELETE', target_type: 'contact', target_id: parseInt(req.params.id, 10)
+        });
         res.json({ success: true, message: 'Xóa thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -231,6 +258,10 @@ const createAccount = async (req, res) => {
             return res.status(400).json({ success: false, message: 'Tên đăng nhập đã tồn tại' });
         }
         const id = await accountModel.createAccount(username, password, name, role || 'employee');
+        auditLogModel.log({
+            req, action: 'ACCOUNT_CREATE', target_type: 'account', target_id: id,
+            details: { username, role: role || 'employee' }
+        });
         res.json({ success: true, message: 'Thêm tài khoản thành công', id });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -257,6 +288,15 @@ const updateAccount = async (req, res) => {
             req.session.user.role = role || req.session.user.role;
             req.session.user.username = username || req.session.user.username;
         }
+        const changed = [];
+        if (username) changed.push('username');
+        if (password) changed.push('password');
+        if (name) changed.push('name');
+        if (role) changed.push('role');
+        auditLogModel.log({
+            req, action: 'ACCOUNT_UPDATE', target_type: 'account', target_id: parseInt(req.params.id, 10),
+            details: { fields: changed }
+        });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -274,6 +314,9 @@ const deleteAccount = async (req, res) => {
         if (!success) {
             return res.status(404).json({ success: false, message: 'Không tìm thấy tài khoản' });
         }
+        auditLogModel.log({
+            req, action: 'ACCOUNT_DELETE', target_type: 'account', target_id: targetId
+        });
         res.json({ success: true, message: 'Xóa thành công' });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });

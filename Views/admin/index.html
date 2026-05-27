@@ -45,6 +45,10 @@
                 <i class="fas fa-users"></i>
                 <span>Account</span>
             </a>
+            <a href="#" class="nav-item" data-section="audit-log">
+                <i class="fas fa-history"></i>
+                <span>Audit Log</span>
+            </a>
         </nav>
         <div class="sidebar-footer">
             <a href="/main" class="back-to-site">
@@ -269,6 +273,38 @@
                     </thead>
                     <tbody id="accounts-tbody">
                     </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Audit Log Section -->
+        <section id="audit-log" class="content-section">
+            <div class="section-header">
+                <h1>Audit Log</h1>
+                <button class="btn-reset" onclick="loadAuditLog()"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="audit-search" placeholder="Search (user / action / target)...">
+                <select id="audit-action-filter" class="audit-filter">
+                    <option value="">All actions</option>
+                </select>
+                <button class="btn-search" onclick="loadAuditLog()">Search</button>
+                <button class="btn-reset" onclick="resetAuditSearch()">Reset</button>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="audit-log-table">
+                    <thead>
+                        <tr>
+                            <th style="width:120px">Time</th>
+                            <th>User</th>
+                            <th>Action</th>
+                            <th>Target</th>
+                            <th>Details</th>
+                            <th style="width:120px">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-log-tbody"></tbody>
                 </table>
             </div>
         </section>

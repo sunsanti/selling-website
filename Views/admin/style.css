@@ -1468,3 +1468,57 @@ body {
     .media-toolbar { padding: 10px 14px; }
     .media-search { font-size: 12px; }
 }
+
+/* ================ AUDIT LOG ================ */
+.audit-filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 13px;
+    background: #fff;
+    cursor: pointer;
+    min-width: 160px;
+}
+
+.audit-badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    background: rgba(52, 152, 219, 0.1);
+    color: #3498db;
+    white-space: nowrap;
+}
+
+/* Tinted badges per action prefix — quickly scan a long log visually */
+.audit-badge[data-action^="LOGIN"] {
+    background: rgba(39, 174, 96, 0.1);
+    color: #27ae60;
+}
+.audit-badge[data-action="LOGIN_FAIL"] {
+    background: rgba(231, 76, 60, 0.12);
+    color: #c0392b;
+}
+.audit-badge[data-action="LOGOUT"] {
+    background: rgba(149, 165, 166, 0.15);
+    color: #7f8c8d;
+}
+.audit-badge[data-action$="_DELETE"],
+.audit-badge[data-action$="_SOFTDELETE"] {
+    background: rgba(231, 76, 60, 0.1);
+    color: #c0392b;
+}
+.audit-badge[data-action$="_CREATE"] {
+    background: rgba(39, 174, 96, 0.12);
+    color: #27ae60;
+}
+.audit-badge[data-action$="_UPDATE"] {
+    background: rgba(155, 89, 182, 0.1);
+    color: #9b59b6;
+}
+.audit-badge[data-action$="_RESTORE"] {
+    background: rgba(243, 156, 18, 0.12);
+    color: #d68910;
+}

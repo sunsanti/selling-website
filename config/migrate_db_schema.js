@@ -200,6 +200,40 @@ async function hasTable(table) {
             );
         }
 
+        // ============== AUDIT LOG ==============
+        if (!(await hasTable('audit_log'))) {
+            await pool.query(`
+                CREATE TABLE audit_log (
+                    id INT AUTO_INCREMENT PRIMARY KEY,
+                    user_id INT,
+                    username VARCHAR(50),
+                    action VARCHAR(64) NOT NULL,
+                    target_type VARCHAR(50),
+                    target_id INT,
+                    details TEXT,
+                    ip_address VARCHAR(45),
+                    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+                )
+            `);
+            console.log('✅ Created audit_log');
+        } else {
+            console.log('⏭️  audit_log already exists');
+        }
+
+        const auditIndexes = [
+            { name: 'idx_audit_created', cols: '(created_at DESC)' },
+            { name: 'idx_audit_user', cols: '(user_id, created_at DESC)' },
+            { name: 'idx_audit_target', cols: '(target_type, target_id)' }
+        ];
+        for (const { name, cols } of auditIndexes) {
+            if (await hasIndex('audit_log', name)) {
+                console.log(`⏭️  Index ${name} already exists`);
+                continue;
+            }
+            await pool.query(`CREATE INDEX ${name} ON audit_log ${cols}`);
+            console.log(`✅ Created index ${name} on audit_log${cols}`);
+        }
+
         console.log('\n🎉 Migration hoàn tất.');
     } catch (err) {
         console.error('❌ Migration error:', err.message);
