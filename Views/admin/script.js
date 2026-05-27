@@ -1661,6 +1661,122 @@ document.addEventListener('DOMContentLoaded', () => {
 });
 
 // ===================== AUDIT LOG =====================
+// Vietnamese labels — readable for non-IT staff. Keep raw action codes
+// in the DB / data-attribute for filtering + CSS tinting; render the
+// human label in the table cell.
+const AUDIT_ACTION_LABELS = {
+    'SETTINGS_UPDATE': 'Cập nhật cài đặt website',
+    'PROJECT_CREATE': 'Tạo dự án mới',
+    'PROJECT_UPDATE': 'Cập nhật dự án',
+    'PROJECT_SOFTDELETE': 'Ngừng kinh doanh dự án',
+    'PROJECT_RESTORE': 'Khôi phục dự án',
+    'PROJECT_DELETE': 'Xóa vĩnh viễn dự án',
+    'CONTACT_DELETE': 'Xóa liên hệ',
+    'ACCOUNT_CREATE': 'Tạo tài khoản',
+    'ACCOUNT_UPDATE': 'Cập nhật tài khoản',
+    'ACCOUNT_DELETE': 'Xóa tài khoản',
+    'ABOUT_UPDATE': 'Cập nhật phần About',
+    'SERVICE_UPDATE': 'Cập nhật Service',
+    'FOOTER_PERSON_UPDATE': 'Cập nhật nhân viên Footer'
+};
+
+const AUDIT_TARGET_LABELS = {
+    'project': 'Dự án',
+    'contact': 'Liên hệ',
+    'account': 'Tài khoản',
+    'settings': 'Cài đặt',
+    'about_section': 'Phần About',
+    'service': 'Service slot',
+    'footer_person': 'Nhân viên Footer'
+};
+
+const AUDIT_FIELD_LABELS = {
+    'logo': 'Logo',
+    'phone': 'Số điện thoại',
+    'main_image': 'Ảnh chính',
+    'username': 'Tên đăng nhập',
+    'password': 'Mật khẩu',
+    'name': 'Tên',
+    'role': 'Vai trò',
+    'title': 'Tiêu đề',
+    'description': 'Mô tả',
+    'image_path': 'Ảnh',
+    'banner': 'Banner',
+    'paragraph_left': 'Đoạn văn trái',
+    'paragraph_right': 'Đoạn văn phải',
+    'stats': 'Số liệu thống kê',
+    'area': 'Khu vực',
+    'square_meters': 'Diện tích (m²)',
+    'category': 'Danh mục',
+    'year': 'Năm',
+    'style': 'Phong cách',
+    'small_content': 'Mô tả ngắn',
+    'display_order': 'Thứ tự hiển thị',
+    'email': 'Email',
+    'phone1': 'SĐT 1',
+    'phone2': 'SĐT 2',
+    'facebook_url': 'Link Facebook',
+    'avatar_path': 'Ảnh đại diện'
+};
+
+const AUDIT_AREA_LABELS = {
+    'sydney': 'Sydney',
+    'melbourne': 'Melbourne',
+    'brisbane': 'Brisbane',
+    'goldcoast': 'Gold Coast'
+};
+
+function formatAuditTarget(target_type, target_id) {
+    const label = AUDIT_TARGET_LABELS[target_type] || target_type || '';
+    if (!label) return '-';
+    return target_id ? label + ' #' + target_id : label;
+}
+
+function formatAuditDetails(action, raw) {
+    if (!raw) return '-';
+    let d = raw;
+    if (typeof d === 'string') {
+        try { d = JSON.parse(d); } catch { return raw; }
+    }
+    if (typeof d !== 'object' || d === null) return String(d);
+
+    // "fields changed" pattern — used by UPDATE actions
+    if (Array.isArray(d.fields) && d.fields.length > 0) {
+        const labelled = d.fields.map(f => AUDIT_FIELD_LABELS[f] || f);
+        return 'Đã sửa: ' + labelled.join(', ');
+    }
+
+    // Per-action specific rendering
+    if (action === 'PROJECT_CREATE') {
+        const parts = [];
+        if (d.name) parts.push('Tên: ' + d.name);
+        if (d.area) parts.push('Khu vực: ' + (AUDIT_AREA_LABELS[d.area] || d.area));
+        return parts.join(' · ') || '-';
+    }
+    if (action === 'ACCOUNT_CREATE') {
+        const parts = [];
+        if (d.username) parts.push('Tên đăng nhập: ' + d.username);
+        if (d.role) {
+            const roleLabel = d.role === 'admin' ? 'Quản trị viên' : 'Nhân viên';
+            parts.push('Vai trò: ' + roleLabel);
+        }
+        return parts.join(' · ') || '-';
+    }
+    if (action === 'ABOUT_UPDATE' && typeof d.stats_count === 'number') {
+        return 'Cập nhật banner, 2 đoạn văn và ' + d.stats_count + ' số liệu';
+    }
+
+    // Generic fallback: prefix-translate keys we know, join "key: value"
+    const parts = Object.entries(d).map(([k, v]) => {
+        const keyLabel = AUDIT_FIELD_LABELS[k] || k;
+        if (k === 'area') v = AUDIT_AREA_LABELS[v] || v;
+        if (k === 'role') v = v === 'admin' ? 'Quản trị viên' : 'Nhân viên';
+        if (Array.isArray(v)) v = v.join(', ');
+        return keyLabel + ': ' + v;
+    });
+    return parts.join(' · ') || '-';
+}
+
 let _auditActionsLoaded = false;
 
 async function loadAuditLog() {
@@ -1671,11 +1787,11 @@ async function loadAuditLog() {
                 if (ar.ok) {
                     const aj = await ar.json();
                     const sel = document.getElementById('audit-action-filter');
-                    sel.innerHTML = '<option value="">All actions</option>';
+                    sel.innerHTML = '<option value="">Tất cả hành động</option>';
                     (aj.data || []).forEach(a => {
                         const opt = document.createElement('option');
                         opt.value = a;
-                        opt.textContent = a;
+                        opt.textContent = AUDIT_ACTION_LABELS[a] || a;
                         sel.appendChild(opt);
                     });
                 }
@@ -1721,33 +1837,23 @@ async function loadAuditLog() {
             const badge = document.createElement('span');
             badge.className = 'audit-badge';
             badge.dataset.action = row.action;
-            badge.textContent = row.action;
+            badge.textContent = AUDIT_ACTION_LABELS[row.action] || row.action;
             tdAction.appendChild(badge);
             tr.appendChild(tdAction);
 
             const tdTarget = document.createElement('td');
-            tdTarget.textContent = row.target_type
-                ? (row.target_type + (row.target_id ? ' #' + row.target_id : ''))
-                : '-';
+            tdTarget.textContent = formatAuditTarget(row.target_type, row.target_id);
             tr.appendChild(tdTarget);
 
             const tdDetails = document.createElement('td');
-            tdDetails.style.fontSize = '11px';
-            tdDetails.style.maxWidth = '300px';
+            tdDetails.style.fontSize = '12px';
+            tdDetails.style.maxWidth = '320px';
             tdDetails.style.overflow = 'hidden';
             tdDetails.style.textOverflow = 'ellipsis';
             tdDetails.style.whiteSpace = 'nowrap';
-            if (row.details) {
-                try {
-                    const obj = typeof row.details === 'string' ? JSON.parse(row.details) : row.details;
-                    tdDetails.textContent = JSON.stringify(obj);
-                    tdDetails.title = JSON.stringify(obj, null, 2);
-                } catch {
-                    tdDetails.textContent = row.details;
-                }
-            } else {
-                tdDetails.textContent = '-';
-            }
+            const readable = formatAuditDetails(row.action, row.details);
+            tdDetails.textContent = readable;
+            tdDetails.title = readable;   // tooltip on hover for truncated values
             tr.appendChild(tdDetails);
 
             const tdIp = document.createElement('td');

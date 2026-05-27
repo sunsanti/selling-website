@@ -285,9 +285,9 @@
             </div>
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" id="audit-search" placeholder="Search (user / action / target)...">
+                <input type="text" id="audit-search" placeholder="Tìm theo tên user, hành động, đối tượng...">
                 <select id="audit-action-filter" class="audit-filter">
-                    <option value="">All actions</option>
+                    <option value="">Tất cả hành động</option>
                 </select>
                 <button class="btn-search" onclick="loadAuditLog()">Search</button>
                 <button class="btn-reset" onclick="resetAuditSearch()">Reset</button>
@@ -296,11 +296,11 @@
                 <table class="data-table" id="audit-log-table">
                     <thead>
                         <tr>
-                            <th style="width:120px">Time</th>
-                            <th>User</th>
-                            <th>Action</th>
-                            <th>Target</th>
-                            <th>Details</th>
+                            <th style="width:140px">Thời gian</th>
+                            <th>Người thực hiện</th>
+                            <th>Hành động</th>
+                            <th>Đối tượng</th>
+                            <th>Chi tiết</th>
                             <th style="width:120px">IP</th>
                         </tr>
                     </thead>

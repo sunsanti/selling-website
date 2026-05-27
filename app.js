@@ -65,7 +65,6 @@ const contactController = require('./Controllers/contactController');
 const homeContentController = require('./Controllers/homeContentController');
 const mediaController = require('./Controllers/mediaController');
 const auditLogController = require('./Controllers/auditLogController');
-const auditLogModel = require('./Models/auditLogModel');
 
 app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
@@ -137,21 +136,11 @@ app.post('/api/admin/detect-language', adminController.detectTextLanguage);
 app.post('/api/contact', contactLimiter, contactController.submitContact);
 
 app.post("/logout", (req, res) => {
-    // Capture user BEFORE destroying session — auditLogModel.log() reads req.session.user
-    const user = req.session.user;
     req.session.destroy((err) => {
         if (err) {
             return res.status(500).send("Logout failed");
         }
         res.clearCookie("connect.sid");
-        if (user) {
-            auditLogModel.log({
-                req: { session: { user }, headers: req.headers, socket: req.socket },
-                action: 'LOGOUT',
-                target_type: 'account',
-                target_id: user.id
-            });
-        }
         res.send("Logged out");
     });
 });
