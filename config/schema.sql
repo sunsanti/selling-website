@@ -16,7 +16,6 @@ CREATE TABLE IF NOT EXISTS settings (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 );
 
--- Insert default settings
 INSERT IGNORE INTO settings (setting_key, setting_value) VALUES
 ('logo', 'LOGO'),
 ('phone', 'phone number'),
@@ -38,11 +37,13 @@ CREATE TABLE IF NOT EXISTS projects (
     status ENUM('active', 'inactive') DEFAULT 'active',
     display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    INDEX idx_projects_area_status (area, status),
+    INDEX idx_projects_display_order (display_order)
 );
 
 -- ----------------------------
--- 2b. PROJECT IMAGES TABLE (one row per image, linked to project)
+-- 2b. PROJECT IMAGES TABLE
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS tableimages (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -50,30 +51,9 @@ CREATE TABLE IF NOT EXISTS tableimages (
     image_path VARCHAR(255) NOT NULL,
     display_order INT DEFAULT 0,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_tableimages_project_id (project_id),
     FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
 );
-
--- Insert default project images
-INSERT IGNORE INTO tableimages (project_id, image_path, display_order) VALUES
-(1, 'project1_1.jpg', 1),
-(1, 'project1.jpg', 2),
-(1, 'project3.jpg', 3),
-(2, 'project2_2.jpg', 1),
-(2, 'project2.jpg', 2),
-(2, 'project4.jpg', 3),
-(3, 'project3_3.jpg', 1),
-(3, 'project1.jpg', 2),
-(3, 'project2.jpg', 3),
-(4, 'project4.jpg', 1),
-(4, 'project3.jpg', 2),
-(4, 'project1_1.jpg', 3);
-
--- Insert default projects (keep image_path for backward compatibility, tableimages has full data)
-INSERT IGNORE INTO projects (name, area, square_meters, category, year, style, small_content, image_path, status, display_order) VALUES
-('QUANDUONG COMPLEX', 'sydney', 25, 'LIVING ROOM', 2024, 'MODERN', 'A 25m² house designed to maximize every inch of space, offering comfort and practicality in a compact layout. Despite its small size, it provides all the essential amenities for modern and convenient living.', 'project1_1.jpg', 'active', 1),
-('NGUYENTHIEN COMPLEX', 'melbourne', 20, 'BEDROOM ROOM', 2025, 'MODERN', 'A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.', 'project2_2.jpg', 'active', 2),
-('TUANANH COMPLEX', 'brisbane', 30, 'LIVING ROOM', 2023, 'MODERN', 'A modern living room connected to a small private garden, bringing natural light and fresh air into the home. This relaxing space blends indoor comfort with a touch of greenery, creating a calm and inviting atmosphere.', 'project3_3.jpg', 'active', 3),
-('PHONG COMPLEX', 'goldcoast', 25, 'BEDROOM ROOM', 2025, 'MODERN', 'A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.', 'project4.jpg', 'active', 4);
 
 -- ----------------------------
 -- 3. CONTACTS TABLE (from contact form)
@@ -83,11 +63,13 @@ CREATE TABLE IF NOT EXISTS contacts (
     name VARCHAR(255) NOT NULL,
     phone VARCHAR(50),
     email VARCHAR(255),
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_contacts_email (email),
+    INDEX idx_contacts_created_at (created_at)
 );
 
 -- ----------------------------
--- 4. ACCOUNTS TABLE (employees)
+-- 4. ACCOUNTS TABLE
 -- ----------------------------
 CREATE TABLE IF NOT EXISTS accounts (
     id INT AUTO_INCREMENT PRIMARY KEY,
@@ -98,8 +80,96 @@ CREATE TABLE IF NOT EXISTS accounts (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
--- Insert default admin account (password 'admin123' hashed with bcrypt rounds=10).
--- Change this hash if you change BCRYPT_ROUNDS in code, or run config/migrate_hash_passwords.js
--- after seeding with a different value.
+-- Default admin account (password: admin123, bcrypt rounds=10)
 INSERT IGNORE INTO accounts (username, password, name, role) VALUES
 ('admin', '$2b$10$yfdejtIDbvDGhuudguCFVOZTBz.U1EC0vDNZ1LNmsURHW7vEutvQa', 'Administrator', 'admin');
+
+-- ----------------------------
+-- 5. ABOUT SECTION (single row, id=1)
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS about_section (
+    id INT PRIMARY KEY DEFAULT 1,
+    banner TEXT NOT NULL,
+    paragraph_left TEXT NOT NULL,
+    paragraph_right TEXT NOT NULL,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+    CHECK (id = 1)
+);
+
+INSERT IGNORE INTO about_section (id, banner, paragraph_left, paragraph_right) VALUES
+(1,
+ 'MANY BEAUTIFUL PLACES ARE WAITING FOR YOU TO SEE',
+ 'We are a passionate real estate team dedicated to developing modern and sustainable properties that blend aesthetic design with practical functionality, creating high-quality living and working spaces that offer lasting value and reflect distinctive character.',
+ 'With a strong commitment to quality and professionalism, we collaborate closely with our clients to turn their real estate goals into reality. From project planning and development to final delivery, we focus on exceeding expectations and providing properties that offer comfort, value, and long-term satisfaction.'
+);
+
+-- ----------------------------
+-- 6. ABOUT STATS (4 slots)
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS about_stats (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slot TINYINT NOT NULL UNIQUE,
+    num VARCHAR(20) NOT NULL DEFAULT '',
+    label VARCHAR(255) NOT NULL DEFAULT '',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO about_stats (slot, num, label) VALUES
+(1, '20+', 'years of experience'),
+(2, '200+', 'projects have done'),
+(3, '7+', 'awards received'),
+(4, '15+', 'team members');
+
+-- ----------------------------
+-- 7. SERVICES (3 slots)
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS services (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slot TINYINT NOT NULL UNIQUE,
+    title VARCHAR(255) NOT NULL DEFAULT '',
+    description TEXT NOT NULL,
+    image_path VARCHAR(255) NOT NULL DEFAULT '',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO services (slot, title, description, image_path) VALUES
+(1, 'See more about our business', 'Our company specializes in buying and selling real estate with a focus on value and long-term investment.', '/uploads/service1.jpg'),
+(2, 'Take a look at our projects', 'Take a look at our projects and discover properties designed for value, quality, and long-term investment.', '/uploads/service2.jpg'),
+(3, 'Be confident to be one of our partner', 'Sell or buy properties from our company', '/uploads/service3_3.jpg');
+
+-- ----------------------------
+-- 8. FOOTER PERSONS (2 slots)
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS footer_persons (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    slot TINYINT NOT NULL UNIQUE,
+    name VARCHAR(255) NOT NULL DEFAULT '',
+    avatar_path VARCHAR(255) NOT NULL DEFAULT '',
+    email VARCHAR(255) NOT NULL DEFAULT '',
+    phone1 VARCHAR(50) NOT NULL DEFAULT '',
+    phone2 VARCHAR(50) NOT NULL DEFAULT '',
+    facebook_url VARCHAR(500) NOT NULL DEFAULT '',
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+);
+
+INSERT IGNORE INTO footer_persons (slot, name, avatar_path, email, phone1, phone2, facebook_url) VALUES
+(1, 'Hoang Long', '/uploads/footer-Long.jpg', 'Leong@sealandproperty.com.au', '+61 432 285 678', '+84 905 160 805', 'https://www.facebook.com/longg1313'),
+(2, 'Tran Minh Phat (Jeremy)', '/uploads/footer-Phat.jpg', 'Jeremy@sealandproperty.com.au', '+61 45 246 7893', '+84 787665388', 'https://www.facebook.com/minhphat88');
+
+-- ----------------------------
+-- 9. AUDIT LOG
+-- ----------------------------
+CREATE TABLE IF NOT EXISTS audit_log (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    user_id INT,
+    username VARCHAR(50),
+    action VARCHAR(64) NOT NULL,
+    target_type VARCHAR(50),
+    target_id INT,
+    details TEXT,
+    ip_address VARCHAR(45),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_audit_created (created_at DESC),
+    INDEX idx_audit_user (user_id, created_at DESC),
+    INDEX idx_audit_target (target_type, target_id)
+);
