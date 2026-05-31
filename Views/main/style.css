@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root{
     --main-color: #f7f7ed;
@@ -9,7 +9,7 @@
 }
 
 *{
-  font-family: 'Playfair Display', sans-serif;
+  font-family: 'Poppins', sans-serif;
   margin: 0; padding: 0;
   box-sizing: border-box;
   outline: none; border: none;
@@ -17,10 +17,35 @@
   text-decoration: none;
   list-style: none;
 }
+
+h1, h2, h3, .heading,
+.home .content, .home .content *,
+.footer-content .name {
+  font-family: 'Playfair Display', serif;
+}
 body{
   padding-top: 80px;
   background-color: #f7f7ed;
   overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+}
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar inside the mobile drawer too */
+.header .navbar::-webkit-scrollbar {
+  display: none;
+}
+.header .navbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 html{
   font-size: 62.5%;
@@ -259,8 +284,60 @@ section{
     justify-content: space-between;
     align-items: center;
     padding: 2rem 9%;
-    background: white;
-    box-shadow: var(--box-shadow);
+    background: linear-gradient(135deg, rgba(14, 42, 71, 0.88) 0%, rgba(26, 58, 92, 0.88) 50%, rgba(14, 42, 71, 0.88) 100%);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 10px 40px rgba(14, 42, 71, 0.18), 0 2px 8px rgba(0, 0, 0, 0.04);
+    color: #f7f7ed;
+}
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(232, 213, 163, 0.5) 50%, transparent 100%);
+    pointer-events: none;
+}
+.header .logo,
+.header .site-phone,
+.header .account-name,
+.header .admin-text {
+    color: #f7f7ed;
+}
+.header .menu-btn {
+    color: #f7f7ed;
+}
+.header .left-site::after {
+    background-color: rgba(247, 247, 237, 0.4);
+}
+.nav-item::after {
+    background-color: #e8d5a3;
+}
+
+/* Desktop logout button (in header) */
+#logout-btn {
+    margin-top: 6px;
+    padding: 6px 18px;
+    background: transparent;
+    border: 1.5px solid rgba(232, 213, 163, 0.6);
+    border-radius: 999px;
+    color: #e8d5a3;
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    letter-spacing: 0.04em;
+}
+#logout-btn:hover {
+    background-color: #e8d5a3;
+    color: #0E2A47;
+    border-color: #e8d5a3;
+}
+#logout-btn > div {
+    text-transform: uppercase;
+    font-size: inherit;
 }
 .content-header-right{
   display: flex;
@@ -328,13 +405,13 @@ section{
 
 .header .navbar a{
     font-size: 1.75rem;
-    color: var(--black);
 }
 
 .nav-item {
-  position: relative; 
+  position: relative;
   display: inline-block;
   text-decoration: none;
+  color: #ffffff;
 }
 
 .nav-item::after {
@@ -396,6 +473,7 @@ section{
     max-width: 1200px;
     margin: auto;
     line-height: 0.95;
+    letter-spacing: 0.08em;
 }
 
 .home .content .left{
@@ -883,18 +961,18 @@ html{
 
 .header .navbar {
     position: fixed !important;
-    top: 0;
+    top: 80px;
     right: -280px;
     width: 260px;
-    height: 100%;
-    background: white;
+    height: calc(100vh - 80px);
+    background: linear-gradient(180deg, #0E2A47 0%, #1a3a5c 100%);
     display: flex !important;
     flex-direction: column;
     gap: 0;
     padding: 0;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
     transition: right 0.3s ease;
-    z-index: 1001;
+    z-index: 999;
     overflow-y: auto;
     left: auto !important;
     transform: none !important;
@@ -909,13 +987,14 @@ html{
     display: block;
     padding: 1.6rem 2rem;
     font-size: 1.6rem;
-    color: var(--black);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.15);
     transition: background-color 0.2s;
 }
 
 .header .navbar a:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(232, 213, 163, 0.08);
+    color: #e8d5a3;
 }
 
 .header .navbar .nav-item::after {
@@ -923,7 +1002,7 @@ html{
 }
 
 #admin-btn {
-    color: red !important;
+    color: #ff8888 !important;
 }
 
 .home .content{
@@ -966,29 +1045,29 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     justify-content: space-between;
     align-items: center;
     padding: 1.6rem 2rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #f9f9f9;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.25);
+    background: rgba(0, 0, 0, 0.15);
     gap: 1rem;
     flex-wrap: wrap;
 }
 .header .navbar .mobile-nav-header .mobile-site-phone {
     font-size: 1.8rem;
     font-weight: 600;
-    color: var(--black);
+    color: #f7f7ed;
 }
 .header .navbar .mobile-nav-header .mobile-account-name {
     font-size: 1.6rem;
-    color: #555;
+    color: #e8d5a3;
 }
 .header .navbar .mobile-logout-btn {
     margin-top: auto;
     margin: auto 2rem 2rem;
     background: none;
-    border: 1.5px solid #ccc;
+    border: 1.5px solid rgba(232, 213, 163, 0.6);
     border-radius: 6px;
     padding: 1rem 1.4rem;
     font-size: 1.6rem;
-    color: #555;
+    color: #e8d5a3;
     cursor: pointer;
     transition: background-color 0.2s;
     text-align: center;
@@ -1146,18 +1225,18 @@ body{
 
 .header .navbar {
     position: fixed !important;
-    top: 0;
+    top: 60px;
     right: -280px;
     width: 260px;
-    height: 100%;
-    background: white;
+    height: calc(100vh - 60px);
+    background: linear-gradient(180deg, #0E2A47 0%, #1a3a5c 100%);
     display: flex !important;
     flex-direction: column;
     gap: 0;
     padding: 0;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
     transition: right 0.3s ease;
-    z-index: 1001;
+    z-index: 999;
     overflow-y: auto;
     left: auto !important;
     transform: none !important;
@@ -1179,19 +1258,19 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     justify-content: space-between;
     align-items: center;
     padding: 1.2rem 2rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #f9f9f9;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.25);
+    background: rgba(0, 0, 0, 0.15);
 }
 
 .header .navbar .mobile-nav-header .mobile-site-phone {
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--black);
+    color: #f7f7ed;
 }
 
 .header .navbar .mobile-nav-header .mobile-account-name {
     font-size: 1.4rem;
-    color: #555;
+    color: #e8d5a3;
 }
 
 /* Mobile logout button (at bottom of navbar) */
@@ -1202,31 +1281,32 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     margin-right: 2rem;
     margin-bottom: 2rem;
     background: none;
-    border: 1.5px solid #ccc;
+    border: 1.5px solid rgba(232, 213, 163, 0.6);
     border-radius: 6px;
     padding: 0.8rem 1.2rem;
     font-size: 1.4rem;
-    color: #555;
+    color: #e8d5a3;
     cursor: pointer;
     transition: background-color 0.2s;
     text-align: center;
 }
 
 .header .navbar .mobile-logout-btn:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(232, 213, 163, 0.1);
 }
 
 .header .navbar a {
     display: block;
     padding: 1.6rem 2rem;
     font-size: 1.6rem;
-    color: var(--black);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.15);
     transition: background-color 0.2s;
 }
 
 .header .navbar a:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(232, 213, 163, 0.08);
+    color: #e8d5a3;
 }
 
 .header .navbar .nav-item::after {
@@ -1234,7 +1314,7 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 }
 
 #admin-btn, #mobile-admin-btn {
-    color: red !important;
+    color: #ff8888 !important;
 }
 
 /* home */

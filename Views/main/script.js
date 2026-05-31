@@ -72,6 +72,15 @@ function closeFillPopup(){
     document.getElementById("fill-popup").style.display = "none";
 }
 
+// Auto-open contact popup on first visit per session (delay 1.5s)
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('fillPopupShown')) return;
+    setTimeout(() => {
+        fillInfoPopup();
+        sessionStorage.setItem('fillPopupShown', '1');
+    }, 1500);
+});
+
 // ===================== MOBILE MENU TOGGLE (Sidebar Drawer) =====================
 const menuBtn = document.getElementById("menu-btn");
 const navbar = document.getElementById("main-navbar");
