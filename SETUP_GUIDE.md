@@ -8,40 +8,64 @@ npm install
 
 ## 2. Tạo `.env`
 
-```bash
-cp .env.example .env
+Tạo file `.env` ở thư mục root (cùng cấp `app.js`):
+
+```ini
+PORT=5500
+NODE_ENV=development
+
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=your-mysql-password
+DB_NAME=sellingweb
+DB_CONNECTION_LIMIT=10
+
+SESSION_SECRET=
+
+GOOGLE_TRANSLATE_API_KEY=
 ```
 
-Mở `.env` và điền:
-- `DB_USER`, `DB_PASSWORD`, `DB_NAME` — credential MySQL
-- `SESSION_SECRET` — chuỗi random ≥ 64 ký tự. Sinh:
-  ```bash
-  node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
-  ```
-- `GOOGLE_TRANSLATE_API_KEY` — (tuỳ chọn) cho nút dịch trong admin
-- `NODE_ENV` — `development` hoặc `production`. Production bật `cookie.secure`
+Sinh `SESSION_SECRET` (random ≥ 64 ký tự):
+
+```bash
+node -e "console.log(require('crypto').randomBytes(64).toString('hex'))"
+```
+
+Paste output vào `.env`. **BẮT BUỘC** — server sẽ `process.exit(1)` nếu thiếu.
 
 ## 3. Database
 
-### DB mới hoàn toàn
+Có 2 cách. Cách nào cũng được, kết quả như nhau.
+
+### Cách A — Dùng `schema.sql` (chạy 1 lần qua MySQL CLI)
 
 ```bash
 mysql -u root -p < config/schema.sql
 ```
 
-Tài khoản mặc định: `admin / admin123` (password đã hash bcrypt sẵn trong schema).
+Tạo database `sellingweb` + 10 bảng + seed data + indexes. Tài khoản mặc định `admin / admin123` đã hash bcrypt sẵn.
 
-### DB cũ — cần migrate
+### Cách B — Dùng `migrate_db_schema.js` (idempotent qua Node)
 
 ```bash
-# Thêm cột name + role (nếu chưa có)
-mysql -u root -p sellingweb < config/migrate_account_name_role.sql
-
-# Hash các password plain-text đang lưu trong DB
-node config/migrate_hash_passwords.js
+# DB mới hoặc DB đã có sẵn — script tự nhận biết
+node config/migrate_db_schema.js
 ```
 
-Script `migrate_hash_passwords.js` chạy 1 lần, hash tất cả password chưa hash. Idempotent — chạy lại nhiều lần không sao.
+Behavior:
+- Table chưa có → CREATE + seed default
+- Table đã có → fetch row count + sample data để verify state
+- An toàn chạy nhiều lần
+
+**DB cũ rất rác (muốn xoá sạch table cũ rồi tạo lại)**:
+
+```bash
+node config/migrate_db_schema.js --reset
+```
+
+⚠️ `--reset` **DROP TẤT CẢ table** trong DB hiện tại (kể cả table không thuộc app như `users` cũ), rồi tạo lại sạch. Xóa hết data — chỉ dùng cho dev / setup mới.
+
+> Script tự load `.env` từ project root bất kể chạy ở đâu (`pwd` không quan trọng).
 
 ## 4. Chạy
 
@@ -49,7 +73,7 @@ Script `migrate_hash_passwords.js` chạy 1 lần, hash tất cả password chư
 node app.js
 ```
 
-→ `http://localhost:5500/login` (cổng đọc từ `PORT` trong `.env`, mặc định 5500)
+→ `http://localhost:5500/login` (cổng đọc từ `PORT` trong `.env`, mặc định 5500).
 
 ## 5. Đăng Nhập Mặc Định
 
@@ -76,43 +100,59 @@ Free tier: 500,000 ký tự/tháng.
 | 2 | API admin không auth | `requireAuth` cho toàn bộ `/api/admin/*`; `requireAdmin` cho DELETE và Accounts |
 | 3 | Secrets hardcode | Chuyển sang `.env` (`dotenv`) — DB, session secret, Google API |
 | 4 | Cookie yếu | `httpOnly: true`, `sameSite: 'lax'`, `secure` bật ở production |
-| 5 | Upload không filter | `fileFilter` chỉ chấp nhận MIME `image/{jpeg,png,webp,gif}` + extension |
-| 6 | `express.static('.')` | Đã bỏ; mount riêng `/images`, `/uploads`, `/login`, `/main`, `/admin` |
+| 5 | Upload không filter | `fileFilter` chỉ chấp nhận MIME `image/{jpeg,png,webp,gif}` |
+| 6 | `express.static('.')` | Đã bỏ; mount riêng `/uploads`, `/login`, `/main`, `/admin` |
 | 7 | Brute force / spam | `express-rate-limit`: 10 login/15min, 3 contact/min |
 | 8 | Log password | Đã bỏ `console.log` thông tin nhạy cảm trong `loginController` |
-| 9 | Renumber race | Bọc transaction trong `renumberService` (rollback nếu lỗi) |
+| 9 | Audit trail | Bảng `audit_log` ghi mọi mutation: user + action + target + IP + timestamp |
 
 Tham khảo chi tiết: [wiki/09-bao-mat.md](wiki/09-bao-mat.md).
 
 ## Trouble-shooting
 
 ### ❌ `SESSION_SECRET không được khai báo trong .env`
-→ Chưa tạo `.env`. Quay lại bước 2.
+→ Chưa tạo `.env` hoặc thiếu `SESSION_SECRET`. Quay lại bước 2.
+
+### ❌ `injected env (0) from .env`
+→ File `.env` rỗng hoặc không nằm cùng cấp `app.js`. Verify:
+```bash
+ls -la .env       # phải thấy, KHÔNG phải .env.txt
+cat .env          # phải có nội dung
+```
+
+### ❌ `Access denied for user 'root'@'localhost' (using password: NO)`
+→ `DB_PASSWORD` trong `.env` không match password MySQL của bạn. Test thủ công:
+```bash
+mysql -u root -p
+# nhập password — nếu OK thì chỉnh DB_PASSWORD trong .env
+```
+Trên Mac mới cài MySQL qua `brew install mysql`, mặc định root không có password → để `DB_PASSWORD=` trống.
 
 ### ❌ Login đúng `admin/admin123` mà vẫn báo sai
-→ DB của bạn còn password plain-text. Chạy `node config/migrate_hash_passwords.js`.
+→ Bảng `accounts` còn password plain-text từ DB cũ. Reset hash:
+```sql
+UPDATE accounts SET password = '$2b$10$yfdejtIDbvDGhuudguCFVOZTBz.U1EC0vDNZ1LNmsURHW7vEutvQa'
+WHERE username = 'admin';
+```
+Hoặc chạy `node config/migrate_db_schema.js --reset` để tạo lại từ đầu.
 
-### ❌ Upload báo "Chỉ chấp nhận ảnh: jpg, jpeg, png, webp, gif"
-→ Bạn đang upload file không phải ảnh. Đổi format ảnh.
+### ❌ Upload báo "Chỉ chấp nhận file ảnh"
+→ Bạn đang upload file không phải image MIME. Chuyển sang `.jpg/.png/.webp/.gif`.
 
 ### ❌ "Bạn cần đăng nhập" khi gọi API admin
 → Cookie session hết hạn hoặc chưa login. Đăng nhập lại tại `/login`.
 
 ### ❌ Quá nhiều lần đăng nhập sai → bị chặn
-→ Đợi 15 phút hoặc đổi IP. Đây là rate-limit chống brute-force.
+→ Đợi 15 phút hoặc đổi IP. Rate-limit chống brute-force.
 
 ---
 
-## Upgrading From The Two-Folder Layout (`images/` + `uploads/`)
+## File config/ cần thiết khi handoff
 
-Phiên bản trước media-library feature dùng 2 folder ảnh riêng (`images/` cho seed assets, `uploads/` cho admin uploads). Để nâng cấp:
+Chỉ còn 4 file:
+- `database.js` — connection pool, tự resolve `.env` theo `__dirname`
+- `constants.js` — shared constants (AREAS, BCRYPT_ROUNDS, ...)
+- `schema.sql` — full schema SQL (chạy qua MySQL CLI cho setup mới)
+- `migrate_db_schema.js` — idempotent + có flag `--reset` (chạy qua Node)
 
-1. **Dừng server**: `pkill -f "node app"` hoặc Ctrl+C.
-2. **Backup DB**: `mysqldump -u root -p sellingweb > backup.sql`
-3. **Chạy migration**: `node config/migrate_to_uploads.js`
-   - Script move toàn bộ file từ `images/` sang `uploads/` (subfolder được flatten với prefix)
-   - UPDATE 5 bảng (`settings`, `services`, `footer_persons`, `projects`, `tableimages`) — mọi path `/images/x` thành `/uploads/x`, mọi bare filename `x.jpg` thành `/uploads/x.jpg`
-4. **Pull/deploy code mới** (đã drop `/images` static mount khỏi `app.js`)
-5. **Start server**: `node app.js`
-
-Migration **idempotent** — chạy lại nhiều lần OK (skip files đã move, skip rows đã `/uploads/`).
+Các script một lần (dedupe, hash passwords, migrate to uploads, cleanup data) đã xóa khỏi repo sau khi đã được áp dụng.
