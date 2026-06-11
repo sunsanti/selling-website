@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root{
     --main-color: #f7f7ed;
@@ -9,7 +9,7 @@
 }
 
 *{
-  font-family: 'Playfair Display', sans-serif;
+  font-family: 'Poppins', sans-serif;
   margin: 0; padding: 0;
   box-sizing: border-box;
   outline: none; border: none;
@@ -17,10 +17,35 @@
   text-decoration: none;
   list-style: none;
 }
+
+h1, h2, h3, .heading,
+.home .content, .home .content *,
+.footer-content .name {
+  font-family: 'Playfair Display', serif;
+}
 body{
   padding-top: 80px;
   background-color: #f7f7ed;
   overflow-x: hidden;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+body::-webkit-scrollbar,
+html::-webkit-scrollbar {
+  display: none;
+}
+html {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+/* Hide scrollbar inside the mobile drawer too */
+.header .navbar::-webkit-scrollbar {
+  display: none;
+}
+.header .navbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 html{
   font-size: 62.5%;
@@ -77,14 +102,14 @@ section{
   content: "";
   position: absolute;
   top: 50%;
-  right: 14px;
+  right: 29.5px;
   width: 15px;
   height: 15px;
   background-color: #111;
   border-radius: 50%;
-  
-  transform: translateY(-50%) scale(0); 
-  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); 
+
+  transform: translateY(-50%) scale(0);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
 }
 
@@ -119,6 +144,8 @@ section{
 
 .dot {
   position: absolute;
+  inset: 0;
+  margin: auto;
   width: 10px;
   height: 10px;
   background-color: #111;
@@ -128,11 +155,13 @@ section{
 
 .arrow {
   position: absolute;
+  inset: 0;
+  margin: auto;
   width: 18px;
   height: 18px;
   color: #fff;
   opacity: 0;
-  transform: translate(-5px, 5px); 
+  transform: translate(-5px, 5px);
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
@@ -168,14 +197,14 @@ section{
   content: "";
   position: absolute;
   top: 50%;
-  right: 14px;
+  right: 29.5px;
   width: 15px;
   height: 15px;
   background-color: #f7f7ed;
   border-radius: 50%;
-  
-  transform: translateY(-50%) scale(0); 
-  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1); 
+
+  transform: translateY(-50%) scale(0);
+  transition: transform 1s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 0;
 }
 
@@ -211,20 +240,24 @@ section{
 
 .btn-services .dot {
   position: absolute;
+  inset: 0;
+  margin: auto;
   width: 10px;
   height: 10px;
-  background-color: #fff; 
+  background-color: #fff;
   border-radius: 50%;
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
 .btn-services .arrow {
   position: absolute;
+  inset: 0;
+  margin: auto;
   width: 18px;
   height: 18px;
   color: #111;
-  opacity: 0; 
-  transform: translate(-5px, 5px); 
+  opacity: 0;
+  transform: translate(-5px, 5px);
   transition: transform 0.4s ease, opacity 0.4s ease;
 }
 
@@ -251,8 +284,60 @@ section{
     justify-content: space-between;
     align-items: center;
     padding: 2rem 9%;
-    background: white;
-    box-shadow: var(--box-shadow);
+    background: linear-gradient(135deg, rgba(14, 42, 71, 0.88) 0%, rgba(26, 58, 92, 0.88) 50%, rgba(14, 42, 71, 0.88) 100%);
+    backdrop-filter: blur(14px) saturate(140%);
+    -webkit-backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 10px 40px rgba(14, 42, 71, 0.18), 0 2px 8px rgba(0, 0, 0, 0.04);
+    color: #f7f7ed;
+}
+.header::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(232, 213, 163, 0.5) 50%, transparent 100%);
+    pointer-events: none;
+}
+.header .logo,
+.header .site-phone,
+.header .account-name,
+.header .admin-text {
+    color: #f7f7ed;
+}
+.header .menu-btn {
+    color: #f7f7ed;
+}
+.header .left-site::after {
+    background-color: rgba(247, 247, 237, 0.4);
+}
+.nav-item::after {
+    background-color: #e8d5a3;
+}
+
+/* Desktop logout button (in header) */
+#logout-btn {
+    margin-top: 6px;
+    padding: 6px 18px;
+    background: transparent;
+    border: 1.5px solid rgba(232, 213, 163, 0.6);
+    border-radius: 999px;
+    color: #e8d5a3;
+    font-size: 1.3rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+    letter-spacing: 0.04em;
+}
+#logout-btn:hover {
+    background-color: #e8d5a3;
+    color: #0E2A47;
+    border-color: #e8d5a3;
+}
+#logout-btn > div {
+    text-transform: uppercase;
+    font-size: inherit;
 }
 .content-header-right{
   display: flex;
@@ -320,13 +405,13 @@ section{
 
 .header .navbar a{
     font-size: 1.75rem;
-    color: var(--black);
 }
 
 .nav-item {
-  position: relative; 
+  position: relative;
   display: inline-block;
   text-decoration: none;
+  color: #ffffff;
 }
 
 .nav-item::after {
@@ -387,6 +472,8 @@ section{
     width: 100%;
     max-width: 1200px;
     margin: auto;
+    line-height: 0.95;
+    letter-spacing: 0.08em;
 }
 
 .home .content .left{
@@ -395,6 +482,7 @@ section{
 
 .home .content .right{
     text-align: right;
+    margin-top: -0.2em;
 }
 .home .sub-content{
     font-size: 2rem;
@@ -444,6 +532,8 @@ section{
 }
 .info .block-num{
     margin-top: 4rem;
+    padding-top: 2rem;
+    padding-bottom: 6rem;
     position: relative;
     width: 100%;
     margin-right: 2.5rem;
@@ -728,11 +818,11 @@ section{
 
 .footer-person {
     flex: 1;
-    max-width: 480px;
+    max-width: 570px;
     display: flex;
     align-items: center;
-    gap: 24px;
-    padding: 24px 20px;
+    gap: 32px;
+    padding: 36px 32px;
     background: rgba(255, 255, 255, 0.05);
     border-radius: 16px;
     border: 1px solid rgba(255, 255, 255, 0.1);
@@ -755,8 +845,8 @@ section{
 }
 
 .footer-person .img-footer {
-    width: 140px;
-    height: 180px;
+    width: 180px;
+    height: 220px;
     border-radius: 12px;
     overflow: hidden;
     flex-shrink: 0;
@@ -781,10 +871,10 @@ section{
 
 .footer-content .name {
     color: #e8d5a3;
-    font-size: 1.8rem;
+    font-size: 2.1rem;
     font-weight: 700;
-    margin-bottom: 12px;
-    padding-bottom: 10px;
+    margin-bottom: 16px;
+    padding-bottom: 12px;
     border-bottom: 1px solid rgba(201, 169, 110, 0.3);
     letter-spacing: 0.5px;
 }
@@ -795,8 +885,8 @@ section{
     flex-direction: column;
     justify-content: center;
     color: rgba(255, 255, 255, 0.85);
-    font-size: 1.3rem;
-    gap: 10px;
+    font-size: 1.45rem;
+    gap: 12px;
 }
 
 .contact-row {
@@ -871,18 +961,18 @@ html{
 
 .header .navbar {
     position: fixed !important;
-    top: 0;
+    top: 80px;
     right: -280px;
     width: 260px;
-    height: 100%;
-    background: white;
+    height: calc(100vh - 80px);
+    background: linear-gradient(180deg, #0E2A47 0%, #1a3a5c 100%);
     display: flex !important;
     flex-direction: column;
     gap: 0;
     padding: 0;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
     transition: right 0.3s ease;
-    z-index: 1001;
+    z-index: 999;
     overflow-y: auto;
     left: auto !important;
     transform: none !important;
@@ -897,13 +987,14 @@ html{
     display: block;
     padding: 1.6rem 2rem;
     font-size: 1.6rem;
-    color: var(--black);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.15);
     transition: background-color 0.2s;
 }
 
 .header .navbar a:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(232, 213, 163, 0.08);
+    color: #e8d5a3;
 }
 
 .header .navbar .nav-item::after {
@@ -911,23 +1002,75 @@ html{
 }
 
 #admin-btn {
-    color: red !important;
+    color: #ff8888 !important;
 }
 
 .home .content{
-    font-size:10rem;
+    font-size: 8rem;
+    line-height: 0.95;
 }
 
 .home .content .left{
-    margin-left:2rem;
+    margin-left: 2rem;
 }
 
 .home .content .right{
+    margin-right: 2rem;
+    margin-top: -0.15em;
+}
+
+/* iPad: phone/account/logout live in the drawer (mobile-nav-header) — not in
+   the header bar — matching the mobile pattern. Hide entire desktop right block. */
+.content-header-right {
+    display: none;
+}
+.header-right {
     display: none;
 }
 
-.content-header-right {
-    display: none;
+/* Tablet drawer: phone number is always shown (header block);
+   logout button only when logged in. Account name visibility is
+   controlled inline by main/script.js syncLogout(). */
+.header .navbar.open .mobile-nav-header {
+    display: flex !important;
+}
+body.logged-in .header .navbar.open .mobile-logout-btn {
+    display: flex !important;
+}
+
+/* iPad drawer inner styling (mirrors mobile 768 rules below so the phone
+   and account name aren't tiny / unstyled on tablets) */
+.header .navbar .mobile-nav-header {
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.6rem 2rem;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.25);
+    background: rgba(0, 0, 0, 0.15);
+    gap: 1rem;
+    flex-wrap: wrap;
+}
+.header .navbar .mobile-nav-header .mobile-site-phone {
+    font-size: 1.8rem;
+    font-weight: 600;
+    color: #f7f7ed;
+}
+.header .navbar .mobile-nav-header .mobile-account-name {
+    font-size: 1.6rem;
+    color: #e8d5a3;
+}
+.header .navbar .mobile-logout-btn {
+    margin-top: auto;
+    margin: auto 2rem 2rem;
+    background: none;
+    border: 1.5px solid rgba(232, 213, 163, 0.6);
+    border-radius: 6px;
+    padding: 1rem 1.4rem;
+    font-size: 1.6rem;
+    color: #e8d5a3;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    text-align: center;
 }
 
 .home .sub-content{
@@ -1082,26 +1225,28 @@ body{
 
 .header .navbar {
     position: fixed !important;
-    top: 0;
+    top: 60px;
     right: -280px;
     width: 260px;
-    height: 100%;
-    background: white;
+    height: calc(100vh - 60px);
+    background: linear-gradient(180deg, #0E2A47 0%, #1a3a5c 100%);
     display: flex !important;
     flex-direction: column;
     gap: 0;
     padding: 0;
-    box-shadow: -2px 0 10px rgba(0, 0, 0, 0.15);
+    box-shadow: -4px 0 24px rgba(0, 0, 0, 0.25);
     transition: right 0.3s ease;
-    z-index: 1001;
+    z-index: 999;
     overflow-y: auto;
     left: auto !important;
     transform: none !important;
 }
 
-/* Mobile: show phone/name/logout in navbar when open */
-.header .navbar.open .mobile-nav-header,
-.header .navbar.open .mobile-logout-btn {
+/* Mobile: phone block always shown when drawer open; logout requires login */
+.header .navbar.open .mobile-nav-header {
+    display: flex !important;
+}
+body.logged-in .header .navbar.open .mobile-logout-btn {
     display: flex !important;
 }
 
@@ -1113,19 +1258,19 @@ body{
     justify-content: space-between;
     align-items: center;
     padding: 1.2rem 2rem;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-    background: #f9f9f9;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.25);
+    background: rgba(0, 0, 0, 0.15);
 }
 
 .header .navbar .mobile-nav-header .mobile-site-phone {
     font-size: 1.4rem;
     font-weight: 600;
-    color: var(--black);
+    color: #f7f7ed;
 }
 
 .header .navbar .mobile-nav-header .mobile-account-name {
     font-size: 1.4rem;
-    color: #555;
+    color: #e8d5a3;
 }
 
 /* Mobile logout button (at bottom of navbar) */
@@ -1136,31 +1281,32 @@ body{
     margin-right: 2rem;
     margin-bottom: 2rem;
     background: none;
-    border: 1.5px solid #ccc;
+    border: 1.5px solid rgba(232, 213, 163, 0.6);
     border-radius: 6px;
     padding: 0.8rem 1.2rem;
     font-size: 1.4rem;
-    color: #555;
+    color: #e8d5a3;
     cursor: pointer;
     transition: background-color 0.2s;
     text-align: center;
 }
 
 .header .navbar .mobile-logout-btn:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(232, 213, 163, 0.1);
 }
 
 .header .navbar a {
     display: block;
     padding: 1.6rem 2rem;
     font-size: 1.6rem;
-    color: var(--black);
-    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+    color: #ffffff;
+    border-bottom: 1px solid rgba(232, 213, 163, 0.15);
     transition: background-color 0.2s;
 }
 
 .header .navbar a:hover {
-    background-color: rgba(0, 0, 0, 0.04);
+    background-color: rgba(232, 213, 163, 0.08);
+    color: #e8d5a3;
 }
 
 .header .navbar .nav-item::after {
@@ -1168,7 +1314,7 @@ body{
 }
 
 #admin-btn, #mobile-admin-btn {
-    color: red !important;
+    color: #ff8888 !important;
 }
 
 /* home */
@@ -1177,14 +1323,19 @@ body{
 }
 
 .home .content{
-    font-size:6rem;
-    text-align:center;
+    font-size: 5rem;
+    text-align: center;
+    line-height: 0.95;
 }
 
 .home .content .left,
 .home .content .right{
-    margin:0;
-    text-align:center;
+    margin: 0;
+    text-align: center;
+}
+
+.home .content .right{
+    margin-top: -0.1em;
 }
 
 .home .sub-content{
@@ -1203,8 +1354,9 @@ body{
 
 .btn-get-in-touch,
 .btn-services {
-    padding: 10px 20px !important;
-    font-size: 1.1rem !important;
+    padding: 12px 22px !important;
+    font-size: 1.4rem !important;
+    min-height: 44px;
 }
 
 .btn-get-in-touch .btn-text,
@@ -1251,6 +1403,12 @@ body{
     overflow-x: hidden;
 }
 
+/* On mobile the vertical line on the right of each stat block reads as a
+   scrollbar — hide it; keep the horizontal top line for visual separation. */
+.info .block-num::after {
+    display: none;
+}
+
 .info .block-num{
     margin-right:0;
     overflow-x: hidden;
@@ -1262,8 +1420,13 @@ body{
     overflow-x: hidden;
 }
 .feature-project .select {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
+    flex-wrap: wrap;
+    gap: 1rem;
+    padding: 0 1rem;
+}
+.feature-project .select .region {
+    font-size: 12px;
+    padding: 0.45rem 1.1rem;
 }
 .feature-project .project-grid {
     grid-template-columns:1fr;
@@ -1280,7 +1443,7 @@ body{
     height: 200px;
 }
 
-/* services - mobile design */
+/* services - mobile design (content card above, image below) */
 .services .heading{
     margin: 1rem 0;
 }
@@ -1288,37 +1451,55 @@ body{
 .services .service-item{
     display: flex;
     flex-direction: column;
-    margin-bottom: 3rem;
+    justify-content: flex-start;   /* override desktop space-between which pushed image to bottom */
+    min-height: 0;                 /* override desktop min-height: 480px that left a gap */
+    margin: 0 0 3rem 0;
+    overflow: hidden;
+    border-radius: 8px;
 }
 
 .services .service-item .content{
     background-color: #d4d4c9;
-    padding: 1.5rem;
-    margin-bottom: 0;
+    padding: 2.4rem 2rem;
+    margin: 0;                     /* desktop sets margin-bottom: 11rem — kill it */
+    width: 100%;
+    display: block;                /* desktop has display: flex which we don't need in mobile single-column */
+}
+
+.services .service-item .image,
+.services .service-item .image img{
+    display: block;
+    width: 100%;
+    margin: 0;
 }
 
 .services .service-item .content .box-content{
     text-align: center;
+    width: 100%;
 }
 
 .services .service-item .content .box-content .main-content{
-    font-size: 2.5rem;
-    margin-bottom: 0.5rem;
+    font-size: 2.8rem;
+    margin: 0 0 1rem 0;
+    font-weight: 600;
 }
 
 .services .service-item .content .box-content .main-content p{
     margin: 0;
-    line-height: 1.3;
+    line-height: 1.25;
+    text-align: center;
 }
 
 .services .service-item .content .box-content .sub-content{
-    font-size: 1.4rem;
-    margin-bottom: 1rem;
+    font-size: 1.55rem;
+    margin: 0 0 1.6rem 0;
+    padding: 0 0.5rem;
 }
 
 .services .service-item .content .box-content .sub-content p{
     margin: 0;
-    line-height: 1.4;
+    line-height: 1.55;
+    text-align: center;
 }
 
 .services .service-item .content .box-content .btn-get-in-touch{
@@ -1388,58 +1569,63 @@ img{
 
 /* ========== FILL POPUP MOBILE ========== */
 @media (max-width: 768px) {
-    /* fill-popup - mobile: ảnh trái, form phải */
+    /* fill-popup - mobile: form full width, image hidden on small screens */
     .fill-popup .fill-popup-content {
-        width: 88%;
-        height: 65%;
-        padding: 6px;
+        width: 92%;
+        height: auto;
+        max-height: 90vh;
+        padding: 18px 16px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
     }
 
     .fill-popup .fill-popup-content .content {
         display: flex;
-        flex-direction: row;
-        gap: 6px;
+        flex-direction: column;
+        gap: 12px;
+        height: auto;
     }
 
-    .fill-popup .fill-popup-content .content .left {
-        width: 50%;
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        overflow: visible;
-        min-height: 0;
+    .fill-popup .fill-popup-content .content .left,
+    .fill-popup .fill-popup-content .content .right {
+        width: 100%;
+        order: initial;
     }
 
     .fill-popup .fill-popup-content .content .right {
-        width: 50%;
+        display: none;
     }
 
     .fill-popup .fill-popup-content .content .left .title {
-        font-size: 0.9rem;
-        margin-top: 0.8rem;
-        margin-bottom: 0.8rem;
+        font-size: 2rem;
+        margin: 0.5rem auto 1rem;
+        width: 100%;
+        line-height: 1.2;
     }
 
     .fill-content {
-        margin: 0 0.15rem;
+        margin: 0;
     }
 
     .name-box, .phone-box, .email-box span {
-        font-size: 8px;
+        font-size: 13px;
     }
 
     .fill-popup .fill-popup-content .left .fill-content input {
-        font-size: 8px;
-        margin-bottom: 0.6rem;
-        padding-bottom: 2px;
+        font-size: 15px;
+        margin-bottom: 1rem;
+        padding: 6px 0 8px;
+        min-height: 36px;
     }
 
     .submit-btn {
-        padding: 5px 12px;
-        font-size: 8px;
-        width: 80%;
-        margin: 8px auto;
+        padding: 12px 22px;
+        font-size: 14px;
+        width: 60%;
+        margin: 12px auto 0;
         box-sizing: border-box;
+        min-height: 44px;
     }
 
     .fill-popup .fill-popup-content .right .image {
@@ -1523,85 +1709,28 @@ img{
     }
 
     .slider-btn {
-        width: 26px;
-        height: 26px;
-        font-size: 12px;
+        width: 36px;
+        height: 36px;
+        font-size: 14px;
     }
 
     .slider-dots {
-        bottom: 4px;
-        gap: 4px;
+        bottom: 6px;
+        gap: 6px;
     }
 
     .slider-dots .dot {
-        width: 5px;
-        height: 5px;
+        width: 8px;
+        height: 8px;
     }
 
     .slider-thumbnails .thumb {
-        width: 28px;
-        height: 22px;
+        width: 44px;
+        height: 34px;
     }
 
     .slider-thumbnails {
-        padding: 4px;
-    }
-
-    /* fill-popup - gọn hơn */
-    .fill-popup .fill-popup-content {
-        width: 95%;
-        height: 82%;
-        padding: 10px;
-    }
-
-    .fill-popup .fill-popup-content .content {
-        gap: 10px;
-    }
-
-    .fill-popup .fill-popup-content .content .left {
-        width: 50%;
-    }
-
-    .fill-popup .fill-popup-content .content .right {
-        width: 50%;
-    }
-
-    .fill-popup .fill-popup-content .content .left .title {
-        font-size: 1.8rem;
-        width: 100%;
-        margin-top: 2rem;
-        margin-bottom: 2rem;
-    }
-
-    .fill-content {
-        margin: 0 0.3rem;
-    }
-
-    .name-box, .phone-box, .email-box span {
-        font-size: 12px;
-    }
-
-    .fill-popup .fill-popup-content .left .fill-content input {
-        font-size: 12px;
-        margin-bottom: 1.2rem;
-        padding-bottom: 3px;
-    }
-
-    .submit-btn {
-        padding: 8px 18px;
-        font-size: 12px;
-        width: 70%;
-    }
-
-    .fill-popup .fill-popup-content .right .image {
-        width: 100%;
-        height: 100%;
-    }
-
-    .fill-popup .fill-popup-content .right .image img {
-        width: 100%;
-        height: 100%;
-        object-fit: cover;
+        padding: 6px;
     }
 
     /* close button nhỏ lại */

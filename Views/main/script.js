@@ -1,44 +1,3 @@
-// ===================== STATE =====================
-// Static project data kept for fallback (projects loaded from DB via inline script in index.html)
-const projects = {
-    project1: {
-        smallContent: "A 25m² house designed to maximize every inch of space, offering comfort and practicality in a compact layout. Despite its small size, it provides all the essential amenities for modern and convenient living.",
-        detail1: "QUANDUONG COMPLEX",
-        detail2: "25",
-        detail3: "LIVING ROOM",
-        detail4: "2024",
-        detail5: "MODERN",
-        imgSrc: "/images/project1_1.jpg, /images/project1.jpg, /images/project3.jpg"
-    },
-    project2: {
-        smallContent: "A cozy bedroom overlooking the stunning skyline of Sydney, offering a peaceful space to relax while enjoying the vibrant city view. Designed with comfort and style, it creates a perfect balance between modern living and urban scenery.",
-        detail1: "NGUYENTHIEN COMPLEX",
-        detail2: "20",
-        detail3: "BEDROOM ROOM",
-        detail4: "2025",
-        detail5: "MODERN",
-        imgSrc: "/images/project2_2.jpg, /images/project2.jpg, /images/project4.jpg"
-    },
-    project3: {
-        smallContent: "A modern living room connected to a small private garden, bringing natural light and fresh air into the home. This relaxing space blends indoor comfort with a touch of greenery, creating a calm and inviting atmosphere.",
-        detail1: "TUANANH COMPLEX",
-        detail2: "30",
-        detail3: "LIVING ROOM",
-        detail4: "2023",
-        detail5: "MODERN",
-        imgSrc: "/images/project3_3.jpg, /images/project1.jpg, /images/project2.jpg"
-    },
-    project4: {
-        smallContent: "A comfortable bedroom facing the city center, offering a beautiful view of the vibrant skyline and urban lights. Designed to provide a relaxing space while staying connected to the energy of the city.",
-        detail1: "PHONG COMPLEX",
-        detail2: "25",
-        detail3: "BEDROOM ROOM",
-        detail4: "2025",
-        detail5: "MODERN",
-        imgSrc: "/images/project4.jpg, /images/project3.jpg, /images/project1_1.jpg"
-    }
-};
-
 // ===================== ADMIN SESSION =====================
 const adminBtn = document.getElementById("admin-btn");
 const logoutBtn = document.getElementById("logout-btn");
@@ -68,58 +27,14 @@ fetch("/check-auth")
             leftSite.classList.add("hide-line");
         }
     })
-    .catch(err => console.log(err));
-console.log(accountName);
+    .catch(err => console.error(err));
+
 function logoutAdmin(){
     fetch("/logout", {
         method: "POST"
     })
-    .then(res => res.text())
-    .then(data => {
-        console.log(data);
-        window.location.reload();
-    })
-    .catch(err => console.log(err));
-}
-
-// ===================== POPUP HANDLERS (fallback for non-DB projects) =====================
-// Hover events for static projects in script.js are superseded by DB-loaded version in index.html inline script
-// This ensures backward compatibility if DB is not yet set up
-
-document.querySelectorAll('.feature-image').forEach(img => {
-    const type = img.dataset.type;
-    const overlay = img.querySelector('.overlay-text');
-
-    img.addEventListener('mouseenter', () => {
-        if (projects[type]) {
-            overlay.textContent = projects[type].detail1;
-            overlay.style.opacity = 1;
-        }
-    });
-
-    img.addEventListener('mouseleave', () => {
-        overlay.style.opacity = 0;
-    });
-});
-
-function openPopup(type){
-    const project = projects[type];
-    if(!project) return;
-
-    document.getElementById("popup-small-content").innerText = project.smallContent;
-    document.getElementById("popup-right1").innerText = project.detail1;
-    document.getElementById("popup-right2").innerText = project.detail2;
-    document.getElementById("popup-right3").innerText = project.detail3;
-    document.getElementById("popup-right4").innerText = project.detail4;
-    document.getElementById("popup-right5").innerText = project.detail5;
-
-    // Build slider from project image (comma-separated supported)
-    sliderImages = project.imgSrc.split(',').map(s => s.trim()).filter(Boolean);
-    if (sliderImages.length === 0) sliderImages = [project.imgSrc];
-    currentSlide = 0;
-    renderSlider();
-
-    document.getElementById("popup").style.display = "flex";
+    .then(() => window.location.reload())
+    .catch(err => console.error(err));
 }
 
 function closePopup(){
@@ -157,16 +72,29 @@ function closeFillPopup(){
     document.getElementById("fill-popup").style.display = "none";
 }
 
+// Auto-open contact popup on first visit per session (delay 1.5s)
+window.addEventListener('DOMContentLoaded', () => {
+    if (sessionStorage.getItem('fillPopupShown')) return;
+    setTimeout(() => {
+        fillInfoPopup();
+        sessionStorage.setItem('fillPopupShown', '1');
+    }, 1500);
+});
+
 // ===================== MOBILE MENU TOGGLE (Sidebar Drawer) =====================
 const menuBtn = document.getElementById("menu-btn");
 const navbar = document.getElementById("main-navbar");
 const mobileOverlay = document.getElementById("mobile-overlay");
 const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
 
-// Sync logout button visibility to mobile sidebar
+// Sync logout button visibility to mobile sidebar.
+// We toggle body.logged-in so CSS can gate the drawer's phone/account/logout
+// blocks (they have display:flex !important when the drawer is open, which
+// would otherwise override the inline display:none set here).
 if (logoutBtn && mobileLogoutBtn) {
     const syncLogout = () => {
         const isLoggedIn = !leftSite.classList.contains("hide-line");
+        document.body.classList.toggle("logged-in", isLoggedIn);
         if (isLoggedIn) {
             mobileLogoutBtn.style.display = "";
             mobileAccount.style.display = "";
@@ -242,15 +170,14 @@ document.addEventListener("touchend", (e) => {
     }
 }, { passive: true });
 
-// ===================== JQUERY =====================
-$(document).ready(function(){
-
-    $('.region').click(function(){
-        $(this).addClass('active').siblings().removeClass('active');
-        var filter = $(this).attr('data-filter');
+// ===================== REGION FILTER =====================
+document.querySelectorAll('.region').forEach(el => {
+    el.addEventListener('click', () => {
+        document.querySelectorAll('.region').forEach(s => s.classList.remove('active'));
+        el.classList.add('active');
+        const filter = el.dataset.filter;
         if (typeof filterProjects === 'function') {
             filterProjects(filter);
         }
     });
-
 });

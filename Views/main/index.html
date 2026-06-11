@@ -3,8 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-    <!-- font-awesome cdn link -->
+    <title>Sealand Property — Real Estate in Australia</title>
+    <meta name="description" content="Real estate company specializing in modern properties across Sydney, Melbourne, Brisbane, and Gold Coast. Designed for value, quality, and long-term investment.">
+    <meta property="og:title" content="Sealand Property">
+    <meta property="og:description" content="Modern properties across Sydney, Melbourne, Brisbane, and Gold Coast.">
+    <meta property="og:image" content="/uploads/main_image.jpg">
+    <meta property="og:type" content="website">
+    <meta name="theme-color" content="#0E2A47">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -52,13 +57,13 @@
 
 
     <!-- home -->
-    <section>
+    <section id="home-section">
         <div class="home" id="home">
 <div class="content">
                 <!-- <h3 class="content1">SOMETHING &<br></h3>
                 <h3 class="content2">REAL ESTATE</h3> -->
                 <div class="left">
-                    <p>SOMETHING &</p>
+                    <p>LANDSCAPE &</p>
                 </div>
                 <div class="right">
                     <p>REAL ESTATE</p>
@@ -67,7 +72,7 @@
             <div class="sub-content">
                 <!-- <p>abc</p> -->
                 <div class="home-btn">
-                    <a href="#" class="btn-get-in-touch">
+                    <a href="javascript:void(0)" onclick="fillInfoPopup()" class="btn-get-in-touch">
                         <span class="btn-text">GET IN TOUCH</span>
                         
                         <span class="btn-icon">
@@ -96,7 +101,7 @@
             </div>
             <div class="home-image">
                 <!-- làm sau -->
-                <img src="/images/service3.jpg" alt="">
+                <img src="/uploads/service3.jpg" alt="">
             </div>
         </div>
     </section>
@@ -105,38 +110,18 @@
     <section id="about-us" class="about-us">
         <h1 class="heading">About us</h1>
 
-<div class="content">
-            <div class="banner">
-                MANY BEAUTIFUL PLACES <br>
-                ARE WAITING FOR YOU TO SEE
-            </div>
+        <div class="content" id="about-content">
+            <div class="banner" id="about-banner"></div>
             <div class="small-content">
                 <div class="left">
-                    <div class="text">We are a passionate real estate team dedicated to developing modern and sustainable properties that blend aesthetic design with practical functionality, creating high-quality living and working spaces that offer lasting value and reflect distinctive character.</div>
+                    <div class="text" id="about-paragraph-left"></div>
                 </div>
                 <div class="right">
-                    <div class="text">With a strong commitment to quality and professionalism, we collaborate closely with our clients to turn their real estate goals into reality. From project planning and development to final delivery, we focus on exceeding expectations and providing properties that offer comfort, value, and long-term satisfaction.</div>
+                    <div class="text" id="about-paragraph-right"></div>
                 </div>
             </div>
         </div>
-        <div class="info">
-            <div class="block-num">
-                <div class="content-num1">20+</div>
-                <div class="detail-content">years of experience</div>
-            </div>
-            <div class="block-num">
-                <div class="content-num1">200+</div>
-                <div class="detail-content">projects have done</div>
-            </div>
-            <div class="block-num">
-                <div class="content-num1">7+</div>
-                <div class="detail-content">awards received</div>
-            </div>
-            <div class="block-num">
-                <div class="content-num1">15+</div>
-                <div class="detail-content">team members</div>
-            </div>
-        </div>
+        <div class="info" id="about-stats-info"></div>
     </section>
 
     <!-- feature -->
@@ -157,182 +142,12 @@
     <!-- services -->
     <section id="services" class="services">
         <h1 class="heading">Services</h1>
-
-        <div class="service-item">
-<div class="content">
-                <div class="box-content">
-                    <div class="main-content">
-                    <p>See more about our business</p>
-                </div>
-                <div class="sub-content">
-                    <p>Our company specializes in buying and selling real estate with a focus on value and long-term investment.</p>
-                </div>
-                <div>
-                    <a onclick="fillInfoPopup()" class="btn-get-in-touch">
-                        <span class="btn-text">click here</span>
-                        
-                        <span class="btn-icon">
-                            <span class="dot"></span>
-                            
-                            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="7" y1="17" x2="17" y2="7"></line>
-                            <polyline points="7 7 17 7 17 17"></polyline>
-                            </svg>
-                        </span>
-                    </a>
-                </div>
-                </div>
-            </div>
-            <div class="image">
-                <img src="/images/service1.jpg" alt="">
-            </div>
-        </div>
-        <div class="service-item">
-<div class="content">
-                <div class="box-content">
-                    <div class="main-content">
-                    <p>Take a look at our projects</p>
-                </div>
-                <div class="sub-content">
-                    <p>Take a look at our projects and discover properties designed for value, quality, and long-term investment.</p>
-                </div>
-                <div>
-                    <a onclick="fillInfoPopup()" class="btn-get-in-touch">
-                        <span class="btn-text">click here</span>
-                        
-                        <span class="btn-icon">
-                            <span class="dot"></span>
-                            
-                            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="7" y1="17" x2="17" y2="7"></line>
-                            <polyline points="7 7 17 7 17 17"></polyline>
-                            </svg>
-                        </span>
-                    </a>
-                </div>
-                </div>
-            </div>
-            <div class="image">
-                <img src="/images/service2.jpg" alt="">
-            </div>
-            
-        </div>
-       <div class="service-item">
-<div class="content">
-                <div class="box-content">
-                    <div class="main-content">
-                    <p>Be confident to be one of our partner</p>
-                </div>
-                <div class="sub-content">
-                    <p>Sell or buy properties from our company</p>
-                </div>
-                <div>
-                    <a onclick="fillInfoPopup()" class="btn-get-in-touch">
-                        <span class="btn-text">click here</span>
-                        
-                        <span class="btn-icon">
-                            <span class="dot"></span>
-                            
-                            <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                            <line x1="7" y1="17" x2="17" y2="7"></line>
-                            <polyline points="7 7 17 7 17 17"></polyline>
-                            </svg>
-                        </span>
-                    </a>
-                </div>
-                </div>
-            </div>
-            <div class="image">
-                <img src="/images/service3_3.jpg" alt="">
-            </div>
-        </div>
-
+        <div id="services-list"></div>
     </section>
 
     <!-- footer -->
     <section id="footer" class="footer">
-
-        <div class="footer-container">
-            
-            <div class="footer-person">
-                <div class="img-footer">
-                    <img src="/images/footer/Long.jpg" alt="">
-                </div>
-                <div class="line"></div>
-                <div class="footer-content">
-                    <div class="name">
-                        Hoang Long
-                    </div>
-
-                    <div class="footer-detail">
-                        <div class="contact-row">
-                            <i class="fa-solid fa-envelope"></i>
-                            <a href="mailto:Leong@sealandproperty.com.au">
-                                Leong@sealandproperty.com.au
-                            </a>
-                        </div>
-                        <div class="contact-row">
-                            <i class="fa-solid fa-phone"></i>
-                            <a href="tel:+61432285678">
-                                + 61 432 285 678
-                            </a>
-                        </div>
-                        <div class="contact-row">
-                            <i class="fa-solid fa-phone"></i>
-                            <a href="tel:+84905160805">
-                                + 84 905 160 805
-                            </a>
-                        </div>
-                        <div class="contact-row">
-                            <i class="fa-brands fa-facebook"></i>
-                            <a href="https://www.facebook.com/longg1313?mibextid=wwXIfr&rdid=SOe0AlP4Tr18lZNm&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1H2JQrCdbP#">
-                                Hoang Long
-                            </a>
-                        </div>
-                    </div>
-
-                </div>
-            </div>
-            <div class="footer-person">
-                <div class="img-footer">
-                    <img src="/images/footer/Phat.jpg" alt="">
-                </div>
-                <div class="line"></div>
-                <div class="footer-content">
-                    <div class="name">
-                        Tran Minh Phat (Jeremy)
-                    </div>
-                    <div class="footer-detail">
-                        <div class="contact-row">
-                            <i class="fa-solid fa-envelope"></i>
-                            <a href="mailto:Jeremy@sealandproperty.com.au">
-                                Jeremy@sealandproperty.com.au
-                            </a>
-                        </div>
-                        <div class="contact-row">
-                            <i class="fa-solid fa-phone"></i>
-                            <a href="tel:+61452467893">
-                                +61 45 246 7893
-                            </a>
-                        </div>
-                        <div class="contact-row">
-                            <i class="fa-solid fa-phone"></i>
-                            <a href="tel:+84787665388">
-                                +84 787665388
-                            </a>
-                        </div>
-                        <div class="contact-row">
-                            <i class="fa-brands fa-facebook"></i>
-                            <a href="https://www.facebook.com/minhphat88?mibextid=wwXIfr&rdid=jIekGVNJ933bNXGh&share_url=https%3A%2F%2Fwww.facebook.com%2Fshare%2F1D1ARJPSA1%2F%3Fmibextid%3DwwXIfr#">
-                                Minh Phat Tran
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-        </div>
-
+        <div class="footer-container" id="footer-container"></div>
     </section>
 
 
@@ -426,7 +241,7 @@
 <div class="content">
             <div class="right">
                 <div class="image">
-                    <img src="/images/fillinfo.jpg" alt="">
+                    <img src="/uploads/fillinfo.jpg" alt="">
                 </div>
             </div>
             <div class="left">
@@ -456,54 +271,78 @@
         </div>
     </div>
 </div>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.7.1/jquery.min.js"></script>
     <script>
+        // ========== XSS-safe helpers (F03) ==========
+        function setText(el, value) {
+            if (typeof el === 'string') el = document.getElementById(el);
+            if (el) el.textContent = value == null ? '' : String(value);
+        }
+        function hideIfEmpty(el, ...checkValues) {
+            if (typeof el === 'string') el = document.getElementById(el);
+            if (!el) return;
+            const anyValue = checkValues.some(v => v && String(v).trim() !== '');
+            if (!anyValue) el.style.display = 'none';
+        }
+
+        // ========== Settings render (shared by fetch + preview postMessage) ==========
+        function normalizeImageUrl(v) {
+            if (!v) return '';
+            if (v.startsWith('data:') || v.startsWith('/') || v.startsWith('http')) return v;
+            return '/' + v;
+        }
+
+        function renderSettings(s) {
+            if (!s) return;
+            if (s.logo !== undefined) {
+                const v = s.logo;
+                const imgEl = document.getElementById('site-logo-img');
+                const textEl = document.getElementById('site-logo-text');
+                if (v) {
+                    if (imgEl) { imgEl.src = normalizeImageUrl(v); imgEl.style.display = 'inline-block'; }
+                    if (textEl) textEl.style.display = 'none';
+                } else {
+                    if (textEl) { textEl.textContent = (s.logo_text || 'LOGO'); textEl.style.display = 'inline'; }
+                    if (imgEl) imgEl.style.display = 'none';
+                }
+            }
+            if (s.phone !== undefined) {
+                const phoneVal = s.phone || 'phone number';
+                const desktopPhone = document.getElementById('site-phone');
+                if (desktopPhone) desktopPhone.textContent = phoneVal;
+                const mobilePhone = document.getElementById('mobile-site-phone');
+                if (mobilePhone) mobilePhone.textContent = phoneVal;
+            }
+            if (s.main_image !== undefined && s.main_image) {
+                const homeImg = document.querySelector('.home-image img');
+                if (homeImg) homeImg.src = normalizeImageUrl(s.main_image);
+            }
+        }
+
         // Load settings from database
         (async function loadSettings() {
             try {
-                const res = await fetch('/api/admin/settings');
+                const res = await fetch('/api/public/settings');
                 const data = await res.json();
                 if (data.success && data.data) {
-                    const logoVal = data.data.logo || '';
-                    if (logoVal) {
-                        const logoSrc = logoVal.startsWith('/') ? logoVal : '/' + logoVal;
-                        document.getElementById('site-logo-img').src = logoSrc;
-                        document.getElementById('site-logo-img').style.display = 'inline-block';
-                        document.getElementById('site-logo-text').style.display = 'none';
-                    } else {
-                        document.getElementById('site-logo-text').textContent = data.data.logo_text || 'LOGO';
-                        document.getElementById('site-logo-text').style.display = 'inline';
-                        document.getElementById('site-logo-img').style.display = 'none';
-                    }
-                    const phoneVal = data.data.phone || 'phone number';
-                    document.getElementById('site-phone').textContent = phoneVal;
-                    // Sync phone to mobile sidebar
-                    const mobilePhone = document.getElementById('mobile-site-phone');
-                    if (mobilePhone) mobilePhone.textContent = phoneVal;
-                    // Sync account name to mobile sidebar
+                    renderSettings(data.data);
                     const mobileAcc = document.getElementById('mobile-account');
                     const desktopAcc = document.getElementById('account');
                     if (mobileAcc && desktopAcc) mobileAcc.textContent = desktopAcc.textContent || 'User';
-                    if (data.data.main_image) {
-                        const mainSrc = data.data.main_image.startsWith('/') ? data.data.main_image : '/' + data.data.main_image;
-                        document.querySelector('.home-image img').src = mainSrc;
-                    }
                 }
             } catch (e) {
-                console.log('Settings not loaded:', e);
+                console.error('Settings not loaded:', e);
             }
         })();
 
         // Load projects from database and render
         async function loadProjectsFromDB() {
             try {
-                const res = await fetch('/api/admin/projects');
+                const res = await fetch('/api/public/projects');
                 const data = await res.json();
-                if (data.success && data.data && data.data.length > 0) {
-                    renderProjects(data.data);
-                }
+                renderProjects((data && data.success && Array.isArray(data.data)) ? data.data : []);
             } catch (e) {
-                console.log('Projects not loaded:', e);
+                console.error('Projects not loaded:', e);
+                renderProjects([]);
             }
         }
 
@@ -538,7 +377,7 @@
 
             // Fallback: fetch first image from tableimages for projects with empty image_path
             filtered.filter(p => !p.image_path).forEach(p => {
-                fetch('/api/admin/projects/' + p.id)
+                fetch('/api/public/projects/' +p.id)
                     .then(res => res.json())
                     .then(data => {
                         if (data.success && data.data && data.data.images && data.data.images.length > 0) {
@@ -562,7 +401,7 @@
             const projectId = el.dataset.id;
             const img = el.querySelector('img');
 
-            fetch('/api/admin/projects/' + projectId)
+            fetch('/api/public/projects/' +projectId)
                 .then(res => res.json())
                 .then(data => {
                     if (data.success && data.data) {
@@ -650,8 +489,311 @@
             });
         }
 
+        // ========== ABOUT SECTION (F03) ==========
+        function renderAbout(d) {
+            if (!d) return;
+            const content = document.getElementById('about-content');
+            if (content) content.style.display = '';
+            setText('about-banner', d.banner);
+            setText('about-paragraph-left', d.paragraph_left);
+            setText('about-paragraph-right', d.paragraph_right);
+            hideIfEmpty('about-content', d.banner, d.paragraph_left, d.paragraph_right);
+
+            const info = document.getElementById('about-stats-info');
+            if (!info) return;
+            info.innerHTML = '';
+            info.style.display = '';
+            (d.stats || []).forEach(s => {
+                const block = document.createElement('div');
+                block.className = 'block-num';
+
+                const num = document.createElement('div');
+                num.className = 'content-num1';
+                num.textContent = s.num || '';
+
+                const lbl = document.createElement('div');
+                lbl.className = 'detail-content';
+                lbl.textContent = s.label || '';
+
+                block.appendChild(num);
+                block.appendChild(lbl);
+                info.appendChild(block);
+            });
+
+            if ((d.stats || []).every(s => !s.num && !s.label)) {
+                info.style.display = 'none';
+            }
+        }
+
+        async function loadAboutSection() {
+            try {
+                const res = await fetch('/api/public/about');
+                const json = await res.json();
+                if (!json.success || !json.data) return;
+                renderAbout(json.data);
+            } catch (e) {
+                console.error('loadAboutSection:', e);
+            }
+        }
+
+        // ========== SERVICES (F03) ==========
+        function renderServices(items) {
+            const wrap = document.getElementById('services-list');
+            if (!wrap) return;
+            wrap.innerHTML = '';
+
+            (items || []).forEach(svc => {
+                const item = document.createElement('div');
+                item.className = 'service-item';
+
+                const content = document.createElement('div');
+                content.className = 'content';
+                const box = document.createElement('div');
+                box.className = 'box-content';
+
+                const main = document.createElement('div');
+                main.className = 'main-content';
+                const mainP = document.createElement('p');
+                mainP.textContent = svc.title || '';
+                main.appendChild(mainP);
+                box.appendChild(main);
+
+                const sub = document.createElement('div');
+                sub.className = 'sub-content';
+                const subP = document.createElement('p');
+                subP.textContent = svc.description || '';
+                sub.appendChild(subP);
+                box.appendChild(sub);
+
+                const btnWrap = document.createElement('div');
+                btnWrap.innerHTML = ''
+                    + '<a onclick="fillInfoPopup()" class="btn-get-in-touch">'
+                    + '  <span class="btn-text">click here</span>'
+                    + '  <span class="btn-icon">'
+                    + '    <span class="dot"></span>'
+                    + '    <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                    + '      <line x1="7" y1="17" x2="17" y2="7"></line>'
+                    + '      <polyline points="7 7 17 7 17 17"></polyline>'
+                    + '    </svg>'
+                    + '  </span>'
+                    + '</a>';
+                box.appendChild(btnWrap);
+                content.appendChild(box);
+                item.appendChild(content);
+
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'image';
+                const img = document.createElement('img');
+                img.alt = '';
+                img.onerror = function () { this.style.display = 'none'; };
+                if (svc.image_path) img.src = normalizeImageUrl(svc.image_path);
+                imgWrap.appendChild(img);
+                item.appendChild(imgWrap);
+
+                wrap.appendChild(item);
+            });
+        }
+
+        async function loadServices() {
+            try {
+                const res = await fetch('/api/public/services');
+                const json = await res.json();
+                if (!json.success) return;
+                renderServices(json.data);
+            } catch (e) {
+                console.error('loadServices:', e);
+            }
+        }
+
+        // ========== FOOTER PERSONS (F03) ==========
+        function renderFooterPersons(items) {
+            const container = document.getElementById('footer-container');
+            if (!container) return;
+            container.innerHTML = '';
+
+            (items || []).forEach(p => {
+                const block = document.createElement('div');
+                block.className = 'footer-person';
+
+                const imgWrap = document.createElement('div');
+                imgWrap.className = 'img-footer';
+                const img = document.createElement('img');
+                img.alt = p.name || 'footer person';
+                img.onerror = function () { this.style.display = 'none'; };
+                if (p.avatar_path) img.src = normalizeImageUrl(p.avatar_path);
+                imgWrap.appendChild(img);
+                block.appendChild(imgWrap);
+
+                const line = document.createElement('div');
+                line.className = 'line';
+                block.appendChild(line);
+
+                const fc = document.createElement('div');
+                fc.className = 'footer-content';
+
+                const name = document.createElement('div');
+                name.className = 'name';
+                name.textContent = p.name || '';
+                fc.appendChild(name);
+
+                const detail = document.createElement('div');
+                detail.className = 'footer-detail';
+
+                if (p.email) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-solid fa-envelope';
+                    const a = document.createElement('a');
+                    a.href = 'mailto:' + p.email;
+                    a.textContent = p.email;
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+                if (p.phone1) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-solid fa-phone';
+                    const a = document.createElement('a');
+                    a.href = 'tel:' + p.phone1.replace(/\s+/g, '');
+                    a.textContent = p.phone1;
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+                if (p.phone2) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-solid fa-phone';
+                    const a = document.createElement('a');
+                    a.href = 'tel:' + p.phone2.replace(/\s+/g, '');
+                    a.textContent = p.phone2;
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+                if (p.facebook_url && /^https:\/\//i.test(p.facebook_url)) {
+                    const row = document.createElement('div');
+                    row.className = 'contact-row';
+                    const ic = document.createElement('i');
+                    ic.className = 'fa-brands fa-facebook';
+                    const a = document.createElement('a');
+                    a.href = p.facebook_url;
+                    a.target = '_blank';
+                    a.rel = 'noopener noreferrer';
+                    a.textContent = p.name || 'Facebook';
+                    row.appendChild(ic);
+                    row.appendChild(a);
+                    detail.appendChild(row);
+                }
+
+                fc.appendChild(detail);
+                block.appendChild(fc);
+                container.appendChild(block);
+            });
+        }
+
+        async function loadFooterPersons() {
+            try {
+                const res = await fetch('/api/public/footer-persons');
+                const json = await res.json();
+                if (!json.success) return;
+                renderFooterPersons(json.data);
+            } catch (e) {
+                console.error('loadFooterPersons:', e);
+            }
+        }
+
+        // ========== PREVIEW MODE (admin iframe with ?preview=1&scope=X) ==========
+        // When loaded inside the admin's live-preview iframe, /main hides every
+        // section except the one being edited and listens for postMessage from
+        // the parent so admin form changes show up before they're saved.
+        const PREVIEW_PARAMS = new URLSearchParams(window.location.search);
+        const PREVIEW_MODE = PREVIEW_PARAMS.get('preview') === '1';
+        const PREVIEW_SCOPE = PREVIEW_PARAMS.get('scope') || '';
+
+        function applyPreviewMode(scope) {
+            const keepSelectorsByScope = {
+                settings: ['#home-section'],   // header + home (logo, phone in header; main_image in home)
+                about: ['#about-us'],
+                services: ['#services'],
+                footer: ['#footer']
+            };
+            const keep = new Set(keepSelectorsByScope[scope] || []);
+            document.querySelectorAll('body > section').forEach(s => {
+                if (s.id && keep.has('#' + s.id)) {
+                    s.style.display = '';
+                } else {
+                    s.style.display = 'none';
+                }
+            });
+            document.body.classList.add('preview-mode');
+            document.body.style.paddingTop = '80px';   // keep room for fixed header
+
+            // Disable click/hover interactions but KEEP scroll working. Putting
+            // pointer-events:none on the body itself blocks scroll too, which
+            // makes the iframe unusable on tall sections like services.
+            const style = document.createElement('style');
+            style.textContent = `
+                body.preview-mode a,
+                body.preview-mode button,
+                body.preview-mode [onclick],
+                body.preview-mode .btn-get-in-touch,
+                body.preview-mode .btn-services,
+                body.preview-mode .menu-btn,
+                body.preview-mode .feature-image,
+                body.preview-mode .region {
+                    pointer-events: none !important;
+                    cursor: default !important;
+                }
+                body.preview-mode { cursor: default; }
+            `;
+            document.head.appendChild(style);
+        }
+
+        function postPreviewHeight() {
+            if (!window.parent || window.parent === window) return;
+            const h = Math.max(
+                document.documentElement.scrollHeight,
+                document.body.scrollHeight
+            );
+            window.parent.postMessage({ type: 'preview-height', height: h }, window.location.origin);
+        }
+
+        window.addEventListener('message', (event) => {
+            if (event.origin !== window.location.origin) return;
+            const msg = event.data || {};
+            if (msg.type === 'preview-data') {
+                const { target, data } = msg;
+                if (!data) return;
+                if (target === 'settings') renderSettings(data);
+                else if (target === 'about') renderAbout(data);
+                else if (target === 'services') renderServices(data.services || []);
+                else if (target === 'footer') renderFooterPersons(data.footer_persons || []);
+                // Resize after content change
+                setTimeout(postPreviewHeight, 50);
+            }
+        });
+
         // Init
         loadProjectsFromDB();
+        loadAboutSection();
+        loadServices();
+        loadFooterPersons();
+
+        if (PREVIEW_MODE) {
+            applyPreviewMode(PREVIEW_SCOPE);
+            // Signal ready so parent can push initial data
+            if (window.parent && window.parent !== window) {
+                window.parent.postMessage({ type: 'preview-ready', scope: PREVIEW_SCOPE }, window.location.origin);
+            }
+            // Auto-resize observer
+            window.addEventListener('load', postPreviewHeight);
+            window.addEventListener('resize', postPreviewHeight);
+        }
 
         // Contact form submission
         document.getElementById('contact-submit').addEventListener('click', async (e) => {

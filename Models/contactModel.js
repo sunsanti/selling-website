@@ -34,22 +34,8 @@ const deleteContact = async (id) => {
     }
 };
 
-const searchContacts = async (keyword) => {
-    try {
-        const [rows] = await pool.query(
-            'SELECT * FROM contacts WHERE name LIKE ? OR phone LIKE ? OR email LIKE ? ORDER BY created_at DESC',
-            [`%${keyword}%`, `%${keyword}%`, `%${keyword}%`]
-        );
-        return rows;
-    } catch (error) {
-        console.error('Lỗi searchContacts:', error);
-        throw error;
-    }
-};
-
 module.exports = {
     getAllContacts,
     createContact,
-    deleteContact,
-    searchContacts
+    deleteContact
 };

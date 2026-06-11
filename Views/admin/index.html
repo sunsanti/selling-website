@@ -29,9 +29,25 @@
                 <i class="fas fa-address-book"></i>
                 <span>Contact List</span>
             </a>
+            <a href="#" class="nav-item" data-section="home-about">
+                <i class="fas fa-info-circle"></i>
+                <span>About</span>
+            </a>
+            <a href="#" class="nav-item" data-section="home-services">
+                <i class="fas fa-concierge-bell"></i>
+                <span>Services</span>
+            </a>
+            <a href="#" class="nav-item" data-section="home-footer">
+                <i class="fas fa-id-card"></i>
+                <span>Footer</span>
+            </a>
             <a href="#" class="nav-item" data-section="accounts">
                 <i class="fas fa-users"></i>
                 <span>Account</span>
+            </a>
+            <a href="#" class="nav-item" data-section="audit-log">
+                <i class="fas fa-history"></i>
+                <span>Audit Log</span>
             </a>
         </nav>
         <div class="sidebar-footer">
@@ -91,10 +107,9 @@
                                 </span>
                             </div>
                             <div class="settings-image-actions">
-                                <button type="button" class="btn-add" id="logo-upload-btn">
-                                    <i class="fas fa-upload"></i> Upload Logo
+                                <button type="button" class="btn-add" id="logo-pick-btn">
+                                    <i class="fas fa-images"></i> Chọn ảnh logo
                                 </button>
-                                <input type="file" id="logo-file-input" accept="image/*" style="display:none">
                                 <button type="button" class="btn-cancel" id="logo-remove-btn" style="display:none" onclick="removeLogoImage()">
                                     <i class="fas fa-times"></i> Remove
                                 </button>
@@ -115,10 +130,9 @@
                                 </span>
                             </div>
                             <div class="settings-image-actions">
-                                <button type="button" class="btn-add" id="main-image-upload-btn">
-                                    <i class="fas fa-upload"></i> Upload Main Image
+                                <button type="button" class="btn-add" id="main-image-pick-btn">
+                                    <i class="fas fa-images"></i> Chọn ảnh main
                                 </button>
-                                <input type="file" id="main-image-file-input" accept="image/*" style="display:none">
                                 <button type="button" class="btn-cancel" id="main-image-remove-btn" style="display:none" onclick="removeMainImage()">
                                     <i class="fas fa-times"></i> Remove
                                 </button>
@@ -131,6 +145,18 @@
                         </button>
                     </div>
                 </form>
+            </div>
+
+            <!-- Live Preview (settings) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — Public Page</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('settings')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-settings" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
             </div>
         </section>
 
@@ -250,6 +276,123 @@
                 </table>
             </div>
         </section>
+
+        <!-- Audit Log Section -->
+        <section id="audit-log" class="content-section">
+            <div class="section-header">
+                <h1>Audit Log</h1>
+                <button class="btn-reset" onclick="loadAuditLog()"><i class="fas fa-sync"></i> Refresh</button>
+            </div>
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="audit-search" placeholder="Tìm theo tên user, hành động, đối tượng...">
+                <select id="audit-action-filter" class="audit-filter">
+                    <option value="">Tất cả hành động</option>
+                </select>
+                <button class="btn-search" onclick="loadAuditLog()">Search</button>
+                <button class="btn-reset" onclick="resetAuditSearch()">Reset</button>
+            </div>
+            <div class="table-container">
+                <table class="data-table" id="audit-log-table">
+                    <thead>
+                        <tr>
+                            <th style="width:140px">Thời gian</th>
+                            <th>Người thực hiện</th>
+                            <th>Hành động</th>
+                            <th>Đối tượng</th>
+                            <th>Chi tiết</th>
+                            <th style="width:120px">IP</th>
+                        </tr>
+                    </thead>
+                    <tbody id="audit-log-tbody"></tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- About Section -->
+        <section id="home-about" class="content-section">
+            <div class="section-header">
+                <h1>About Section</h1>
+            </div>
+            <form id="home-about-form" class="settings-form">
+                <div class="form-group">
+                    <label>Banner Heading</label>
+                    <textarea id="about-input-banner" rows="2" maxlength="500" placeholder="MANY BEAUTIFUL PLACES ARE WAITING FOR YOU TO SEE"></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Paragraph Left</label>
+                        <textarea id="about-input-left" rows="6" maxlength="2000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Paragraph Right</label>
+                        <textarea id="about-input-right" rows="6" maxlength="2000"></textarea>
+                    </div>
+                </div>
+                <div class="project-section-title">
+                    <h3><i class="fas fa-chart-bar"></i> Stats (4 blocks)</h3>
+                </div>
+                <div class="form-row" id="about-stats-grid">
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save About</button>
+                </div>
+            </form>
+
+            <!-- Live Preview (about) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — About Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('about')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#about-us" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-about" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <!-- Services Section -->
+        <section id="home-services" class="content-section">
+            <div class="section-header">
+                <h1>Services (3 slots)</h1>
+            </div>
+            <div id="home-services-cards">
+            </div>
+
+            <!-- Live Preview (services) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — Services Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('services')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#services" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-services" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
+            </div>
+        </section>
+
+        <!-- Footer Section -->
+        <section id="home-footer" class="content-section">
+            <div class="section-header">
+                <h1>Footer (2 slots)</h1>
+            </div>
+            <div id="home-footer-cards">
+            </div>
+
+            <!-- Live Preview (footer) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — Footer Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('footer')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#footer" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-footer" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
+            </div>
+        </section>
     </main>
 </div>
 
@@ -313,11 +456,10 @@
                 <div class="project-images-area" id="project-images-area">
                     <div class="project-images-list" id="project-images-list"></div>
                     <div class="image-upload-trigger" id="image-upload-trigger">
-                        <i class="fas fa-plus"></i>
-                        <span>Add Images</span>
+                        <i class="fas fa-images"></i>
+                        <span>Chọn ảnh</span>
                     </div>
                 </div>
-                <input type="file" id="project-media-file" accept="image/*" multiple style="display:none">
             </div>
             <div class="form-group">
                 <label>Small Content
@@ -377,19 +519,53 @@
     </div>
 </div>
 
+<!-- Media Library Modal -->
+<div id="media-modal" class="modal">
+    <div class="modal-content media-modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-images"></i> Thư viện ảnh</h2>
+            <button class="modal-close" onclick="closeMediaLibrary()">&times;</button>
+        </div>
+        <div class="media-toolbar">
+            <button type="button" class="btn-add" onclick="document.getElementById('media-upload-input').click()">
+                <i class="fas fa-upload"></i> Upload
+            </button>
+            <input type="file" id="media-upload-input" accept="image/*" style="display:none">
+            <input type="text" id="media-search-input" class="media-search" placeholder="Tìm theo tên file...">
+            <span class="media-count" id="media-count"></span>
+        </div>
+        <div class="modal-body media-body">
+            <div id="media-grid" class="media-grid"></div>
+            <div id="media-empty" class="media-empty" style="display:none">
+                <i class="fas fa-image"></i>
+                <p>Chưa có ảnh — bấm Upload để thêm</p>
+            </div>
+        </div>
+        <div class="form-actions media-actions">
+            <button type="button" class="btn-cancel" onclick="closeMediaLibrary()">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button type="button" class="btn-save" id="media-confirm-btn" onclick="confirmMediaSelection()" disabled>
+                <i class="fas fa-check"></i> Chọn <span id="media-selected-count">(0)</span>
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Confirm Modal -->
 <div id="confirm-modal" class="modal">
     <div class="modal-content modal-small">
         <div class="modal-header">
-            <h2>Confirm</h2>
+            <h2><i class="fas fa-exclamation-triangle" style="color:#e74c3c; margin-right:8px"></i>Xác nhận</h2>
             <button class="modal-close" onclick="closeConfirmModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <p id="confirm-message">Are you sure?</p>
+            <p id="confirm-message">Bạn có chắc chắn không?</p>
+            <p class="confirm-warning"><i class="fas fa-info-circle"></i> Hành động này không thể hoàn tác.</p>
         </div>
         <div class="form-actions">
-            <button type="button" class="btn-cancel" onclick="closeConfirmModal()">Cancel</button>
-            <button type="button" class="btn-danger" id="confirm-btn">Confirm</button>
+            <button type="button" class="btn-cancel" onclick="closeConfirmModal()"><i class="fas fa-times"></i> Hủy</button>
+            <button type="button" class="btn-danger" id="confirm-btn"><i class="fas fa-trash"></i> Xóa</button>
         </div>
     </div>
 </div>

@@ -1,4 +1,6 @@
+const bcrypt = require('bcrypt');
 const pool = require('../config/database');
+const { BCRYPT_ROUNDS } = require('../config/constants');
 
 const getAllAccounts = async () => {
     try {
@@ -32,9 +34,10 @@ const getAccountByUsername = async (username) => {
 
 const createAccount = async (username, password, name, role = 'employee') => {
     try {
+        const hashed = await bcrypt.hash(password, BCRYPT_ROUNDS);
         const [result] = await pool.query(
             'INSERT INTO accounts (username, password, name, role) VALUES (?, ?, ?, ?)',
-            [username, password, name, role]
+            [username, hashed, name, role]
         );
         return result.insertId;
     } catch (error) {
@@ -56,8 +59,9 @@ const updateAccount = async (id, username, password, name, role) => {
             values.push(username);
         }
         if (password !== undefined && password !== '') {
+            const hashed = await bcrypt.hash(password, BCRYPT_ROUNDS);
             fields.push('password = ?');
-            values.push(password);
+            values.push(hashed);
         }
         if (name !== undefined) {
             fields.push('name = ?');

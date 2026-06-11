@@ -1,4 +1,5 @@
 const pool = require('../config/database');
+const { MAX_PROJECTS_PER_AREA } = require('../config/constants');
 
 const getAllProjects = async (includeInactive = false) => {
     try {
@@ -37,13 +38,13 @@ const createProject = async (projectData) => {
     try {
         const { name, area, square_meters, category, year, style, small_content, image_path } = projectData;
 
-        // Limit max 6 active projects per area
+        // Limit max active projects per area
         const [existing] = await pool.query(
             'SELECT COUNT(*) as count FROM projects WHERE area = ? AND status = "active"',
             [area]
         );
-        if (existing[0].count >= 6) {
-            throw new Error(`Maximum 6 active projects allowed per area (${area}).`);
+        if (existing[0].count >= MAX_PROJECTS_PER_AREA) {
+            throw new Error(`Maximum ${MAX_PROJECTS_PER_AREA} active projects allowed per area (${area}).`);
         }
 
         // Auto-calculate display_order: max + 1 for this area
@@ -110,6 +111,22 @@ const softDeleteProject = async (id) => {
 
 const restoreProject = async (id) => {
     try {
+        // Look up the inactive project's area to enforce per-area cap
+        const [projectRows] = await pool.query(
+            'SELECT area FROM projects WHERE id = ?',
+            [id]
+        );
+        if (projectRows.length === 0) return false;
+        const area = projectRows[0].area;
+
+        const [count] = await pool.query(
+            'SELECT COUNT(*) as count FROM projects WHERE area = ? AND status = "active"',
+            [area]
+        );
+        if (count[0].count >= MAX_PROJECTS_PER_AREA) {
+            throw new Error(`Maximum ${MAX_PROJECTS_PER_AREA} active projects allowed per area (${area}).`);
+        }
+
         const [result] = await pool.query(
             'UPDATE projects SET status = "active", updated_at = CURRENT_TIMESTAMP WHERE id = ?',
             [id]

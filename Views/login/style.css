@@ -122,5 +122,34 @@ button{
     text-decoration: underline;
 }
 
+/* ================= MOBILE ================= */
+@media (max-width: 480px) {
+    .login-box {
+        width: calc(100% - 32px);
+        max-width: 360px;
+        height: auto;
+        min-height: 420px;
+        padding: 30px 20px;
+        margin: 0 16px;
+    }
+    .input-box {
+        width: 100%;
+    }
+    h2 {
+        font-size: 1.6em;
+        margin-bottom: 10px;
+    }
+    .remember-forget {
+        font-size: 0.8em;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+}
 
-
+@media (max-width: 480px) and (orientation: landscape) {
+    section {
+        height: auto;
+        min-height: 100vh;
+        padding: 20px 0;
+    }
+}

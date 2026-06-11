@@ -36,18 +36,26 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Project images upload handler
+    // Project images picker — open media library (multi-select)
     const uploadTrigger = document.getElementById('image-upload-trigger');
-    const fileInput = document.getElementById('project-media-file');
-    if (uploadTrigger && fileInput) {
-        uploadTrigger.addEventListener('click', () => fileInput.click());
-        fileInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                for (const file of e.target.files) {
-                    await handleNewImageFile(file);
+    if (uploadTrigger) {
+        uploadTrigger.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'multi',
+                onSelect: (urls) => {
+                    urls.forEach(url => {
+                        currentProjectImages.push({
+                            id: null,
+                            image_path: url,
+                            isNew: true,
+                            isBlob: false,
+                            order: currentProjectImages.length + 1
+                        });
+                    });
+                    renderProjectImagesList();
+                    showToast('Đã thêm ' + urls.length + ' ảnh', 'success');
                 }
-                e.target.value = '';
-            }
+            });
         });
     }
 
@@ -86,10 +94,14 @@ function switchSection(section) {
     document.getElementById(section).classList.add('active');
 
     switch (section) {
-        case 'dashboard': loadDashboard(); break;
+        case 'dashboard': loadDashboard(); ensurePreviewLoaded('settings'); break;
         case 'projects': loadProjects(); break;
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
+        case 'audit-log': loadAuditLog(); break;
+        case 'home-about': loadHomeAbout(); ensurePreviewLoaded('about'); break;
+        case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
+        case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
     }
 }
 
@@ -158,36 +170,42 @@ async function loadDashboard() {
 // ===================== SETTINGS UPLOAD HELPERS =====================
 function setupSettingsUpload() {
     // Logo upload
-    const logoBtn = document.getElementById('logo-upload-btn');
-    const logoInput = document.getElementById('logo-file-input');
-    if (logoBtn && logoInput) {
-        logoBtn.addEventListener('click', () => logoInput.click());
-        logoInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                currentLogoFile = e.target.files[0];
-                const previewUrl = URL.createObjectURL(currentLogoFile);
-                document.getElementById('current-logo-img').src = previewUrl;
-                document.getElementById('current-logo-img').style.display = 'block';
-                document.getElementById('logo-preview-placeholder').style.display = 'none';
-                document.getElementById('logo-remove-btn').style.display = 'inline-flex';
-            }
+    const logoBtn = document.getElementById('logo-pick-btn');
+    if (logoBtn) {
+        logoBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    currentLogoFile = null;
+                    currentLogoPath = url;
+                    window._pendingLogoDataUrl = null;
+                    document.getElementById('current-logo-img').src = url;
+                    document.getElementById('current-logo-img').style.display = 'block';
+                    document.getElementById('logo-preview-placeholder').style.display = 'none';
+                    document.getElementById('logo-remove-btn').style.display = 'inline-flex';
+                    postPreviewData('settings');
+                }
+            });
         });
     }
 
-    // Main image upload
-    const mainBtn = document.getElementById('main-image-upload-btn');
-    const mainInput = document.getElementById('main-image-file-input');
-    if (mainBtn && mainInput) {
-        mainBtn.addEventListener('click', () => mainInput.click());
-        mainInput.addEventListener('change', async (e) => {
-            if (e.target.files.length > 0) {
-                currentMainImageFile = e.target.files[0];
-                const previewUrl = URL.createObjectURL(currentMainImageFile);
-                document.getElementById('current-main-image-img').src = previewUrl;
-                document.getElementById('current-main-image-img').style.display = 'block';
-                document.getElementById('main-image-preview-placeholder').style.display = 'none';
-                document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
-            }
+    // Main image picker
+    const mainBtn = document.getElementById('main-image-pick-btn');
+    if (mainBtn) {
+        mainBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    currentMainImageFile = null;
+                    currentMainImagePath = url;
+                    window._pendingMainImageDataUrl = null;
+                    document.getElementById('current-main-image-img').src = url;
+                    document.getElementById('current-main-image-img').style.display = 'block';
+                    document.getElementById('main-image-preview-placeholder').style.display = 'none';
+                    document.getElementById('main-image-remove-btn').style.display = 'inline-flex';
+                    postPreviewData('settings');
+                }
+            });
         });
     }
 }
@@ -198,7 +216,6 @@ function removeLogoImage() {
     document.getElementById('current-logo-img').style.display = 'none';
     document.getElementById('logo-preview-placeholder').style.display = 'flex';
     document.getElementById('logo-remove-btn').style.display = 'none';
-    document.getElementById('logo-file-input').value = '';
 }
 
 function removeMainImage() {
@@ -207,7 +224,6 @@ function removeMainImage() {
     document.getElementById('current-main-image-img').style.display = 'none';
     document.getElementById('main-image-preview-placeholder').style.display = 'flex';
     document.getElementById('main-image-remove-btn').style.display = 'none';
-    document.getElementById('main-image-file-input').value = '';
 }
 
 // ===================== SETTINGS =====================
@@ -268,7 +284,10 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
             if (currentMainImageFile) currentMainImagePath = mainImageValue;
             currentLogoFile = null;
             currentMainImageFile = null;
+            window._pendingLogoDataUrl = null;
+            window._pendingMainImageDataUrl = null;
             showToast('Settings saved successfully!', 'success');
+            refreshPreview('settings');
         } else {
             showToast(result.message || 'Error saving settings', 'error');
         }
@@ -387,7 +406,7 @@ function renderActiveProjects(projects) {
             <td>
                 <div class="action-btns">
                     <button class="action-btn edit" onclick="editProject(${p.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete" onclick="confirmAction('Stop this project?', () => softDeleteProject(${p.id}))" title="Stop"><i class="fas fa-ban"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Ngừng kinh doanh dự án này?', () => softDeleteProject(${p.id}))" title="Stop"><i class="fas fa-ban"></i></button>
                 </div>
             </td>
         </tr>
@@ -412,7 +431,7 @@ function renderInactiveProjects(projects) {
             <td>
                 <div class="action-btns">
                     <button class="action-btn restore" onclick="restoreProject(${p.id})" title="Restore"><i class="fas fa-undo"></i> Restore</button>
-                    <button class="action-btn delete" onclick="confirmAction('Permanently delete this project?', () => permanentlyDeleteProject(${p.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Xóa vĩnh viễn dự án này?', () => permanentlyDeleteProject(${p.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -707,7 +726,7 @@ function renderContactsTable(contacts) {
             <td>${formatDate(c.created_at)}</td>
             <td>
                 <div class="action-btns">
-                    <button class="action-btn delete" onclick="confirmAction('Delete this contact?', () => deleteContact(${c.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Xóa liên hệ này?', () => deleteContact(${c.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -781,7 +800,7 @@ function renderAccountsTable(accounts) {
             <td>
                 <div class="action-btns">
                     <button class="action-btn edit" onclick="editAccount(${a.id})" title="Edit"><i class="fas fa-edit"></i></button>
-                    <button class="action-btn delete" onclick="confirmAction('Delete this account?', () => deleteAccount(${a.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    <button class="action-btn delete" onclick="confirmAction('Xóa tài khoản này?', () => deleteAccount(${a.id}))" title="Delete"><i class="fas fa-trash"></i></button>
                 </div>
             </td>
         </tr>
@@ -987,4 +1006,873 @@ function logoutAdmin() {
     fetch('/logout', { method: 'POST' })
         .then(() => window.location.href = '/login')
         .catch(() => window.location.href = '/login');
+}
+
+// ===================== LIVE PREVIEW =====================
+// Each editable section in admin (settings, about, services, footer) has an
+// iframe loading /main?preview=1&scope=X. The iframe hides other sections,
+// disables interaction, and listens for postMessage('preview-data') so admin
+// form input updates the preview live — no save needed.
+//
+// Flow:
+//   1. admin loads section → ensurePreviewLoaded(target) sets iframe.src
+//   2. iframe finishes loading → posts 'preview-ready' back
+//   3. admin posts 'preview-data' with current form state
+//   4. user types/uploads → debounced pushPreviewData → iframe re-renders
+//   5. iframe posts 'preview-height' → admin resizes iframe to fit content
+const PREVIEW_READY = new Set();
+
+function refreshPreview(target) {
+    const iframe = document.getElementById('preview-iframe-' + target);
+    if (!iframe) return;
+    PREVIEW_READY.delete(target);
+    iframe.src = '/main?preview=1&scope=' + target + '&t=' + Date.now();
+}
+
+function ensurePreviewLoaded(target) {
+    const iframe = document.getElementById('preview-iframe-' + target);
+    if (!iframe) return;
+    const src = iframe.getAttribute('src') || '';
+    if (src && src !== 'about:blank' && src.includes('preview=1')) return;
+    refreshPreview(target);
+}
+
+function postPreviewData(target) {
+    const iframe = document.getElementById('preview-iframe-' + target);
+    if (!iframe || !iframe.contentWindow) return;
+    if (!PREVIEW_READY.has(target)) return;   // iframe not loaded yet
+    const data = gatherPreviewData(target);
+    iframe.contentWindow.postMessage({ type: 'preview-data', target, data }, window.location.origin);
+}
+
+function gatherPreviewData(target) {
+    if (target === 'settings') {
+        return {
+            logo: window._pendingLogoDataUrl || currentLogoPath || '',
+            phone: (document.getElementById('setting-phone') || {}).value || '',
+            main_image: window._pendingMainImageDataUrl || currentMainImagePath || ''
+        };
+    }
+    if (target === 'about') {
+        const stats = [];
+        document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
+            const slot = parseInt(inp.dataset.slot, 10);
+            const field = inp.dataset.field;
+            let entry = stats.find(s => s.slot === slot);
+            if (!entry) { entry = { slot }; stats.push(entry); }
+            entry[field] = inp.value;
+        });
+        return {
+            banner: (document.getElementById('about-input-banner') || {}).value || '',
+            paragraph_left: (document.getElementById('about-input-left') || {}).value || '',
+            paragraph_right: (document.getElementById('about-input-right') || {}).value || '',
+            stats
+        };
+    }
+    if (target === 'services') {
+        const services = [];
+        document.querySelectorAll('#home-services-cards .settings-panel').forEach(card => {
+            services.push({
+                slot: parseInt(card.dataset.slot, 10),
+                title: (card.querySelector('.svc-title') || {}).value || '',
+                description: (card.querySelector('.svc-desc') || {}).value || '',
+                image_path: card.dataset.imagePath || ''
+            });
+        });
+        return { services };
+    }
+    if (target === 'footer') {
+        const footer_persons = [];
+        document.querySelectorAll('#home-footer-cards .settings-panel').forEach(card => {
+            footer_persons.push({
+                slot: parseInt(card.dataset.slot, 10),
+                name: (card.querySelector('.fp-name') || {}).value || '',
+                email: (card.querySelector('.fp-email') || {}).value || '',
+                phone1: (card.querySelector('.fp-phone1') || {}).value || '',
+                phone2: (card.querySelector('.fp-phone2') || {}).value || '',
+                facebook_url: (card.querySelector('.fp-fb') || {}).value || '',
+                avatar_path: card.dataset.avatarPath || ''
+            });
+        });
+        return { footer_persons };
+    }
+    return {};
+}
+
+// Debounced wrapper for input events
+function debounce(fn, ms) {
+    let t;
+    return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+const pushPreviewDebounced = {
+    settings: debounce(() => postPreviewData('settings'), 200),
+    about: debounce(() => postPreviewData('about'), 200),
+    services: debounce(() => postPreviewData('services'), 200),
+    footer: debounce(() => postPreviewData('footer'), 200)
+};
+
+// Listen for iframe messages (ready + auto-resize)
+window.addEventListener('message', (event) => {
+    if (event.origin !== window.location.origin) return;
+    const msg = event.data || {};
+    if (msg.type === 'preview-ready') {
+        PREVIEW_READY.add(msg.scope);
+        postPreviewData(msg.scope);   // push initial state
+    } else if (msg.type === 'preview-height') {
+        // Auto-resize all 4 iframes by matching the source frame
+        ['settings', 'about', 'services', 'footer'].forEach(t => {
+            const ifr = document.getElementById('preview-iframe-' + t);
+            if (ifr && ifr.contentWindow === event.source && msg.height) {
+                ifr.style.height = Math.min(msg.height, 1200) + 'px';
+            }
+        });
+    }
+});
+
+// Wire input listeners on form fields → debounced postMessage
+// Static fields (settings + about): wire once on DOMContentLoaded
+document.addEventListener('DOMContentLoaded', () => {
+    const phone = document.getElementById('setting-phone');
+    if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
+
+    ['about-input-banner', 'about-input-left', 'about-input-right'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', pushPreviewDebounced.about);
+    });
+
+    // about stat inputs are dynamic — use event delegation on the grid
+    const statsGrid = document.getElementById('about-stats-grid');
+    if (statsGrid) statsGrid.addEventListener('input', pushPreviewDebounced.about);
+
+    // services/footer cards are dynamic — delegate at container
+    const svcWrap = document.getElementById('home-services-cards');
+    if (svcWrap) svcWrap.addEventListener('input', pushPreviewDebounced.services);
+
+    const fooWrap = document.getElementById('home-footer-cards');
+    if (fooWrap) fooWrap.addEventListener('input', pushPreviewDebounced.footer);
+
+    // Auto-init live preview for whichever section is active on first load.
+    // switchSection only fires on click, so a browser refresh that lands on
+    // the default-active Dashboard would otherwise leave the iframe blank
+    // (or worse, show full /main if its initial src didn't say about:blank).
+    const SECTION_TO_PREVIEW = {
+        'dashboard': 'settings',
+        'home-about': 'about',
+        'home-services': 'services',
+        'home-footer': 'footer'
+    };
+    const active = document.querySelector('.content-section.active');
+    if (active) {
+        const target = SECTION_TO_PREVIEW[active.id];
+        if (target) ensurePreviewLoaded(target);
+    }
+});
+
+// ===================== HOME CONTENT — shared helpers =====================
+async function uploadHomeImage(file) {
+    const fd = new FormData();
+    fd.append('media', file);
+    const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: fd });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.message || 'Upload failed');
+    return json.path;
+}
+
+// ===================== HOME — ABOUT =====================
+async function loadHomeAbout() {
+    try {
+        const res = await fetch('/api/admin/about');
+        if (!res.ok) {
+            showToast('Failed to load About', 'error');
+            return;
+        }
+        const { data } = await res.json();
+        if (!data) return;
+
+        document.getElementById('about-input-banner').value = data.banner || '';
+        document.getElementById('about-input-left').value = data.paragraph_left || '';
+        document.getElementById('about-input-right').value = data.paragraph_right || '';
+
+        const grid = document.getElementById('about-stats-grid');
+        grid.innerHTML = '';
+        (data.stats || []).forEach(s => {
+            const wrap = document.createElement('div');
+            wrap.className = 'form-group';
+
+            const title = document.createElement('label');
+            title.textContent = 'Stat ' + s.slot;
+            wrap.appendChild(title);
+
+            const num = document.createElement('input');
+            num.type = 'text';
+            num.placeholder = 'e.g. 20+';
+            num.maxLength = 20;
+            num.dataset.slot = s.slot;
+            num.dataset.field = 'num';
+            num.value = s.num || '';
+            wrap.appendChild(num);
+
+            const lbl = document.createElement('input');
+            lbl.type = 'text';
+            lbl.placeholder = 'e.g. years of experience';
+            lbl.maxLength = 255;
+            lbl.dataset.slot = s.slot;
+            lbl.dataset.field = 'label';
+            lbl.value = s.label || '';
+            lbl.style.marginTop = '6px';
+            wrap.appendChild(lbl);
+
+            grid.appendChild(wrap);
+        });
+    } catch (err) {
+        console.error('loadHomeAbout:', err);
+        showToast('Error loading About: ' + err.message, 'error');
+    }
+}
+
+document.getElementById('home-about-form').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-save');
+    btn.disabled = true;
+    try {
+        const stats = [];
+        document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
+            const slot = parseInt(inp.dataset.slot, 10);
+            const field = inp.dataset.field;
+            let entry = stats.find(s => s.slot === slot);
+            if (!entry) { entry = { slot }; stats.push(entry); }
+            entry[field] = inp.value;
+        });
+        const payload = {
+            banner: document.getElementById('about-input-banner').value,
+            paragraph_left: document.getElementById('about-input-left').value,
+            paragraph_right: document.getElementById('about-input-right').value,
+            stats
+        };
+        const res = await fetch('/api/admin/about', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+        if (json.success) refreshPreview('about');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    } finally {
+        btn.disabled = false;
+    }
+});
+
+// ===================== HOME — SERVICES =====================
+async function loadHomeServices() {
+    try {
+        const res = await fetch('/api/admin/services');
+        if (!res.ok) {
+            showToast('Failed to load Services', 'error');
+            return;
+        }
+        const { data } = await res.json();
+        const wrap = document.getElementById('home-services-cards');
+        wrap.innerHTML = '';
+
+        (data || []).forEach(svc => {
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '20px';
+            card.dataset.slot = svc.slot;
+            card.innerHTML = ''
+                + '<h2><i class="fas fa-concierge-bell"></i> Service ' + svc.slot + '</h2>'
+                + '<div class="form-group"><label>Title</label>'
+                + '  <input type="text" class="svc-title" maxlength="255"></div>'
+                + '<div class="form-group"><label>Description</label>'
+                + '  <textarea class="svc-desc" rows="4" maxlength="2000"></textarea></div>'
+                + '<div class="form-group"><label>Image</label>'
+                + '  <div class="settings-image-area">'
+                + '    <div class="settings-image-preview">'
+                + '      <img class="svc-img-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
+                + '      <span class="settings-preview-placeholder svc-img-placeholder">'
+                + '        <i class="fas fa-image"></i> No image</span>'
+                + '    </div>'
+                + '    <div class="settings-image-actions">'
+                + '      <button type="button" class="btn-add svc-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
+                + '    </div>'
+                + '  </div></div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save svc-save-btn"><i class="fas fa-save"></i> Save Service ' + svc.slot + '</button>'
+                + '</div>';
+            wrap.appendChild(card);
+
+            card.querySelector('.svc-title').value = svc.title || '';
+            card.querySelector('.svc-desc').value = svc.description || '';
+            const imgEl = card.querySelector('.svc-img-preview');
+            const placeholderEl = card.querySelector('.svc-img-placeholder');
+            if (svc.image_path) {
+                imgEl.src = svc.image_path;
+                imgEl.style.display = 'block';
+                placeholderEl.style.display = 'none';
+            }
+            card.dataset.imagePath = svc.image_path || '';
+
+            card.querySelector('.svc-pick-btn').addEventListener('click', () => {
+                openMediaLibrary({
+                    mode: 'single',
+                    onSelect: ([url]) => {
+                        imgEl.src = url;
+                        imgEl.style.display = 'block';
+                        placeholderEl.style.display = 'none';
+                        card.dataset.imagePath = url;
+                        postPreviewData('services');
+                        showToast('Đã chọn ảnh — bấm Save để lưu', 'success');
+                    }
+                });
+            });
+
+            card.querySelector('.svc-save-btn').addEventListener('click', async () => {
+                const btn = card.querySelector('.svc-save-btn');
+                btn.disabled = true;
+                try {
+                    const payload = {
+                        title: card.querySelector('.svc-title').value,
+                        description: card.querySelector('.svc-desc').value
+                    };
+                    const currentPath = card.dataset.imagePath;
+                    if (currentPath) payload.image_path = currentPath;
+                    const res = await fetch('/api/admin/services/' + svc.slot, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+                    if (json.success) refreshPreview('services');
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+    } catch (err) {
+        console.error('loadHomeServices:', err);
+        showToast('Error loading Services: ' + err.message, 'error');
+    }
+}
+
+// ===================== HOME — FOOTER PERSONS =====================
+async function loadHomeFooter() {
+    try {
+        const res = await fetch('/api/admin/footer-persons');
+        if (!res.ok) {
+            showToast('Failed to load Footer', 'error');
+            return;
+        }
+        const { data } = await res.json();
+        const wrap = document.getElementById('home-footer-cards');
+        wrap.innerHTML = '';
+
+        (data || []).forEach(person => {
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '20px';
+            card.dataset.slot = person.slot;
+            card.innerHTML = ''
+                + '<h2><i class="fas fa-id-card"></i> Person ' + person.slot + '</h2>'
+                + '<div class="form-group"><label>Avatar</label>'
+                + '  <div class="settings-image-area">'
+                + '    <div class="settings-image-preview">'
+                + '      <img class="fp-avatar-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
+                + '      <span class="settings-preview-placeholder fp-avatar-placeholder">'
+                + '        <i class="fas fa-user"></i> No avatar</span>'
+                + '    </div>'
+                + '    <div class="settings-image-actions">'
+                + '      <button type="button" class="btn-add fp-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
+                + '    </div>'
+                + '  </div></div>'
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Name</label>'
+                + '    <input type="text" class="fp-name" maxlength="255"></div>'
+                + '  <div class="form-group"><label>Email</label>'
+                + '    <input type="email" class="fp-email" maxlength="255"></div>'
+                + '</div>'
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Phone 1</label>'
+                + '    <input type="text" class="fp-phone1" maxlength="50"></div>'
+                + '  <div class="form-group"><label>Phone 2</label>'
+                + '    <input type="text" class="fp-phone2" maxlength="50"></div>'
+                + '</div>'
+                + '<div class="form-group"><label>Facebook URL (https:// only)</label>'
+                + '  <input type="url" class="fp-fb" maxlength="500" pattern="https://.*"></div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save fp-save-btn"><i class="fas fa-save"></i> Save Person ' + person.slot + '</button>'
+                + '</div>';
+            wrap.appendChild(card);
+
+            card.querySelector('.fp-name').value = person.name || '';
+            card.querySelector('.fp-email').value = person.email || '';
+            card.querySelector('.fp-phone1').value = person.phone1 || '';
+            card.querySelector('.fp-phone2').value = person.phone2 || '';
+            card.querySelector('.fp-fb').value = person.facebook_url || '';
+
+            const imgEl = card.querySelector('.fp-avatar-preview');
+            const placeholderEl = card.querySelector('.fp-avatar-placeholder');
+            if (person.avatar_path) {
+                imgEl.src = person.avatar_path;
+                imgEl.style.display = 'block';
+                placeholderEl.style.display = 'none';
+            }
+            card.dataset.avatarPath = person.avatar_path || '';
+
+            card.querySelector('.fp-pick-btn').addEventListener('click', () => {
+                openMediaLibrary({
+                    mode: 'single',
+                    onSelect: ([url]) => {
+                        imgEl.src = url;
+                        imgEl.style.display = 'block';
+                        placeholderEl.style.display = 'none';
+                        card.dataset.avatarPath = url;
+                        postPreviewData('footer');
+                        showToast('Đã chọn avatar — bấm Save để lưu', 'success');
+                    }
+                });
+            });
+
+            card.querySelector('.fp-save-btn').addEventListener('click', async () => {
+                const btn = card.querySelector('.fp-save-btn');
+                btn.disabled = true;
+                try {
+                    const fb = card.querySelector('.fp-fb').value.trim();
+                    if (fb && !/^https:\/\//i.test(fb)) {
+                        showToast('Facebook URL phải bắt đầu https://', 'error');
+                        btn.disabled = false;
+                        return;
+                    }
+                    const payload = {
+                        name: card.querySelector('.fp-name').value,
+                        email: card.querySelector('.fp-email').value,
+                        phone1: card.querySelector('.fp-phone1').value,
+                        phone2: card.querySelector('.fp-phone2').value,
+                        facebook_url: fb
+                    };
+                    const currentPath = card.dataset.avatarPath;
+                    if (currentPath) payload.avatar_path = currentPath;
+                    const res = await fetch('/api/admin/footer-persons/' + person.slot, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const json = await res.json();
+                    showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
+                    if (json.success) refreshPreview('footer');
+                } catch (err) {
+                    showToast('Error: ' + err.message, 'error');
+                } finally {
+                    btn.disabled = false;
+                }
+            });
+        });
+    } catch (err) {
+        console.error('loadHomeFooter:', err);
+        showToast('Error loading Footer: ' + err.message, 'error');
+    }
+}
+
+// ===================== MEDIA LIBRARY =====================
+// One global modal that any image picker can open.
+//
+//   openMediaLibrary({
+//       mode: 'single' | 'multi',
+//       onSelect: (urls) => { /* urls is always an array */ }
+//   });
+//
+// Single-mode: clicking a thumb selects it (replacing prior selection).
+// Multi-mode: each thumb toggles in/out of a Set. After successful upload
+// in multi-mode the new file is auto-added to the selection. Search is
+// case-insensitive substring on filename.
+
+let _mediaState = {
+    allMedia: [],
+    filteredMedia: [],
+    selectedUrls: new Set(),
+    mode: 'single',
+    onSelect: null,
+    query: ''
+};
+
+function openMediaLibrary({ mode = 'single', onSelect = null } = {}) {
+    _mediaState.mode = mode;
+    _mediaState.onSelect = onSelect;
+    _mediaState.selectedUrls = new Set();
+    _mediaState.query = '';
+    const searchInp = document.getElementById('media-search-input');
+    if (searchInp) searchInp.value = '';
+    document.getElementById('media-modal').style.display = 'flex';
+    updateMediaSelectedCount();
+    loadMediaGrid();
+}
+
+function closeMediaLibrary() {
+    document.getElementById('media-modal').style.display = 'none';
+    _mediaState.onSelect = null;
+    _mediaState.selectedUrls.clear();
+}
+
+async function loadMediaGrid() {
+    const grid = document.getElementById('media-grid');
+    const empty = document.getElementById('media-empty');
+    grid.innerHTML = '<div style="padding:20px;text-align:center;color:#95a5a6">Đang tải...</div>';
+    empty.style.display = 'none';
+    try {
+        const res = await fetch('/api/admin/media');
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || 'Failed');
+        _mediaState.allMedia = json.data || [];
+        applyMediaFilter();
+    } catch (err) {
+        grid.innerHTML = '';
+        empty.style.display = 'block';
+        empty.querySelector('p').textContent = 'Lỗi tải thư viện: ' + err.message;
+        showToast('Lỗi tải thư viện ảnh', 'error');
+    }
+}
+
+function applyMediaFilter() {
+    const q = (_mediaState.query || '').toLowerCase();
+    _mediaState.filteredMedia = q
+        ? _mediaState.allMedia.filter(m => m.name.toLowerCase().includes(q))
+        : _mediaState.allMedia.slice();
+    renderMediaGrid();
+}
+
+function renderMediaGrid() {
+    const grid = document.getElementById('media-grid');
+    const empty = document.getElementById('media-empty');
+    const count = document.getElementById('media-count');
+    grid.innerHTML = '';
+
+    if (_mediaState.allMedia.length === 0) {
+        empty.style.display = 'block';
+        count.textContent = '';
+        return;
+    }
+    empty.style.display = 'none';
+    count.textContent = _mediaState.filteredMedia.length + ' / ' + _mediaState.allMedia.length;
+
+    _mediaState.filteredMedia.forEach(m => {
+        const item = document.createElement('div');
+        item.className = 'media-item';
+        if (_mediaState.selectedUrls.has(m.url)) item.classList.add('selected');
+        item.dataset.url = m.url;
+
+        const img = document.createElement('img');
+        img.src = m.url;
+        img.alt = '';
+        img.loading = 'lazy';
+        img.onerror = function () { this.style.display = 'none'; };
+        item.appendChild(img);
+
+        const check = document.createElement('div');
+        check.className = 'media-check';
+        check.innerHTML = '<i class="fas fa-check"></i>';
+        item.appendChild(check);
+
+        const name = document.createElement('div');
+        name.className = 'media-name';
+        name.textContent = m.name;
+        item.appendChild(name);
+
+        item.addEventListener('click', () => toggleMediaSelection(m.url));
+        grid.appendChild(item);
+    });
+}
+
+function toggleMediaSelection(url) {
+    if (_mediaState.mode === 'single') {
+        _mediaState.selectedUrls.clear();
+        _mediaState.selectedUrls.add(url);
+    } else {
+        if (_mediaState.selectedUrls.has(url)) _mediaState.selectedUrls.delete(url);
+        else _mediaState.selectedUrls.add(url);
+    }
+    renderMediaGrid();
+    updateMediaSelectedCount();
+}
+
+function updateMediaSelectedCount() {
+    const n = _mediaState.selectedUrls.size;
+    const countEl = document.getElementById('media-selected-count');
+    const btnEl = document.getElementById('media-confirm-btn');
+    if (countEl) countEl.textContent = '(' + n + ')';
+    if (btnEl) btnEl.disabled = n === 0;
+}
+
+function confirmMediaSelection() {
+    const urls = Array.from(_mediaState.selectedUrls);
+    const cb = _mediaState.onSelect;
+    closeMediaLibrary();
+    if (cb && urls.length > 0) cb(urls);
+}
+
+// Wire static listeners on DOMContentLoaded (modal elements always present in HTML)
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInp = document.getElementById('media-search-input');
+    if (searchInp) {
+        searchInp.addEventListener('input', (e) => {
+            _mediaState.query = e.target.value;
+            applyMediaFilter();
+        });
+    }
+
+    const uploadInp = document.getElementById('media-upload-input');
+    if (uploadInp) {
+        uploadInp.addEventListener('change', async (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            try {
+                const fd = new FormData();
+                fd.append('media', file);
+                const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: fd });
+                const json = await res.json();
+                if (!json.success) throw new Error(json.message || 'Upload failed');
+                // Optimistically prepend the new file
+                const newItem = {
+                    url: json.path,
+                    name: json.path.split('/').pop(),
+                    size: 0,
+                    mtime: Date.now()
+                };
+                _mediaState.allMedia.unshift(newItem);
+                _mediaState.query = '';
+                if (searchInp) searchInp.value = '';
+                // D6: multi-mode auto-adds to selection; D7: single-mode does NOT
+                if (_mediaState.mode === 'multi') {
+                    _mediaState.selectedUrls.add(newItem.url);
+                }
+                applyMediaFilter();
+                updateMediaSelectedCount();
+                showToast('Upload thành công', 'success');
+            } catch (err) {
+                showToast('Lỗi upload: ' + err.message, 'error');
+            } finally {
+                e.target.value = '';
+            }
+        });
+    }
+});
+
+// ===================== AUDIT LOG =====================
+// Vietnamese labels — readable for non-IT staff. Keep raw action codes
+// in the DB / data-attribute for filtering + CSS tinting; render the
+// human label in the table cell.
+const AUDIT_ACTION_LABELS = {
+    'SETTINGS_UPDATE': 'Cập nhật cài đặt website',
+    'PROJECT_CREATE': 'Tạo dự án mới',
+    'PROJECT_UPDATE': 'Cập nhật dự án',
+    'PROJECT_SOFTDELETE': 'Ngừng kinh doanh dự án',
+    'PROJECT_RESTORE': 'Khôi phục dự án',
+    'PROJECT_DELETE': 'Xóa vĩnh viễn dự án',
+    'CONTACT_DELETE': 'Xóa liên hệ',
+    'ACCOUNT_CREATE': 'Tạo tài khoản',
+    'ACCOUNT_UPDATE': 'Cập nhật tài khoản',
+    'ACCOUNT_DELETE': 'Xóa tài khoản',
+    'ABOUT_UPDATE': 'Cập nhật phần About',
+    'SERVICE_UPDATE': 'Cập nhật Service',
+    'FOOTER_PERSON_UPDATE': 'Cập nhật nhân viên Footer'
+};
+
+const AUDIT_TARGET_LABELS = {
+    'project': 'Dự án',
+    'contact': 'Liên hệ',
+    'account': 'Tài khoản',
+    'settings': 'Cài đặt',
+    'about_section': 'Phần About',
+    'service': 'Service slot',
+    'footer_person': 'Nhân viên Footer'
+};
+
+const AUDIT_FIELD_LABELS = {
+    'logo': 'Logo',
+    'phone': 'Số điện thoại',
+    'main_image': 'Ảnh chính',
+    'username': 'Tên đăng nhập',
+    'password': 'Mật khẩu',
+    'name': 'Tên',
+    'role': 'Vai trò',
+    'title': 'Tiêu đề',
+    'description': 'Mô tả',
+    'image_path': 'Ảnh',
+    'banner': 'Banner',
+    'paragraph_left': 'Đoạn văn trái',
+    'paragraph_right': 'Đoạn văn phải',
+    'stats': 'Số liệu thống kê',
+    'area': 'Khu vực',
+    'square_meters': 'Diện tích (m²)',
+    'category': 'Danh mục',
+    'year': 'Năm',
+    'style': 'Phong cách',
+    'small_content': 'Mô tả ngắn',
+    'display_order': 'Thứ tự hiển thị',
+    'email': 'Email',
+    'phone1': 'SĐT 1',
+    'phone2': 'SĐT 2',
+    'facebook_url': 'Link Facebook',
+    'avatar_path': 'Ảnh đại diện'
+};
+
+const AUDIT_AREA_LABELS = {
+    'sydney': 'Sydney',
+    'melbourne': 'Melbourne',
+    'brisbane': 'Brisbane',
+    'goldcoast': 'Gold Coast'
+};
+
+function formatAuditTarget(target_type, target_id) {
+    const label = AUDIT_TARGET_LABELS[target_type] || target_type || '';
+    if (!label) return '-';
+    return target_id ? label + ' #' + target_id : label;
+}
+
+function formatAuditDetails(action, raw) {
+    if (!raw) return '-';
+    let d = raw;
+    if (typeof d === 'string') {
+        try { d = JSON.parse(d); } catch { return raw; }
+    }
+    if (typeof d !== 'object' || d === null) return String(d);
+
+    // "fields changed" pattern — used by UPDATE actions
+    if (Array.isArray(d.fields) && d.fields.length > 0) {
+        const labelled = d.fields.map(f => AUDIT_FIELD_LABELS[f] || f);
+        return 'Đã sửa: ' + labelled.join(', ');
+    }
+
+    // Per-action specific rendering
+    if (action === 'PROJECT_CREATE') {
+        const parts = [];
+        if (d.name) parts.push('Tên: ' + d.name);
+        if (d.area) parts.push('Khu vực: ' + (AUDIT_AREA_LABELS[d.area] || d.area));
+        return parts.join(' · ') || '-';
+    }
+    if (action === 'ACCOUNT_CREATE') {
+        const parts = [];
+        if (d.username) parts.push('Tên đăng nhập: ' + d.username);
+        if (d.role) {
+            const roleLabel = d.role === 'admin' ? 'Quản trị viên' : 'Nhân viên';
+            parts.push('Vai trò: ' + roleLabel);
+        }
+        return parts.join(' · ') || '-';
+    }
+    if (action === 'ABOUT_UPDATE' && typeof d.stats_count === 'number') {
+        return 'Cập nhật banner, 2 đoạn văn và ' + d.stats_count + ' số liệu';
+    }
+
+    // Generic fallback: prefix-translate keys we know, join "key: value"
+    const parts = Object.entries(d).map(([k, v]) => {
+        const keyLabel = AUDIT_FIELD_LABELS[k] || k;
+        if (k === 'area') v = AUDIT_AREA_LABELS[v] || v;
+        if (k === 'role') v = v === 'admin' ? 'Quản trị viên' : 'Nhân viên';
+        if (Array.isArray(v)) v = v.join(', ');
+        return keyLabel + ': ' + v;
+    });
+    return parts.join(' · ') || '-';
+}
+
+let _auditActionsLoaded = false;
+
+async function loadAuditLog() {
+    try {
+        if (!_auditActionsLoaded) {
+            try {
+                const ar = await fetch('/api/admin/audit-log/actions');
+                if (ar.ok) {
+                    const aj = await ar.json();
+                    const sel = document.getElementById('audit-action-filter');
+                    sel.innerHTML = '<option value="">Tất cả hành động</option>';
+                    (aj.data || []).forEach(a => {
+                        const opt = document.createElement('option');
+                        opt.value = a;
+                        opt.textContent = AUDIT_ACTION_LABELS[a] || a;
+                        sel.appendChild(opt);
+                    });
+                }
+                _auditActionsLoaded = true;
+            } catch {}
+        }
+
+        const q = (document.getElementById('audit-search') || {}).value || '';
+        const action = (document.getElementById('audit-action-filter') || {}).value || '';
+        const params = new URLSearchParams();
+        if (q) params.set('q', q);
+        if (action) params.set('action', action);
+        params.set('limit', '200');
+
+        const res = await fetch('/api/admin/audit-log?' + params.toString());
+        if (res.status === 403) {
+            showToast('Chỉ admin được xem audit log', 'error');
+            return;
+        }
+        const j = await res.json();
+        const tbody = document.getElementById('audit-log-tbody');
+        tbody.innerHTML = '';
+
+        if (!j.success || !j.data || j.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#95a5a6">Không có dữ liệu</td></tr>';
+            return;
+        }
+
+        j.data.forEach(row => {
+            const tr = document.createElement('tr');
+
+            const tdTime = document.createElement('td');
+            tdTime.textContent = new Date(row.created_at).toLocaleString('vi-VN');
+            tdTime.style.fontSize = '11px';
+            tdTime.style.whiteSpace = 'nowrap';
+            tr.appendChild(tdTime);
+
+            const tdUser = document.createElement('td');
+            tdUser.textContent = row.username || '(anonymous)';
+            tr.appendChild(tdUser);
+
+            const tdAction = document.createElement('td');
+            const badge = document.createElement('span');
+            badge.className = 'audit-badge';
+            badge.dataset.action = row.action;
+            badge.textContent = AUDIT_ACTION_LABELS[row.action] || row.action;
+            tdAction.appendChild(badge);
+            tr.appendChild(tdAction);
+
+            const tdTarget = document.createElement('td');
+            tdTarget.textContent = formatAuditTarget(row.target_type, row.target_id);
+            tr.appendChild(tdTarget);
+
+            const tdDetails = document.createElement('td');
+            tdDetails.style.fontSize = '12px';
+            tdDetails.style.maxWidth = '320px';
+            tdDetails.style.overflow = 'hidden';
+            tdDetails.style.textOverflow = 'ellipsis';
+            tdDetails.style.whiteSpace = 'nowrap';
+            const readable = formatAuditDetails(row.action, row.details);
+            tdDetails.textContent = readable;
+            tdDetails.title = readable;   // tooltip on hover for truncated values
+            tr.appendChild(tdDetails);
+
+            const tdIp = document.createElement('td');
+            tdIp.textContent = row.ip_address || '-';
+            tdIp.style.fontSize = '11px';
+            tr.appendChild(tdIp);
+
+            tbody.appendChild(tr);
+        });
+    } catch (err) {
+        console.error('loadAuditLog:', err);
+        showToast('Lỗi tải audit log: ' + err.message, 'error');
+    }
+}
+
+function resetAuditSearch() {
+    const s = document.getElementById('audit-search');
+    if (s) s.value = '';
+    const a = document.getElementById('audit-action-filter');
+    if (a) a.value = '';
+    loadAuditLog();
 }
