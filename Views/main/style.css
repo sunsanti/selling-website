@@ -6,6 +6,12 @@
     --gray: #BEBEBE;
     --black:#13131a;
     --box-shadow: 0 .5rem 1rem rgba(0,0,0,.1);
+
+    /* Sealand Premium brand tokens (F02) */
+    --color-navy: #000342;
+    --color-gold: #ffcf00;
+    --color-cream: #fffff5;
+    --color-cream-warm: #ffffe3;
 }
 
 *{
@@ -273,7 +279,7 @@ section{
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 /* full app start from here */
-/* header */
+/* ============== HEADER (F02 — 3-zone navy/gold) ============== */
 .header{
     position: fixed;
     top: 0;
@@ -283,12 +289,12 @@ section{
     z-index: 1000;
     justify-content: space-between;
     align-items: center;
-    padding: 2rem 9%;
-    background: linear-gradient(135deg, rgba(14, 42, 71, 0.88) 0%, rgba(26, 58, 92, 0.88) 50%, rgba(14, 42, 71, 0.88) 100%);
+    padding: 1.6rem 4%;
+    background: linear-gradient(135deg, rgba(0,3,66,0.92) 0%, rgba(20,30,90,0.92) 50%, rgba(0,3,66,0.92) 100%);
     backdrop-filter: blur(14px) saturate(140%);
     -webkit-backdrop-filter: blur(14px) saturate(140%);
-    box-shadow: 0 10px 40px rgba(14, 42, 71, 0.18), 0 2px 8px rgba(0, 0, 0, 0.04);
-    color: #f7f7ed;
+    box-shadow: 0 10px 40px rgba(0,3,66,0.18), 0 2px 8px rgba(0, 0, 0, 0.04);
+    color: var(--color-cream);
 }
 .header::after {
     content: '';
@@ -297,33 +303,109 @@ section{
     left: 0;
     right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent 0%, rgba(232, 213, 163, 0.5) 50%, transparent 100%);
+    background: linear-gradient(90deg, transparent 0%, rgba(255, 207, 0, 0.5) 50%, transparent 100%);
     pointer-events: none;
 }
+.header-zone {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+}
+
 .header .logo,
 .header .site-phone,
 .header .account-name,
 .header .admin-text {
-    color: #f7f7ed;
+    color: var(--color-cream);
+}
+.logo-text {
+    font-family: 'Playfair Display', serif;
+    font-size: 2rem;
+    font-weight: 700;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    display: inline-block;
 }
 .header .menu-btn {
-    color: #f7f7ed;
+    color: var(--color-cream);
 }
 .header .left-site::after {
-    background-color: rgba(247, 247, 237, 0.4);
-}
-.nav-item::after {
-    background-color: #e8d5a3;
+    background-color: rgba(255, 255, 245, 0.4);
 }
 
-/* Desktop logout button (in header) */
+/* CTA right zone */
+.header-cta {
+    display: flex;
+    align-items: center;
+    gap: 1.2rem;
+}
+.btn-header-phone {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.8rem 1.6rem;
+    border: 1px solid rgba(255,255,255,0.4);
+    border-radius: 999px;
+    color: #fff;
+    font-size: 1.3rem;
+    background: transparent;
+    transition: border-color 0.25s, background-color 0.25s;
+    text-decoration: none;
+}
+.btn-header-phone:hover {
+    border-color: var(--color-gold);
+    background-color: rgba(255,207,0,0.08);
+}
+.btn-header-phone i { color: var(--color-gold); }
+
+.btn-book-consultation {
+    padding: 0.9rem 2rem;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    font-size: 1.2rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 999px;
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.btn-book-consultation:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(255,207,0,0.4);
+}
+
+/* Active nav item gold underline */
+.nav-item.nav-active {
+    color: var(--color-gold);
+    position: relative;
+}
+.nav-item.nav-active::after {
+    content: '';
+    position: absolute;
+    bottom: -6px;
+    left: 0; right: 0;
+    height: 2px;
+    background: var(--color-gold);
+    transform: scaleX(1);
+    transform-origin: left;
+}
+
+/* Admin link red pastel for dark header */
+#admin-btn {
+    color: #ff8888 !important;
+}
+
+/* Desktop logout button — gold pill (legacy preserved) */
 #logout-btn {
     margin-top: 6px;
     padding: 6px 18px;
     background: transparent;
-    border: 1.5px solid rgba(232, 213, 163, 0.6);
+    border: 1.5px solid rgba(255, 207, 0, 0.6);
     border-radius: 999px;
-    color: #e8d5a3;
+    color: var(--color-gold);
     font-size: 1.3rem;
     font-weight: 500;
     cursor: pointer;
@@ -331,9 +413,9 @@ section{
     letter-spacing: 0.04em;
 }
 #logout-btn:hover {
-    background-color: #e8d5a3;
-    color: #0E2A47;
-    border-color: #e8d5a3;
+    background-color: var(--color-gold);
+    color: var(--color-navy);
+    border-color: var(--color-gold);
 }
 #logout-btn > div {
     text-transform: uppercase;
@@ -391,12 +473,16 @@ section{
     margin-right: 2rem;
 }
 
+/* F02: Navbar is now a flex child centered between header zones */
 .header .navbar {
-  position: absolute;
-  left: 50%;
-  transform: translateX(-50%);
+  position: static;
+  transform: none;
   display: flex;
-  gap: 4rem;
+  align-items: center;
+  gap: 2.4rem;
+  flex: 1 1 auto;
+  justify-content: center;
+  margin: 0 2rem;
 }
 
 .admin-text {
@@ -404,7 +490,10 @@ section{
 }
 
 .header .navbar a{
-    font-size: 1.75rem;
+    font-size: 1.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 500;
 }
 
 .nav-item {
@@ -412,21 +501,21 @@ section{
   display: inline-block;
   text-decoration: none;
   color: #ffffff;
+  transition: color 0.25s ease;
 }
+.nav-item:hover { color: var(--color-gold); }
 
 .nav-item::after {
     content: '';
     position: absolute;
     width: 100%;
-    height: 2px; 
+    height: 2px;
     bottom: -3px;
     left: 0;
-    background-color: #333; 
-
-
+    background-color: var(--color-gold);
     transform: scaleX(0);
-    transform-origin: right; 
-    transition: transform 0.3s ease-out; 
+    transform-origin: right;
+    transition: transform 0.3s ease-out;
 }
 
 .nav-item:hover::after{

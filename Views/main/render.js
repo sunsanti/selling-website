@@ -461,6 +461,7 @@ function applyPreviewMode(scope) {
     // Disable click/hover interactions but KEEP scroll working. Putting
     // pointer-events:none on the body itself blocks scroll too, which
     // makes the iframe unusable on tall sections like services.
+    // F02: extended selector list — new CTA buttons + generic anchor catch-all
     const style = document.createElement('style');
     style.textContent = `
         body.preview-mode a,
@@ -468,11 +469,17 @@ function applyPreviewMode(scope) {
         body.preview-mode [onclick],
         body.preview-mode .btn-get-in-touch,
         body.preview-mode .btn-services,
+        body.preview-mode .btn-header-phone,
+        body.preview-mode .btn-book-consultation,
+        body.preview-mode .nav-item,
         body.preview-mode .menu-btn,
         body.preview-mode .feature-image,
         body.preview-mode .region {
             pointer-events: none !important;
             cursor: default !important;
+        }
+        body.preview-mode a:not([href^="#"]) {
+            pointer-events: none !important;
         }
         body.preview-mode { cursor: default; }
     `;

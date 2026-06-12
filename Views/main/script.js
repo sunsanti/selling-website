@@ -2,29 +2,26 @@
 const adminBtn = document.getElementById("admin-btn");
 const logoutBtn = document.getElementById("logout-btn");
 const accountName = document.getElementById("account");
-const leftSite = document.querySelector(".left-site");
-const mobileSitePhone = document.getElementById("mobile-site-phone");
 const mobileAccount = document.getElementById("mobile-account");
-const desktopSitePhone = document.getElementById("site-phone");
 
+// F02: 3-zone header — CTA toggles entire blocks (logged-out vs logged-in)
+const loggedOutCta = document.querySelector(".logged-out-cta");
+const loggedInCta = document.querySelector(".logged-in-cta");
 
 fetch("/check-auth")
     .then(res => res.json())
     .then(data => {
+        document.body.classList.toggle("logged-in", !!data.loggedIn);
         if (data.loggedIn) {
-            adminBtn.style.display = "block";
-            logoutBtn.style.display = "block";
-            accountName.style.display = "block";
-            leftSite.classList.remove("hide-line");
-            // Display account name from session
-            accountName.textContent = data.name || 'User';
-            // Sync account name to mobile sidebar
-            mobileAccount.textContent = data.name || 'User';
+            if (loggedOutCta) loggedOutCta.style.display = "none";
+            if (loggedInCta) loggedInCta.style.display = "flex";
+            if (adminBtn) adminBtn.style.display = "block";
+            if (accountName) accountName.textContent = data.name || 'User';
+            if (mobileAccount) mobileAccount.textContent = data.name || 'User';
         } else {
-            adminBtn.style.display = "none";
-            logoutBtn.style.display = "none";
-            accountName.style.display = "none";
-            leftSite.classList.add("hide-line");
+            if (loggedOutCta) loggedOutCta.style.display = "flex";
+            if (loggedInCta) loggedInCta.style.display = "none";
+            if (adminBtn) adminBtn.style.display = "none";
         }
     })
     .catch(err => console.error(err));
@@ -87,28 +84,9 @@ const navbar = document.getElementById("main-navbar");
 const mobileOverlay = document.getElementById("mobile-overlay");
 const mobileLogoutBtn = document.getElementById("mobile-logout-btn");
 
-// Sync logout button visibility to mobile sidebar.
-// We toggle body.logged-in so CSS can gate the drawer's phone/account/logout
-// blocks (they have display:flex !important when the drawer is open, which
-// would otherwise override the inline display:none set here).
-if (logoutBtn && mobileLogoutBtn) {
-    const syncLogout = () => {
-        const isLoggedIn = !leftSite.classList.contains("hide-line");
-        document.body.classList.toggle("logged-in", isLoggedIn);
-        if (isLoggedIn) {
-            mobileLogoutBtn.style.display = "";
-            mobileAccount.style.display = "";
-        } else {
-            mobileLogoutBtn.style.display = "none";
-            mobileAccount.style.display = "none";
-        }
-    };
-    // Watch for changes on logoutBtn and accountName
-    const observer = new MutationObserver(syncLogout);
-    observer.observe(logoutBtn, { attributes: true, attributeFilter: ["style"] });
-    observer.observe(accountName, { attributes: true, attributeFilter: ["style"] });
-    syncLogout();
-}
+// F02: body.logged-in class is now set directly by /check-auth handler above.
+// Mobile drawer logout/account visibility is gated via CSS body.logged-in rules
+// (see style.css lines around 1133 + 1345). No MutationObserver needed.
 
 function openMobileMenu() {
     navbar.classList.add("open");

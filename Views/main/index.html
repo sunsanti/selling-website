@@ -14,39 +14,51 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
-    <!-- This will be the header of the website -->
+    <!-- Header — 3-zone: logo / nav / CTA (F02 redesign) -->
     <header class="header">
-        <a href="#" class="logo" id="logo-link">
-            <span id="site-logo-text" style="display:none"></span>
-            <img id="site-logo-img" src="" alt="" style="display:none; height:40px; object-fit:contain;">
-        </a>
+        <!-- ZONE 1: Logo left -->
+        <div class="header-zone header-zone-left">
+            <a href="/main" class="logo" id="logo-link">
+                <span id="site-logo-text" class="logo-text">SEALAND PROPERTY</span>
+                <img id="site-logo-img" src="" alt="" style="display:none; height:40px; object-fit:contain;">
+            </a>
+        </div>
 
+        <!-- ZONE 2: Nav center (7 items + admin + mobile logout) -->
         <nav class="navbar" id="main-navbar">
-                <div class="mobile-nav-header" style="display: none;">
-                    <div id="mobile-site-phone" class="mobile-site-phone"></div>
-                    <div id="mobile-account" class="mobile-account-name"></div>
-                </div>
-                <a class = 'nav-item' href="#about-us">About us</a>
-                <a class = 'nav-item' href="#feature-project">Project</a>
-                <a class = 'nav-item' href="#services">Services</a>
-                <a class = 'nav-item' href="#footer">Contract</a>
-                <a class = 'nav-item desktop-admin-btn' id="admin-btn" style="display: none; color: red;" onclick="window.location.href='/admin'">Admin</a>
-                <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()" >logout</button>
+            <div class="mobile-nav-header" style="display: none;">
+                <div id="mobile-site-phone" class="mobile-site-phone"></div>
+                <div id="mobile-account" class="mobile-account-name"></div>
+            </div>
+            <a class="nav-item nav-active" href="/main">HOME</a>
+            <a class="nav-item" href="/projects">PROJECTS</a>
+            <a class="nav-item" href="#about-us">ABOUT US</a>
+            <a class="nav-item" href="#services">SERVICES</a>
+            <a class="nav-item" href="#video">VIDEO</a>
+            <a class="nav-item" href="#news">NEWS</a>
+            <a class="nav-item" href="#footer">CONTACT</a>
+            <a class="nav-item desktop-admin-btn" id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">ADMIN</a>
+            <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()">LOGOUT</button>
         </nav>
-        <div class="header-right">
-            <div class="content-header-right">
-                <div class="left-site">
-                    <div id="site-phone" class="site-phone">phone number</div>
-                </div>
-                <hr>
-                <div class="right-site">
-                    <div class="account-name" id="account">Name</div>
-                    <button id="logout-btn" onclick="logoutAdmin()">
-                        <div>logout</div>
-                    </button>
-                </div>
+
+        <!-- ZONE 3: CTA right -->
+        <div class="header-zone header-zone-right">
+            <!-- Logged-out state -->
+            <div class="header-cta logged-out-cta">
+                <a href="javascript:void(0)" class="btn-header-phone" id="header-phone-btn">
+                    <i class="fa-solid fa-phone"></i>
+                    <span id="site-phone">phone number</span>
+                </a>
+                <a href="#footer" class="btn-book-consultation">BOOK CONSULTATION</a>
+            </div>
+
+            <!-- Logged-in state (hidden default; toggled by /check-auth) -->
+            <div class="header-cta logged-in-cta" style="display: none;">
+                <div class="account-name" id="account">Name</div>
+                <button id="logout-btn" onclick="logoutAdmin()"><div>LOGOUT</div></button>
             </div>
         </div>
+
         <button class="menu-btn" id="menu-btn">
             <i class="fa-solid fa-bars"></i>
         </button>
