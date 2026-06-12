@@ -1116,6 +1116,10 @@ html{
 .header-right {
     display: none;
 }
+/* F02: new 3-zone right block also hidden in tablet/mobile drawer mode */
+.header-zone-right {
+    display: none;
+}
 
 /* Tablet drawer: phone number is always shown (header block);
    logout button only when logged in. Account name visibility is
@@ -1285,6 +1289,10 @@ body{
 
 /* Mobile: hide desktop header-right entirely, keep hamburger in navbar */
 .header-right {
+    display: none !important;
+}
+/* F02: new 3-zone right block also hidden in mobile */
+.header-zone-right {
     display: none !important;
 }
 

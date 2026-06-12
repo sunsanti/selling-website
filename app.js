@@ -28,6 +28,9 @@ app.use(session({
     }
 }));
 
+// Favicon: respond 204 to avoid 404 spam in console (no favicon file present)
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));
