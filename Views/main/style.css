@@ -734,70 +734,78 @@ section{
 }
 
 
-/* about us */
-.about-us{
+/* F04 — About: 4-stats compact bar with icons; old banner+paragraphs hidden */
+.about-us {
     width: 100%;
+    background: var(--color-cream-warm, #ffffe3);
+    padding: 6rem 5%;
 }
-.about-us .content{
+.about-us .heading {
+    text-align: center;
+    font-family: 'Playfair Display', serif;
+    color: var(--color-navy);
+    font-size: 3.6rem;
+    margin-bottom: 3.6rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+/* Hide legacy banner + 2 paragraphs (still rendered for admin preview but not visible) */
+#about-content {
+    display: none;
+}
+
+/* Stats horizontal bar */
+.info {
+    max-width: 1100px;
+    margin: 0 auto;
     display: flex;
     justify-content: space-between;
-    margin-bottom: 3rem;
+    align-items: stretch;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 30px rgba(10,31,61,0.06);
+    overflow: hidden;
 }
-.about-us .content .banner{
-    font-size: 5rem;
-
-}
-.about-us .content .small-content{
-    font-size: 16px;
+.info .block-num {
+    flex: 1;
     display: flex;
-    width: 50%;
-}
-.about-us .content .small-content .left{
-    width: 100%;
-    margin-right: 1rem;
-
-}
-.about-us .content .small-content .right{
-    width: 100%;
-}
-.info{
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    overflow: visible;
-}
-.info .block-num{
-    margin-top: 4rem;
-    padding-top: 2rem;
-    padding-bottom: 6rem;
+    align-items: center;
+    gap: 1.4rem;
+    padding: 2rem 2.4rem;
+    margin: 0;
+    border-right: 1px solid #eee;
     position: relative;
-    width: 100%;
-    margin-right: 2.5rem;
-    overflow: visible;
 }
-.info .block-num::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 0;      /* chỉnh vị trí bắt đầu */
-    width: 100%;     /* chỉnh độ dài */
-    height: 1px;
-    background: black;
+.info .block-num:last-child {
+    border-right: none;
 }
+/* Disable legacy ::before / ::after dividers */
+.info .block-num::before,
 .info .block-num::after {
-    content: "";
-    position: absolute;
-    right: 0;      /* sát mép phải */
-    top: 10%;      /* bắt đầu từ đâu */
-    height: 100%;   /* độ dài line */
-    width: 1px;
-    background: black;
+    display: none;
+    content: none;
 }
-.info .block-num .content-num1{
-    font-size: 6.5rem;
+.info .block-num .stat-icon {
+    font-size: 3rem;
+    color: var(--color-gold);
+    flex-shrink: 0;
 }
-.info .block-num .detail-content{
-    font-size: 1.5rem;
+.info .block-num .stat-text {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+.info .block-num .content-num1 {
+    font-family: 'Poppins', sans-serif;
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--color-navy);
+    line-height: 1;
+}
+.info .block-num .detail-content {
+    font-size: 1.2rem;
+    color: #777;
+    margin-top: 0.3rem;
 }
 
 /* feature */
@@ -1424,8 +1432,20 @@ body.logged-in .header .navbar .mobile-nav-header .mobile-account-name {
     margin-top:2rem;
 }
 
-.info{
-    flex-wrap:wrap;
+/* F04: tablet — 2x2 grid */
+.info {
+    flex-wrap: wrap;
+}
+.info .block-num {
+    flex: 0 0 50%;
+    box-sizing: border-box;
+    border-bottom: 1px solid #eee;
+}
+.info .block-num:nth-child(2n) {
+    border-right: none;
+}
+.info .block-num:nth-child(n+3) {
+    border-bottom: none;
 }
 
 .services .service-item{
@@ -1754,6 +1774,28 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 /* trên mobile giảm chiều cao khung ảnh */
 .feature-project .feature-item .feature-image {
     height: 200px;
+}
+
+/* F04 mobile: about stats 2x2 compact */
+.about-us {
+    padding: 4rem 4%;
+}
+.about-us .heading {
+    font-size: 2.4rem;
+    margin-bottom: 2.4rem;
+}
+.info .block-num {
+    padding: 1.4rem 1.4rem;
+    gap: 1rem;
+}
+.info .block-num .stat-icon {
+    font-size: 2.2rem;
+}
+.info .block-num .content-num1 {
+    font-size: 1.8rem;
+}
+.info .block-num .detail-content {
+    font-size: 1.05rem;
 }
 
 /* services - mobile design (content card above, image below) */

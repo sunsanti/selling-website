@@ -229,9 +229,26 @@ function renderAbout(d) {
     if (!info) return;
     info.innerHTML = '';
     info.style.display = '';
-    (d.stats || []).forEach(s => {
+
+    // F04: icon mapping per slot — line-art gold accents
+    const ABOUT_STAT_ICONS = {
+        1: 'fa-users',          // Happy Clients
+        2: 'fa-house-user',     // Property Sold
+        3: 'fa-award',          // Years Experience
+        4: 'fa-city'            // Projects Completed
+    };
+
+    (d.stats || []).forEach((s, idx) => {
+        const slot = s.slot || (idx + 1);
         const block = document.createElement('div');
         block.className = 'block-num';
+
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid ' + (ABOUT_STAT_ICONS[slot] || 'fa-circle') + ' stat-icon';
+        block.appendChild(icon);
+
+        const textWrap = document.createElement('div');
+        textWrap.className = 'stat-text';
 
         const num = document.createElement('div');
         num.className = 'content-num1';
@@ -241,11 +258,13 @@ function renderAbout(d) {
         lbl.className = 'detail-content';
         lbl.textContent = s.label || '';
 
-        block.appendChild(num);
-        block.appendChild(lbl);
+        textWrap.appendChild(num);
+        textWrap.appendChild(lbl);
+        block.appendChild(textWrap);
         info.appendChild(block);
     });
 
+    // Empty state: hide the bar if all stats blank
     if ((d.stats || []).every(s => !s.num && !s.label)) {
         info.style.display = 'none';
     }

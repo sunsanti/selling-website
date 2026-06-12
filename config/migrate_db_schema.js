@@ -158,10 +158,11 @@ const TABLES = [
             )
         `,
         seed: [
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [1, '20+', 'years of experience']],
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [2, '200+', 'projects have done']],
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [3, '7+', 'awards received']],
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [4, '15+', 'team members']]
+            // F04 Premium labels — admin can override via UI; INSERT IGNORE skips existing rows
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [1, '500+', 'Happy Clients']],
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [2, '$300M+', 'Property Sold']],
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [3, '10+', 'Years Experience']],
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [4, '50+', 'Projects Completed']]
         ],
         summaryCols: ['slot', 'num', 'label']
     },
