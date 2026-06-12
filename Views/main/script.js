@@ -103,8 +103,18 @@ function closeMobileMenu() {
     document.documentElement.style.overflow = "";
 }
 
+function toggleMobileMenu(event) {
+    // Prevent the window-onclick handler in this file from re-closing immediately
+    if (event) event.stopPropagation();
+    if (navbar.classList.contains("open")) {
+        closeMobileMenu();
+    } else {
+        openMobileMenu();
+    }
+}
+
 if (menuBtn && navbar) {
-    menuBtn.addEventListener("click", openMobileMenu);
+    menuBtn.addEventListener("click", toggleMobileMenu);
 }
 
 if (mobileOverlay) {

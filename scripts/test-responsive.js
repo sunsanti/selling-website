@@ -89,10 +89,14 @@ async function runViewportAuth(browser, vp, authState, report) {
         if (msg.type() === 'warning') vpErrors.push(`[CONSOLE WARN] ${msg.text()}`);
     });
     page.on('pageerror', err => vpErrors.push(`[PAGE ERROR] ${err.message}`));
-    page.on('requestfailed', req => vpErrors.push(`[REQ FAIL] ${req.url()} — ${req.failure().errorText}`));
+    const isExternalCdn = url => /unpkg\.com|fonts\.gstatic\.com|cdnjs\.cloudflare\.com|fonts\.googleapis\.com/i.test(url);
+    page.on('requestfailed', req => {
+        if (isExternalCdn(req.url())) return;
+        vpErrors.push(`[REQ FAIL] ${req.url()} — ${req.failure().errorText}`);
+    });
     page.on('response', resp => {
         const status = resp.status();
-        if (status >= 400) vpErrors.push(`[HTTP ${status}] ${resp.url()}`);
+        if (status >= 400 && !isExternalCdn(resp.url())) vpErrors.push(`[HTTP ${status}] ${resp.url()}`);
     });
 
     try {
@@ -128,6 +132,7 @@ async function runViewportAuth(browser, vp, authState, report) {
 
     let drawerToggled = null;
     let drawerBox = null;
+    let drawerCloseByHamburger = null;
     let mobileAccountVisible = null;
     if (vp.width <= 1024) {
         try {
@@ -147,6 +152,12 @@ async function runViewportAuth(browser, vp, authState, report) {
             mobileAccountVisible = await page.locator('#mobile-account').isVisible().catch(() => false);
             const drawerShot = path.join(OUT_DIR, `${FEATURE}-${vp.name}-drawer-open-${authState}.png`);
             await page.screenshot({ path: drawerShot, fullPage: false });
+
+            // Click hamburger again — should CLOSE drawer (toggle)
+            await page.locator('.menu-btn').click();
+            await page.waitForTimeout(500);
+            const drawerStillOpen = await page.locator('.navbar.open').count();
+            drawerCloseByHamburger = drawerStillOpen === 0;
         } catch (e) {
             drawerToggled = `error: ${e.message}`;
         }
@@ -155,6 +166,10 @@ async function runViewportAuth(browser, vp, authState, report) {
         const expectAccountVisible = (authState === 'logged-in');
         if (mobileAccountVisible !== expectAccountVisible) {
             layoutMismatch.push(`#mobile-account expected ${expectAccountVisible ? 'visible' : 'hidden'}, got ${mobileAccountVisible ? 'visible' : 'hidden'}`);
+        }
+        // Verify drawer closes via second hamburger click (toggle behavior)
+        if (drawerCloseByHamburger === false) {
+            layoutMismatch.push('hamburger 2nd click did not close drawer');
         }
     }
 
