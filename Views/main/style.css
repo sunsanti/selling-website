@@ -1206,7 +1206,10 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     align-items: center;
     gap: 0.8rem;
     letter-spacing: 0.04em;
-    margin-left: auto;     /* always push phone to right edge */
+}
+/* Name flush right (when visible / logged in) */
+body.logged-in .header .navbar .mobile-nav-header .mobile-account-name {
+    margin-left: auto;
 }
 /* Account name only when logged in — hidden otherwise */
 .header .navbar .mobile-nav-header .mobile-account-name {
