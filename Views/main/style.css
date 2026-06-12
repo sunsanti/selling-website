@@ -550,16 +550,15 @@ section{
 .mobile-nav-header {
     display: block;
 }
-/* F03 — Home hero redesign: bg image cover + left gradient overlay + premium copy */
+/* F03 — Home hero: left cream solid / right image (sharp split with soft transition) */
 #home-section {
     position: relative;
-    min-height: 85vh;
     overflow: hidden;
-    background: var(--color-cream);
+    background: #f5f1e8;             /* warm cream matching reference */
 }
 .home {
     position: relative;
-    min-height: 85vh;
+    min-height: 78vh;
     display: block;
 }
 .home-bg {
@@ -575,29 +574,34 @@ section{
 .home-overlay {
     position: absolute;
     inset: 0;
-    background: linear-gradient(90deg, rgba(255,255,245,0.92) 0%, rgba(255,255,245,0.6) 30%, rgba(255,255,245,0.1) 55%, transparent 70%);
+    background: linear-gradient(90deg,
+        #f5f1e8 0%,
+        #f5f1e8 38%,
+        rgba(245,241,232,0.85) 46%,
+        rgba(245,241,232,0.3) 56%,
+        transparent 66%);
 }
 .home-content-wrapper {
     position: relative;
     z-index: 2;
-    max-width: 1300px;
+    max-width: 1400px;
     margin: 0 auto;
-    padding: 10rem 5% 14rem;
+    padding: 8rem 6% 12rem;
     display: flex;
     align-items: center;
 }
 .home-content-wrapper .content {
-    max-width: 640px;
+    max-width: 560px;
 }
 .hero-tagline {
     display: inline-flex;
     align-items: center;
-    gap: 0.6rem;
-    color: var(--color-gold);
-    font-size: 1.3rem;
-    font-weight: 700;
+    gap: 0.8rem;
+    color: #c89a1f;                  /* darker gold like reference */
+    font-size: 1.25rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.22em;
     margin-bottom: 2.4rem;
     font-family: 'Poppins', sans-serif;
 }
@@ -606,128 +610,127 @@ section{
 }
 .hero-title {
     font-family: 'Playfair Display', serif;
-    font-size: clamp(3.6rem, 6vw, 6.4rem);
+    font-size: clamp(3.6rem, 5.6vw, 5.8rem);
     line-height: 1.05;
-    color: var(--color-navy);
+    color: #0a1f3d;
     text-transform: uppercase;
     margin-bottom: 2.4rem;
     font-weight: 700;
-    letter-spacing: 0.01em;
+    letter-spacing: 0;
 }
 .hero-subtitle {
     font-size: 1.5rem;
-    color: var(--color-navy);
-    line-height: 1.6;
-    max-width: 560px;
+    color: rgba(10, 31, 61, 0.75);
+    line-height: 1.55;
+    max-width: 480px;
     margin-bottom: 3.4rem;
-    opacity: 0.85;
+    font-weight: 400;
 }
 
 /* Hero CTA buttons */
 .home-btn {
     display: flex;
-    gap: 1.4rem;
+    gap: 1.2rem;
     align-items: center;
     flex-wrap: wrap;
 }
-.btn-explore-projects {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.8rem;
-    padding: 1.5rem 2.8rem;
-    background: var(--color-navy);
-    color: #fff;
-    font-size: 1.3rem;
-    font-weight: 700;
-    text-transform: uppercase;
-    letter-spacing: 0.12em;
-    border-radius: 4px;
-    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease;
-    text-decoration: none;
-}
-.btn-explore-projects:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 12px 28px rgba(0,3,66,0.3);
-    background: var(--color-gold);
-    color: var(--color-navy);
-}
+.btn-explore-projects,
 .btn-book-outline {
     display: inline-flex;
     align-items: center;
-    padding: 1.5rem 2.8rem;
-    background: transparent;
-    color: var(--color-navy);
-    border: 2px solid var(--color-navy);
-    font-size: 1.3rem;
-    font-weight: 700;
+    gap: 1rem;
+    padding: 1.3rem 2.4rem;
+    font-size: 1.2rem;
+    font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.12em;
-    border-radius: 4px;
-    transition: background 0.25s ease, color 0.25s ease;
+    border-radius: 6px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease, color 0.25s ease;
     text-decoration: none;
 }
-.btn-book-outline:hover {
-    background: var(--color-navy);
+.btn-explore-projects {
+    background: #0a1f3d;
     color: #fff;
+    border: 1.5px solid #0a1f3d;
+}
+.btn-explore-projects:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(10,31,61,0.3);
+}
+.btn-book-outline {
+    background: transparent;
+    color: #0a1f3d;
+    border: 1.5px solid rgba(10,31,61,0.3);
+}
+.btn-book-outline:hover {
+    background: #0a1f3d;
+    color: #fff;
+    border-color: #0a1f3d;
+}
+.btn-explore-projects i,
+.btn-book-outline i {
+    font-size: 1.1rem;
 }
 
-/* Property Search Bar — overlap bottom of hero */
+/* Property Search Bar — sits below hero on cream bg, subtle shadow */
 .property-search {
     position: relative;
     z-index: 3;
-    margin: -6rem 5% 0;
+    margin: 0 6% -3.5rem;
     background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 24px 60px rgba(0,3,66,0.18);
+    border-radius: 8px;
+    box-shadow: 0 4px 24px rgba(10,31,61,0.08);
     display: grid;
     grid-template-columns: repeat(4, 1fr) auto;
     overflow: hidden;
+    border: 1px solid rgba(10,31,61,0.06);
 }
 .search-field {
-    padding: 1.4rem 1.8rem;
+    padding: 1.4rem 2rem;
     border-right: 1px solid #ececec;
     display: flex;
     flex-direction: column;
-    gap: 0.5rem;
+    gap: 0.4rem;
 }
 .search-field label {
-    font-size: 1.05rem;
+    font-size: 0.95rem;
     color: #999;
     text-transform: uppercase;
-    letter-spacing: 0.12em;
-    font-weight: 700;
+    letter-spacing: 0.14em;
+    font-weight: 600;
 }
 .search-field select {
     border: none;
     background: transparent;
-    font-size: 1.4rem;
-    color: var(--color-navy);
+    font-size: 1.35rem;
+    color: #0a1f3d;
     font-weight: 500;
     cursor: pointer;
     appearance: none;
-    padding-right: 1.4rem;
-    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%23000342' stroke-width='1.6' stroke-linecap='round'/></svg>");
+    padding-right: 1.6rem;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%230a1f3d' stroke-width='1.5' stroke-linecap='round'/></svg>");
     background-repeat: no-repeat;
     background-position: right 0 center;
 }
 .btn-search-property {
-    background: var(--color-navy);
+    background: #0a1f3d;
     color: #fff;
     border: none;
-    padding: 0 2.6rem;
-    font-size: 1.3rem;
-    font-weight: 700;
+    padding: 0 3rem;
+    font-size: 1.15rem;
+    font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.1em;
+    letter-spacing: 0.12em;
     display: inline-flex;
     align-items: center;
     gap: 0.8rem;
     cursor: pointer;
     transition: background 0.25s ease, color 0.25s ease;
+    min-height: 70px;
 }
 .btn-search-property:hover {
     background: var(--color-gold);
-    color: var(--color-navy);
+    color: #0a1f3d;
 }
 
 
