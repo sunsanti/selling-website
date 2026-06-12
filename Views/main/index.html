@@ -41,18 +41,20 @@
             <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()">LOGOUT</button>
         </nav>
 
-        <!-- ZONE 3: CTA right -->
+        <!-- ZONE 3: CTA right — phone always visible; second slot toggles by auth -->
         <div class="header-zone header-zone-right">
-            <!-- Logged-out state -->
+            <!-- Always-visible phone button -->
+            <a href="javascript:void(0)" class="btn-header-phone" id="header-phone-btn">
+                <i class="fa-solid fa-phone"></i>
+                <span id="site-phone">phone number</span>
+            </a>
+
+            <!-- Logged-out CTA -->
             <div class="header-cta logged-out-cta">
-                <a href="javascript:void(0)" class="btn-header-phone" id="header-phone-btn">
-                    <i class="fa-solid fa-phone"></i>
-                    <span id="site-phone">phone number</span>
-                </a>
                 <a href="#footer" class="btn-book-consultation">BOOK CONSULTATION</a>
             </div>
 
-            <!-- Logged-in state (hidden default; toggled by /check-auth) -->
+            <!-- Logged-in CTA (hidden default; toggled by /check-auth) -->
             <div class="header-cta logged-in-cta" style="display: none;">
                 <div class="account-name" id="account">Name</div>
                 <button id="logout-btn" onclick="logoutAdmin()"><div>LOGOUT</div></button>
