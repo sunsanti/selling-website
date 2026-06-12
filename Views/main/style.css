@@ -550,41 +550,184 @@ section{
 .mobile-nav-header {
     display: block;
 }
-/* home */
-.home{
-    display: flex;
+/* F03 — Home hero redesign: bg image cover + left gradient overlay + premium copy */
+#home-section {
     position: relative;
-    align-items: center;
-    flex-direction: column;
+    min-height: 85vh;
+    overflow: hidden;
+    background: var(--color-cream);
 }
-.home .content{
-    font-size: clamp(4rem,10vw,14rem);
+.home {
+    position: relative;
+    min-height: 85vh;
+    display: block;
+}
+.home-bg {
+    position: absolute;
+    inset: 0;
+    z-index: 0;
+}
+.home-bg img {
     width: 100%;
-    max-width: 1200px;
-    margin: auto;
-    line-height: 0.95;
-    letter-spacing: 0.08em;
+    height: 100%;
+    object-fit: cover;
 }
-
-.home .content .left{
-    text-align: left;
+.home-overlay {
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(90deg, rgba(255,255,245,0.92) 0%, rgba(255,255,245,0.6) 30%, rgba(255,255,245,0.1) 55%, transparent 70%);
 }
-
-.home .content .right{
-    text-align: right;
-    margin-top: -0.2em;
-}
-.home .sub-content{
-    font-size: 2rem;
+.home-content-wrapper {
+    position: relative;
+    z-index: 2;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: 10rem 5% 14rem;
     display: flex;
     align-items: center;
-    gap: 2rem;
 }
-.home .home-image{
-  margin-top: 1rem;  
+.home-content-wrapper .content {
+    max-width: 640px;
 }
-.home .home-image img{
-  width: 100%;
+.hero-tagline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-gold);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    margin-bottom: 2.4rem;
+    font-family: 'Poppins', sans-serif;
+}
+.hero-tagline i {
+    font-size: 1.1rem;
+}
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3.6rem, 6vw, 6.4rem);
+    line-height: 1.05;
+    color: var(--color-navy);
+    text-transform: uppercase;
+    margin-bottom: 2.4rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+}
+.hero-subtitle {
+    font-size: 1.5rem;
+    color: var(--color-navy);
+    line-height: 1.6;
+    max-width: 560px;
+    margin-bottom: 3.4rem;
+    opacity: 0.85;
+}
+
+/* Hero CTA buttons */
+.home-btn {
+    display: flex;
+    gap: 1.4rem;
+    align-items: center;
+    flex-wrap: wrap;
+}
+.btn-explore-projects {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.5rem 2.8rem;
+    background: var(--color-navy);
+    color: #fff;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-radius: 4px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.25s ease;
+    text-decoration: none;
+}
+.btn-explore-projects:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 28px rgba(0,3,66,0.3);
+    background: var(--color-gold);
+    color: var(--color-navy);
+}
+.btn-book-outline {
+    display: inline-flex;
+    align-items: center;
+    padding: 1.5rem 2.8rem;
+    background: transparent;
+    color: var(--color-navy);
+    border: 2px solid var(--color-navy);
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    border-radius: 4px;
+    transition: background 0.25s ease, color 0.25s ease;
+    text-decoration: none;
+}
+.btn-book-outline:hover {
+    background: var(--color-navy);
+    color: #fff;
+}
+
+/* Property Search Bar — overlap bottom of hero */
+.property-search {
+    position: relative;
+    z-index: 3;
+    margin: -6rem 5% 0;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 24px 60px rgba(0,3,66,0.18);
+    display: grid;
+    grid-template-columns: repeat(4, 1fr) auto;
+    overflow: hidden;
+}
+.search-field {
+    padding: 1.4rem 1.8rem;
+    border-right: 1px solid #ececec;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+.search-field label {
+    font-size: 1.05rem;
+    color: #999;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 700;
+}
+.search-field select {
+    border: none;
+    background: transparent;
+    font-size: 1.4rem;
+    color: var(--color-navy);
+    font-weight: 500;
+    cursor: pointer;
+    appearance: none;
+    padding-right: 1.4rem;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8' fill='none'><path d='M1 1.5L6 6.5L11 1.5' stroke='%23000342' stroke-width='1.6' stroke-linecap='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 0 center;
+}
+.btn-search-property {
+    background: var(--color-navy);
+    color: #fff;
+    border: none;
+    padding: 0 2.6rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    cursor: pointer;
+    transition: background 0.25s ease, color 0.25s ease;
+}
+.btn-search-property:hover {
+    background: var(--color-gold);
+    color: var(--color-navy);
 }
 
 
@@ -1151,18 +1294,28 @@ html{
     color: #ff8888 !important;
 }
 
-.home .content{
-    font-size: 8rem;
-    line-height: 0.95;
+/* F03: tablet hero — shrink padding, search bar wraps to 2x2 */
+.home-content-wrapper {
+    padding: 8rem 5% 12rem;
 }
-
-.home .content .left{
-    margin-left: 2rem;
+.hero-title {
+    font-size: clamp(3rem, 7vw, 5.2rem);
 }
-
-.home .content .right{
-    margin-right: 2rem;
-    margin-top: -0.15em;
+.property-search {
+    grid-template-columns: repeat(4, 1fr);
+    margin: -5rem 4% 0;
+}
+.btn-search-property {
+    grid-column: 1 / -1;
+    padding: 1.6rem;
+    justify-content: center;
+    border-top: 1px solid #ececec;
+}
+/* Hide legacy markup if any */
+.home .content .left,
+.home .content .right,
+.home .sub-content {
+    display: none;
 }
 
 /* iPad: phone/account/logout live in the drawer (mobile-nav-header) — not in
@@ -1456,27 +1609,50 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     margin-top:1.5rem;
 }
 
-.home .content{
-    font-size: 5rem;
-    text-align: center;
-    line-height: 0.95;
+/* F03: mobile hero — full overlay, single col stack, search 1-col */
+.home-overlay {
+    background: linear-gradient(180deg, rgba(255,255,245,0.85) 0%, rgba(255,255,245,0.9) 100%);
 }
-
-.home .content .left,
-.home .content .right{
-    margin: 0;
-    text-align: center;
+.home-content-wrapper {
+    padding: 6rem 5% 14rem;
+    text-align: left;
 }
-
-.home .content .right{
-    margin-top: -0.1em;
+.hero-title {
+    font-size: clamp(2.8rem, 9vw, 4rem);
 }
-
-.home .sub-content{
-    flex-direction:row;
-    flex-wrap: wrap;
+.hero-subtitle {
+    font-size: 1.4rem;
+}
+.home-btn {
+    flex-direction: column;
+    align-items: stretch;
+}
+.btn-explore-projects,
+.btn-book-outline {
+    width: 100%;
     justify-content: center;
-    gap: 1rem;
+    padding: 1.5rem 1.8rem;
+}
+.property-search {
+    grid-template-columns: 1fr;
+    margin: -8rem 5% 0;
+}
+.search-field {
+    border-right: none;
+    border-bottom: 1px solid #ececec;
+    padding: 1.2rem 1.6rem;
+}
+.btn-search-property {
+    grid-column: 1;
+    padding: 1.4rem;
+    border-top: none;
+}
+
+/* Legacy hidden overrides (defensive — already display:none at @1024) */
+.home .content .left,
+.home .content .right,
+.home .sub-content {
+    display: none;
 }
 
 .home-btn {

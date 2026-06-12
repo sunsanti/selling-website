@@ -39,7 +39,19 @@ const REQUIRED_SELECTORS = [
     '.btn-book-consultation',
     '.btn-header-phone',
     '.logo-text',
-    '.menu-btn'
+    '.menu-btn',
+    // F03 hero
+    '.hero-tagline',
+    '.hero-title',
+    '.hero-subtitle',
+    '.btn-explore-projects',
+    '.btn-book-outline',
+    '#property-search',
+    '#search-state',
+    '#search-suburb',
+    '#search-type',
+    '#search-price',
+    '.btn-search-property'
 ];
 
 async function loginIfNeeded(page) {

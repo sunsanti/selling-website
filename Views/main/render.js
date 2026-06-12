@@ -39,8 +39,9 @@ function renderSettings(s) {
         if (mobilePhone) mobilePhone.textContent = phoneVal;
     }
     if (s.main_image !== undefined && s.main_image) {
-        const homeImg = document.querySelector('.home-image img');
-        if (homeImg) homeImg.src = normalizeImageUrl(s.main_image);
+        // F03: hero image element id #hero-image (replaces legacy .home-image img selector)
+        const heroImg = document.getElementById('hero-image') || document.querySelector('.home-image img');
+        if (heroImg) heroImg.src = normalizeImageUrl(s.main_image);
     }
 }
 
@@ -563,3 +564,16 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 });
+
+// F03: Property Search Bar — collect dropdowns, navigate /projects with query string
+function handleSearchSubmit(event) {
+    event.preventDefault();
+    const params = new URLSearchParams();
+    ['state', 'suburb', 'type', 'price'].forEach(f => {
+        const el = document.getElementById('search-' + f);
+        if (el && el.value) params.set(f, el.value);
+    });
+    const qs = params.toString();
+    window.location.href = '/projects' + (qs ? '?' + qs : '');
+}
+window.handleSearchSubmit = handleSearchSubmit;
