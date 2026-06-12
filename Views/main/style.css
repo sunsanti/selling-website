@@ -1061,6 +1061,8 @@ html{
     background: linear-gradient(180deg, var(--color-navy) 0%, #0a1450 100%);
     display: flex !important;
     flex-direction: column;
+    justify-content: flex-start;   /* override desktop center → items at top */
+    align-items: stretch;
     gap: 0;
     padding: 0 24px 0 0;
     box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);
@@ -1185,25 +1187,26 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
     display: flex !important;
 }
 
-/* F02 polish v3: cleaner account block — minimal, no boxy bg */
+/* F02 polish v5: NAME on LEFT (flush), PHONE on RIGHT (flush) — same width as drawer items */
 .header .navbar .mobile-nav-header {
-    flex-direction: column;
-    align-items: flex-start;
+    flex-direction: row;
+    align-items: center;
     justify-content: flex-start;
     padding: 1.8rem 2.4rem 1.4rem;
     border-bottom: 1px solid rgba(255, 207, 0, 0.15);
     background: transparent;
-    gap: 0.4rem;
+    gap: 1.6rem;
+    flex-shrink: 0;
 }
 .header .navbar .mobile-nav-header .mobile-site-phone {
     font-size: 1.4rem;
     font-weight: 500;
     color: rgba(255, 255, 255, 0.9);
-    display: grid;
-    grid-template-columns: 24px 1fr;
+    display: inline-flex;
     align-items: center;
-    gap: 1.6rem;
+    gap: 0.8rem;
     letter-spacing: 0.04em;
+    margin-left: auto;     /* always push phone to right edge */
 }
 /* Account name only when logged in — hidden otherwise */
 .header .navbar .mobile-nav-header .mobile-account-name {
@@ -1226,9 +1229,9 @@ body.logged-in .header .navbar .mobile-nav-header .mobile-account-name {
     text-transform: uppercase;
     letter-spacing: 0.12em;
 }
+/* Logout pinned to BOTTOM of drawer column via auto top margin */
 .header .navbar .mobile-logout-btn {
-    margin-top: auto;
-    margin: 2rem 2.4rem 2.4rem;
+    margin: auto 2.4rem 2.4rem;  /* top=auto pushes element to bottom of flex column */
     background: transparent;
     border: 1.5px solid var(--color-gold);
     border-radius: 999px;
@@ -1241,6 +1244,7 @@ body.logged-in .header .navbar .mobile-nav-header .mobile-account-name {
     cursor: pointer;
     transition: background-color 0.25s, color 0.25s;
     text-align: center;
+    flex-shrink: 0;
 }
 .header .navbar .mobile-logout-btn:hover {
     background-color: var(--color-gold);
@@ -1414,6 +1418,8 @@ body{
     background: linear-gradient(180deg, var(--color-navy) 0%, #0a1450 100%);
     display: flex !important;
     flex-direction: column;
+    justify-content: flex-start;   /* override desktop center → items at top */
+    align-items: stretch;
     gap: 0;
     padding: 0 24px 0 0;
     box-shadow: -8px 0 32px rgba(0, 0, 0, 0.4);

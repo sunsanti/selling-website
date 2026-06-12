@@ -44,7 +44,6 @@ const REQUIRED_SELECTORS = [
 
 async function loginIfNeeded(page) {
     await page.goto(BASE + '/login', { waitUntil: 'domcontentloaded' });
-    // Login form typically has username + password fields. Adapt to project.
     const userInput = page.locator('input[name="username"]').first();
     const passInput = page.locator('input[name="password"]').first();
     if (await userInput.count() === 0) throw new Error('Login form not found');
@@ -54,7 +53,16 @@ async function loginIfNeeded(page) {
         page.waitForURL(/\/main/, { timeout: 5000 }).catch(() => {}),
         page.locator('form button[type="submit"], form input[type="submit"]').first().click()
     ]);
-    await page.waitForTimeout(800);
+    await page.waitForTimeout(1000);
+    // Verify login succeeded via /check-auth
+    const auth = await page.evaluate(async () => {
+        try {
+            const r = await fetch('/check-auth');
+            return await r.json();
+        } catch (e) { return { loggedIn: false }; }
+    });
+    if (!auth.loggedIn) throw new Error('Login failed — /check-auth says not logged in');
+    return auth;
 }
 
 async function dismissFillPopup(page) {
