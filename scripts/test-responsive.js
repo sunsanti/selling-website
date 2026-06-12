@@ -111,24 +111,46 @@ async function run() {
             layoutMismatch.push(`CTA right zone expected ${expectCtaRight ? 'visible' : 'hidden'}, got ${ctaRightVisible ? 'visible' : 'hidden'}`);
         }
 
-        // Test drawer open on mobile/tablet
+        // Take screenshot of closed-drawer state first
+        const shot = path.join(OUT_DIR, `${FEATURE}-${vp.name}.png`);
+        await page.screenshot({ path: shot, fullPage: false });
+
+        // Test drawer open on mobile/tablet + screenshot of opened state
         let drawerToggled = null;
+        let drawerBox = null;
         if (vp.width <= 1024) {
             try {
                 await page.locator('.menu-btn').click();
-                await page.waitForTimeout(500);
+                await page.waitForTimeout(600); // wait for slide animation
                 const drawerOpen = await page.locator('.navbar.open').count();
                 drawerToggled = drawerOpen > 0;
-                // Close it back for screenshot
-                await page.locator('.menu-btn').click().catch(() => {});
-                await page.waitForTimeout(300);
+                // Measure actual drawer rendered position
+                drawerBox = await page.evaluate(() => {
+                    const n = document.querySelector('.navbar.open') || document.querySelector('.navbar');
+                    if (!n) return null;
+                    const r = n.getBoundingClientRect();
+                    const cs = window.getComputedStyle(n);
+                    const docCS = window.getComputedStyle(document.documentElement);
+                    const bodyCS = window.getComputedStyle(document.body);
+                    return {
+                        x: r.x, y: r.y, width: r.width, height: r.height,
+                        right: r.right, viewport_w: window.innerWidth,
+                        client_w: document.documentElement.clientWidth,
+                        gap_right_px: window.innerWidth - r.right,
+                        scrollbar_gap_px: window.innerWidth - document.documentElement.clientWidth,
+                        css_width: cs.width, css_transform: cs.transform,
+                        html_overflow: docCS.overflow,
+                        body_overflow: bodyCS.overflow,
+                        html_scrollbar_width: docCS.scrollbarWidth
+                    };
+                });
+                const drawerShot = path.join(OUT_DIR, `${FEATURE}-${vp.name}-drawer-open.png`);
+                await page.screenshot({ path: drawerShot, fullPage: false });
             } catch (e) {
                 drawerToggled = `error: ${e.message}`;
             }
         }
-
-        const shot = path.join(OUT_DIR, `${FEATURE}-${vp.name}.png`);
-        await page.screenshot({ path: shot, fullPage: false });
+        if (drawerBox) report.viewports = report.viewports || {};
 
         report.viewports[vp.name] = {
             url: BASE + '/main/',
@@ -138,9 +160,13 @@ async function run() {
             cta_right_visible: ctaRightVisible,
             layout_mismatch: layoutMismatch,
             drawer_toggled: drawerToggled,
+            drawer_box: drawerBox,
             console_errors: vpErrors,
             screenshot: shot
         };
+        if (drawerBox) {
+            console.log('  drawer measured:', `x=${drawerBox.x.toFixed(1)} w=${drawerBox.width.toFixed(1)} right=${drawerBox.right.toFixed(1)} viewport_w=${drawerBox.viewport_w} gap_right=${drawerBox.gap_right_px.toFixed(1)}px`);
+        }
 
         const failed = missing.length > 0 || layoutMismatch.length > 0 || vpErrors.length > 0;
         totalErrors += failed ? 1 : 0;

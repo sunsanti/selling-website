@@ -92,17 +92,15 @@ function openMobileMenu() {
     navbar.classList.add("open");
     mobileOverlay.classList.add("active");
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden"; // also lock <html> to remove scrollbar gap
 }
 
 function closeMobileMenu() {
     navbar.classList.remove("open");
     mobileOverlay.classList.remove("active");
-    setTimeout(() => {
-        if (!mobileOverlay.classList.contains("active")) {
-            mobileOverlay.style.display = "none";
-        }
-    }, 300);
+    // F02 polish: overlay hidden via opacity + pointer-events (CSS), no inline display toggle needed
     document.body.style.overflow = "";
+    document.documentElement.style.overflow = "";
 }
 
 if (menuBtn && navbar) {
