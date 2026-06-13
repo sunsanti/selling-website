@@ -307,7 +307,8 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
             const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: formData });
             const result = await res.json();
             if (result.success) {
-                mainImageValue = result.path.replace(/^\/images\//, '');
+                // F10.fix: upload handler already returns /uploads/<file> — store verbatim
+                mainImageValue = result.path;
             }
         } catch (error) {
             showToast('Error uploading main image', 'error');
@@ -732,12 +733,13 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
             console.log('Step 5 - fetched images:', firstImgData);
             if (firstImgData.success && firstImgData.data && firstImgData.data.length > 0) {
                 const firstImg = firstImgData.data[0];
-                const cleanPath = (firstImg.image_path || '').replace(/^\/images\//, '').replace(/^\/uploads\//, '');
-                console.log('Setting image_path to:', cleanPath);
+                // F10.fix: sync image_path verbatim (already /uploads/<file> from Media Library)
+                const syncPath = firstImg.image_path || '';
+                console.log('Setting image_path to:', syncPath);
                 await fetch(`/api/admin/projects/${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image_path: cleanPath })
+                    body: JSON.stringify({ image_path: syncPath })
                 });
                 console.log('image_path synced!');
             } else {

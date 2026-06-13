@@ -34,7 +34,8 @@ const updateSettings = async (req, res) => {
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
         if (main_image !== undefined) {
-            await settingModel.updateSetting('main_image', main_image.replace(/^\/images\//, ''));
+            // F10.fix: store path as-is; Media Library always returns /uploads/<file>
+            await settingModel.updateSetting('main_image', String(main_image).slice(0, 500));
         }
         // F06: Purpose-Invest video — thumbnail (image path) + url (mp4)
         if (purpose_video_thumbnail !== undefined) {
@@ -75,11 +76,7 @@ const getProjects = async (req, res) => {
         const projects = useInactive
             ? await projectModel.getAllProjects(true)
             : await projectModel.getAllProjects();
-        projects.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
-            }
-        });
+        // F10.fix: projectModel already normalizes image_path to /uploads/ — no extra prefix work here
         res.json({ success: true, data: projects });
     } catch (error) {
         console.error('Lỗi getProjects:', error.message);
@@ -110,10 +107,10 @@ const createProject = async (req, res) => {
         if (!name || !area) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
         }
-        const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
+        // F10.fix: store image_path verbatim (Media Library returns /uploads/<file>)
         const id = await projectModel.createProject({
             name, area, square_meters, category, year, style,
-            small_content, image_path: cleanImagePath,
+            small_content, image_path: image_path || '',
             // F05d
             price: price ? String(price).slice(0, 50) : null,
             beds: beds ? String(beds).slice(0, 20) : null,
@@ -153,7 +150,8 @@ const updateProject = async (req, res) => {
         if (style !== undefined) fields.style = style;
         if (small_content !== undefined) fields.small_content = small_content;
         if (image_path !== undefined) {
-            fields.image_path = image_path.replace(/^\/images\//, '');
+            // F10.fix: store image_path verbatim under /uploads/
+            fields.image_path = String(image_path || '').slice(0, 255);
         }
         if (display_order !== undefined) fields.display_order = display_order;
         // F05d extended
@@ -234,12 +232,7 @@ const searchProjects = async (req, res) => {
     try {
         const { keyword, status } = req.query;
         const projects = await searchModel.searchProjects(keyword || '', status || 'active');
-        // Normalize image_path with /images/ prefix
-        projects.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
-            }
-        });
+        // F10.fix: searchModel already normalizes image_path to /uploads/
         res.json({ success: true, data: projects });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });

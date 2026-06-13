@@ -35,7 +35,7 @@ const TABLES = [
         seed: [
             ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['logo', 'LOGO']],
             ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['phone', 'phone number']],
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['main_image', 'service3.jpg']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['main_image', '/uploads/service3.jpg']],
             // F06 — Purpose-Invest video keys
             ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_url', '']],
             ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_thumbnail', '']]
@@ -378,6 +378,57 @@ async function hasColumn(table, column) {
     return rows.length > 0;
 }
 
+// F10.fix: normalize legacy /images/<file> and bare-filename media paths to /uploads/<file>
+// — idempotent: skips rows already /uploads/, http(s)://, data:, or empty
+async function normalizeMediaPaths() {
+    const targets = [
+        // [table, column, where-clause-for-filter]
+        ['settings',       'setting_value', "WHERE setting_key IN ('logo','main_image','purpose_video_url','purpose_video_thumbnail')"],
+        ['projects',       'image_path',    "WHERE image_path IS NOT NULL AND image_path != ''"],
+        ['tableimages',    'image_path',    "WHERE image_path IS NOT NULL AND image_path != ''"],
+        ['services',       'image_path',    "WHERE image_path IS NOT NULL AND image_path != ''"],
+        ['news',           'cover_image',   "WHERE cover_image IS NOT NULL AND cover_image != ''"],
+        ['videos',         'thumbnail_path',"WHERE thumbnail_path IS NOT NULL AND thumbnail_path != ''"],
+        ['footer_persons', 'avatar_path',   "WHERE avatar_path IS NOT NULL AND avatar_path != ''"]
+    ];
+    // about_section banner column (older schemas may differ — wrap in try/catch)
+    const optionalTargets = [
+        ['about_section', 'banner', "WHERE banner IS NOT NULL AND banner != ''"]
+    ];
+
+    const toUploads = (v) => {
+        if (!v) return v;
+        const s = String(v);
+        if (s.startsWith('/uploads/')) return s;
+        if (/^https?:\/\//i.test(s) || s.startsWith('data:')) return s;
+        if (s.startsWith('/images/')) return '/uploads/' + s.slice('/images/'.length);
+        if (s.startsWith('/')) return s;          // already an absolute path we don't own — leave
+        return '/uploads/' + s;                   // bare filename
+    };
+
+    for (const [t, col, where] of [...targets, ...optionalTargets]) {
+        try {
+            if (!(await hasTable(t))) continue;
+            const pkCol = (t === 'settings') ? 'setting_key'
+                        : (t === 'services' || t === 'footer_persons') ? 'slot'
+                        : 'id';
+            const [rows] = await pool.query(`SELECT ${pkCol}, ${col} FROM ${t} ${where}`);
+            let fixed = 0;
+            for (const r of rows) {
+                const oldVal = r[col];
+                const newVal = toUploads(oldVal);
+                if (newVal !== oldVal) {
+                    await pool.query(`UPDATE ${t} SET ${col} = ? WHERE ${pkCol} = ?`, [newVal, r[pkCol]]);
+                    fixed++;
+                }
+            }
+            console.log(`   ${fixed > 0 ? '✅' : '⏭️ '} ${t}.${col}: ${fixed} row(s) normalized`);
+        } catch (e) {
+            console.log(`   ⚠️  ${t}.${col}: skipped (${e.message})`);
+        }
+    }
+}
+
 // F07: idempotent top-up for service slots 4-5
 async function ensureServiceSlots() {
     if (!(await hasTable('services'))) return;
@@ -484,6 +535,10 @@ async function dropAllTables() {
         // F07: top-up service slots 4-5 for 5-card grid
         console.log('\n🔧 Ensuring service slots (F07 5-card grid)...');
         await ensureServiceSlots();
+
+        // F10.fix: normalize all legacy /images/ + bare-filename media paths to /uploads/
+        console.log('\n🔧 Normalizing media paths to /uploads/...');
+        await normalizeMediaPaths();
 
         console.log('\n🎉 Migration hoàn tất.');
     } catch (err) {

@@ -19,15 +19,19 @@ async function fixImagePaths() {
         console.log(`Tìm thấy ${projects.length} projects cần fix`);
 
         for (const project of projects) {
-            const cleanPath = (project.first_image_path || '')
-                .replace(/^\/images\//, '')
-                .replace(/^\/uploads\//, '');
+            // F10.fix: keep /uploads/ paths verbatim; rewrite legacy /images/ + bare filenames
+            let syncPath = project.first_image_path || '';
+            if (syncPath.startsWith('/images/')) {
+                syncPath = '/uploads/' + syncPath.slice('/images/'.length);
+            } else if (syncPath && !syncPath.startsWith('/uploads/') && !/^https?:\/\//i.test(syncPath) && !syncPath.startsWith('/')) {
+                syncPath = '/uploads/' + syncPath;
+            }
 
             await connection.execute(
                 'UPDATE projects SET image_path = ? WHERE id = ?',
-                [cleanPath, project.id]
+                [syncPath, project.id]
             );
-            console.log(`✅ Fixed project #${project.id}: image_path = "${cleanPath}"`);
+            console.log(`✅ Fixed project #${project.id}: image_path = "${syncPath}"`);
         }
 
         console.log('🎉 Hoàn tất!');

@@ -7,8 +7,13 @@ const getImagesByProjectId = async (projectId) => {
             [projectId]
         );
         rows.forEach(r => {
-            if (r.image_path && !r.image_path.startsWith('/images/') && !r.image_path.startsWith('/uploads/')) {
-                r.image_path = '/images/' + r.image_path;
+            // F10.fix: unify under /uploads/ (rewrite legacy /images/ + bare filenames)
+            if (r.image_path) {
+                if (r.image_path.startsWith('/images/')) {
+                    r.image_path = '/uploads/' + r.image_path.slice('/images/'.length);
+                } else if (!r.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(r.image_path) && !r.image_path.startsWith('data:') && !r.image_path.startsWith('/')) {
+                    r.image_path = '/uploads/' + r.image_path;
+                }
             }
         });
         return rows;
@@ -24,8 +29,13 @@ const getAllImages = async () => {
             'SELECT * FROM tableimages ORDER BY project_id ASC, display_order ASC, id ASC'
         );
         rows.forEach(r => {
-            if (r.image_path && !r.image_path.startsWith('/images/') && !r.image_path.startsWith('/uploads/')) {
-                r.image_path = '/images/' + r.image_path;
+            // F10.fix: unify under /uploads/ (rewrite legacy /images/ + bare filenames)
+            if (r.image_path) {
+                if (r.image_path.startsWith('/images/')) {
+                    r.image_path = '/uploads/' + r.image_path.slice('/images/'.length);
+                } else if (!r.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(r.image_path) && !r.image_path.startsWith('data:') && !r.image_path.startsWith('/')) {
+                    r.image_path = '/uploads/' + r.image_path;
+                }
             }
         });
         return rows;

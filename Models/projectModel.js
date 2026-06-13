@@ -23,8 +23,14 @@ const getAllProjects = async (includeInactive = false) => {
         query += ' ORDER BY display_order ASC, id DESC';
         const [rows] = await pool.query(query);
         rows.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
+            // F10.fix: unify all media under /uploads/. Rewrite legacy /images/<file>
+            // and bare-filename paths so admin Media Library + public site share one root.
+            if (p.image_path) {
+                if (p.image_path.startsWith('/images/')) {
+                    p.image_path = '/uploads/' + p.image_path.slice('/images/'.length);
+                } else if (!p.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(p.image_path) && !p.image_path.startsWith('data:') && !p.image_path.startsWith('/')) {
+                    p.image_path = '/uploads/' + p.image_path;
+                }
             }
         });
         return rows;
@@ -37,8 +43,14 @@ const getAllProjects = async (includeInactive = false) => {
 const getProjectById = async (id) => {
     try {
         const [rows] = await pool.query('SELECT * FROM projects WHERE id = ?', [id]);
-        if (rows.length > 0 && rows[0].image_path && !rows[0].image_path.startsWith('/images/') && !rows[0].image_path.startsWith('/uploads/')) {
-            rows[0].image_path = '/images/' + rows[0].image_path;
+        // F10.fix: unify under /uploads/
+        if (rows.length > 0 && rows[0].image_path) {
+            const v = rows[0].image_path;
+            if (v.startsWith('/images/')) {
+                rows[0].image_path = '/uploads/' + v.slice('/images/'.length);
+            } else if (!v.startsWith('/uploads/') && !/^https?:\/\//i.test(v) && !v.startsWith('data:') && !v.startsWith('/')) {
+                rows[0].image_path = '/uploads/' + v;
+            }
         }
         return rows.length > 0 ? rows[0] : null;
     } catch (error) {
@@ -123,8 +135,14 @@ const searchProjects = async ({ state, suburb, type, price, area, status = 'acti
         const sql = `SELECT * FROM projects WHERE ${where.join(' AND ')} ORDER BY display_order ASC, id DESC`;
         const [rows] = await pool.query(sql, params);
         rows.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
+            // F10.fix: unify all media under /uploads/. Rewrite legacy /images/<file>
+            // and bare-filename paths so admin Media Library + public site share one root.
+            if (p.image_path) {
+                if (p.image_path.startsWith('/images/')) {
+                    p.image_path = '/uploads/' + p.image_path.slice('/images/'.length);
+                } else if (!p.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(p.image_path) && !p.image_path.startsWith('data:') && !p.image_path.startsWith('/')) {
+                    p.image_path = '/uploads/' + p.image_path;
+                }
             }
         });
         return rows;
@@ -222,8 +240,14 @@ const getInactiveProjects = async () => {
     try {
         const [rows] = await pool.query('SELECT * FROM projects WHERE status = "inactive" ORDER BY updated_at DESC');
         rows.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
+            // F10.fix: unify all media under /uploads/. Rewrite legacy /images/<file>
+            // and bare-filename paths so admin Media Library + public site share one root.
+            if (p.image_path) {
+                if (p.image_path.startsWith('/images/')) {
+                    p.image_path = '/uploads/' + p.image_path.slice('/images/'.length);
+                } else if (!p.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(p.image_path) && !p.image_path.startsWith('data:') && !p.image_path.startsWith('/')) {
+                    p.image_path = '/uploads/' + p.image_path;
+                }
             }
         });
         return rows;

@@ -19,7 +19,7 @@ CREATE TABLE IF NOT EXISTS settings (
 INSERT IGNORE INTO settings (setting_key, setting_value) VALUES
 ('logo', 'LOGO'),
 ('phone', 'phone number'),
-('main_image', 'service3.jpg');
+('main_image', '/uploads/service3.jpg');
 
 -- ----------------------------
 -- 2. PROJECTS TABLE
