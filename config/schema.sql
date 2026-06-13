@@ -27,7 +27,7 @@ INSERT IGNORE INTO settings (setting_key, setting_value) VALUES
 CREATE TABLE IF NOT EXISTS projects (
     id INT AUTO_INCREMENT PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
-    area VARCHAR(50) NOT NULL COMMENT 'Sydney, Melbourne, Brisbane, Goldcoast',
+    area VARCHAR(50) NOT NULL COMMENT 'Sydney, Melbourne, Brisbane, Goldcoast (legacy filter)',
     square_meters INT,
     category VARCHAR(100),
     year INT,
@@ -36,10 +36,20 @@ CREATE TABLE IF NOT EXISTS projects (
     image_path VARCHAR(255),
     status ENUM('active', 'inactive') DEFAULT 'active',
     display_order INT DEFAULT 0,
+    -- F05a extended fields for Property Search Bar + premium card display
+    price VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'e.g. From $699,000',
+    beds VARCHAR(20) NOT NULL DEFAULT '',
+    baths VARCHAR(20) NOT NULL DEFAULT '',
+    cars VARCHAR(20) NOT NULL DEFAULT '',
+    address VARCHAR(255) NOT NULL DEFAULT '',
+    state VARCHAR(20) NOT NULL DEFAULT '' COMMENT 'NSW/VIC/QLD/... for search filter',
+    property_type VARCHAR(50) NOT NULL DEFAULT '' COMMENT 'apartment/house/townhouse/land',
+    area_label VARCHAR(100) NOT NULL DEFAULT '' COMMENT 'e.g. LIVERPOOL badge text',
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
     INDEX idx_projects_area_status (area, status),
-    INDEX idx_projects_display_order (display_order)
+    INDEX idx_projects_display_order (display_order),
+    INDEX idx_projects_state_type (state, property_type)
 );
 
 -- ----------------------------

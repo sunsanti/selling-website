@@ -51,11 +51,16 @@ const updateSettings = async (req, res) => {
 // ===================== PROJECTS =====================
 const getProjects = async (req, res) => {
     try {
-        const includeInactive = req.query.includeInactive === 'true';
-        const projects = includeInactive
+        const { state, suburb, type, price, area, includeInactive } = req.query;
+        // F05a: if any filter present, use whitelist-based searchProjects
+        if (state || suburb || type || price || area) {
+            const projects = await projectModel.searchProjects({ state, suburb, type, price, area });
+            return res.json({ success: true, data: projects });
+        }
+        const useInactive = includeInactive === 'true';
+        const projects = useInactive
             ? await projectModel.getAllProjects(true)
             : await projectModel.getAllProjects();
-        // Normalize image_path with /images/ prefix
         projects.forEach(p => {
             if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
                 p.image_path = '/images/' + p.image_path;
@@ -63,6 +68,7 @@ const getProjects = async (req, res) => {
         });
         res.json({ success: true, data: projects });
     } catch (error) {
+        console.error('Lỗi getProjects:', error.message);
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };

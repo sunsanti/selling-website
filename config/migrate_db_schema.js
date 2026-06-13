@@ -289,6 +289,38 @@ async function processTable(t) {
     }
 }
 
+// F05a: Idempotent ALTER for adding columns
+async function hasColumn(table, column) {
+    const [rows] = await pool.query(
+        `SELECT 1 FROM information_schema.COLUMNS
+         WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ? AND COLUMN_NAME = ? LIMIT 1`,
+        [table, column]
+    );
+    return rows.length > 0;
+}
+
+async function ensureProjectColumns() {
+    if (!(await hasTable('projects'))) return;
+    const cols = [
+        ['price',         "VARCHAR(50) NOT NULL DEFAULT ''"],
+        ['beds',          "VARCHAR(20) NOT NULL DEFAULT ''"],
+        ['baths',         "VARCHAR(20) NOT NULL DEFAULT ''"],
+        ['cars',          "VARCHAR(20) NOT NULL DEFAULT ''"],
+        ['address',       "VARCHAR(255) NOT NULL DEFAULT ''"],
+        ['state',         "VARCHAR(20) NOT NULL DEFAULT ''"],
+        ['property_type', "VARCHAR(50) NOT NULL DEFAULT ''"],
+        ['area_label',    "VARCHAR(100) NOT NULL DEFAULT ''"]
+    ];
+    for (const [name, type] of cols) {
+        if (await hasColumn('projects', name)) {
+            console.log(`   ⏭️  projects.${name} already exists`);
+        } else {
+            await pool.query(`ALTER TABLE projects ADD COLUMN ${name} ${type}`);
+            console.log(`   ✅ Added projects.${name}`);
+        }
+    }
+}
+
 async function dropAllTables() {
     const [rows] = await pool.query(
         `SELECT TABLE_NAME FROM information_schema.TABLES
@@ -329,6 +361,10 @@ async function dropAllTables() {
         for (const t of TABLES) {
             await processTable(t);
         }
+
+        // F05a: ensure projects has 8 extended columns (idempotent ALTER)
+        console.log('\n🔧 Ensuring extended columns on projects...');
+        await ensureProjectColumns();
 
         console.log('\n🎉 Migration hoàn tất.');
     } catch (err) {
