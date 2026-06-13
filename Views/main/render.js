@@ -456,6 +456,78 @@ async function loadServices() {
     }
 }
 
+// ========== MODULE 5b: Videos (F08 — TikTok external) ==========
+let _videoCarouselPage = 0;
+const VIDEOS_PER_PAGE = 6;
+let _allVideos = [];
+
+function _escapeHtml(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+}
+function _escapeAttr(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+}
+
+async function loadVideos() {
+    try {
+        const res = await fetch('/api/public/videos');
+        const data = await res.json();
+        _allVideos = (data && data.success && Array.isArray(data.data)) ? data.data : [];
+    } catch (e) {
+        console.error('loadVideos:', e);
+        _allVideos = [];
+    }
+    _videoCarouselPage = 0;
+    renderVideoCarousel();
+}
+
+function renderVideoCarousel() {
+    const track = document.getElementById('video-track');
+    const pagination = document.getElementById('video-pagination');
+    if (!track) return;
+
+    if (_allVideos.length === 0) {
+        track.innerHTML = '<p class="empty-state">No videos yet.</p>';
+        if (pagination) { pagination.innerHTML = ''; pagination.style.display = 'none'; }
+        return;
+    }
+
+    const start = _videoCarouselPage * VIDEOS_PER_PAGE;
+    const visible = _allVideos.slice(start, start + VIDEOS_PER_PAGE);
+
+    track.innerHTML = visible.map(v => {
+        const url = _escapeAttr(v.tiktok_url || '#');
+        const thumb = _escapeAttr(v.thumbnail_path || '/uploads/main_image.jpg');
+        const title = _escapeHtml(v.title || '');
+        const views = _escapeHtml(v.views_count || '0');
+        return `
+            <a class="video-item" href="${url}" target="_blank" rel="noopener noreferrer">
+                <img class="video-thumb" src="${thumb}" alt="" onerror="this.style.visibility='hidden'">
+                <div class="video-overlay"></div>
+                <h3 class="video-title">${title}</h3>
+                <div class="video-play-icon"><i class="fa-solid fa-play"></i></div>
+                <span class="video-views"><i class="fa-solid fa-play"></i> ${views}</span>
+            </a>`;
+    }).join('');
+
+    const totalPages = Math.max(1, Math.ceil(_allVideos.length / VIDEOS_PER_PAGE));
+    if (pagination) {
+        pagination.innerHTML = '';
+        for (let i = 0; i < totalPages; i++) {
+            const dot = document.createElement('span');
+            dot.className = 'carousel-dot' + (i === _videoCarouselPage ? ' active' : '');
+            dot.dataset.page = i;
+            dot.onclick = () => { _videoCarouselPage = i; renderVideoCarousel(); };
+            pagination.appendChild(dot);
+        }
+        pagination.style.display = totalPages <= 1 ? 'none' : 'flex';
+    }
+}
+
 // ========== MODULE 6: Footer persons ==========
 function renderFooterPersons(items) {
     const container = document.getElementById('footer-container');
@@ -640,6 +712,7 @@ window.addEventListener('message', (event) => {
 loadProjectsFromDB();
 loadAboutSection();
 loadServices();
+loadVideos();         // F08
 loadFooterPersons();
 
 if (PREVIEW_MODE) {

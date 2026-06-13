@@ -47,6 +47,12 @@ app.get(/^\/projects\/(\d+)\/?$/, (req, res) => {
 });
 app.use('/projects', express.static(path.join(__dirname, 'Views/projects')));
 
+// F08: /videos list page (explicit route → static fallback)
+app.get('/videos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/videos/index.html'));
+});
+app.use('/videos', express.static(path.join(__dirname, 'Views/videos')));
+
 // Admin: gate the HTML entry behind login; static assets (CSS/JS) pass through
 // so the page can load styles after redirect bounce. API endpoints have their
 // own auth middleware further down.
@@ -80,6 +86,7 @@ const contactController = require('./Controllers/contactController');
 const homeContentController = require('./Controllers/homeContentController');
 const mediaController = require('./Controllers/mediaController');
 const auditLogController = require('./Controllers/auditLogController');
+const videoController = require('./Controllers/videoController');
 
 app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
@@ -93,6 +100,8 @@ app.get('/api/public/projects/:id', adminController.getProjectById);
 app.get('/api/public/about', homeContentController.getAbout);
 app.get('/api/public/services', homeContentController.getServices);
 app.get('/api/public/footer-persons', homeContentController.getFooterPersons);
+// F08: public videos
+app.get('/api/public/videos', videoController.getPublic);
 
 app.use('/api/admin', requireAuth);
 
@@ -144,6 +153,14 @@ app.get('/api/admin/media', mediaController.getMedia);
 
 app.get('/api/admin/audit-log', requireAdmin, auditLogController.getAuditLog);
 app.get('/api/admin/audit-log/actions', requireAdmin, auditLogController.getActions);
+
+// F08: Videos admin endpoints (auth via requireAuth above; DELETE needs admin role)
+app.get('/api/admin/videos', videoController.getAll);
+app.get('/api/admin/videos/:id', videoController.getById);
+app.post('/api/admin/videos', videoController.create);
+app.put('/api/admin/videos/:id', videoController.update);
+app.put('/api/admin/videos/:id/soft-delete', videoController.softDelete);
+app.delete('/api/admin/videos/:id', requireAdmin, videoController.hardDelete);
 
 app.post('/api/admin/translate', adminController.translateText);
 app.post('/api/admin/detect-language', adminController.detectTextLanguage);

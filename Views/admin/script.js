@@ -102,6 +102,7 @@ function switchSection(section) {
         case 'home-about': loadHomeAbout(); ensurePreviewLoaded('about'); break;
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
         case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
+        case 'videos': loadVideosAdmin(); break;
     }
 }
 
@@ -1746,7 +1747,12 @@ const AUDIT_ACTION_LABELS = {
     'ACCOUNT_DELETE': 'Xóa tài khoản',
     'ABOUT_UPDATE': 'Cập nhật phần About',
     'SERVICE_UPDATE': 'Cập nhật Service',
-    'FOOTER_PERSON_UPDATE': 'Cập nhật nhân viên Footer'
+    'FOOTER_PERSON_UPDATE': 'Cập nhật nhân viên Footer',
+    // F08: video actions
+    'VIDEO_CREATE': 'Tạo video mới',
+    'VIDEO_UPDATE': 'Cập nhật video',
+    'VIDEO_SOFTDELETE': 'Ẩn video',
+    'VIDEO_DELETE': 'Xóa vĩnh viễn video'
 };
 
 const AUDIT_TARGET_LABELS = {
@@ -1756,7 +1762,8 @@ const AUDIT_TARGET_LABELS = {
     'settings': 'Cài đặt',
     'about_section': 'Phần About',
     'service': 'Service slot',
-    'footer_person': 'Nhân viên Footer'
+    'footer_person': 'Nhân viên Footer',
+    'video': 'Video'
 };
 
 const AUDIT_FIELD_LABELS = {
@@ -1768,6 +1775,10 @@ const AUDIT_FIELD_LABELS = {
     'name': 'Tên',
     'role': 'Vai trò',
     'title': 'Tiêu đề',
+    // F08: video fields
+    'tiktok_url': 'Link TikTok',
+    'thumbnail_path': 'Ảnh thumbnail',
+    'views_count': 'Lượt xem',
     'description': 'Mô tả',
     'image_path': 'Ảnh',
     'banner': 'Banner',
@@ -1956,4 +1967,180 @@ function resetAuditSearch() {
     const a = document.getElementById('audit-action-filter');
     if (a) a.value = '';
     loadAuditLog();
+}
+
+// ===================== F08 — VIDEOS ADMIN =====================
+const TIKTOK_URL_RE = /^https?:\/\/(www\.|vt\.|m\.)?tiktok\.com\//i;
+
+function _escVid(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+}
+
+async function loadVideosAdmin() {
+    try {
+        const res = await fetch('/api/admin/videos');
+        const json = await res.json();
+        const tbody = document.getElementById('videos-table-body');
+        if (!tbody) return;
+        if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
+            return;
+        }
+        tbody.innerHTML = json.data.map(v => {
+            const thumb = _escVid(v.thumbnail_path || '');
+            const thumbHtml = thumb
+                ? `<img src="${thumb}" alt="" style="width:48px;height:64px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`
+                : '<span style="color:#888">—</span>';
+            const statusClass = v.status === 'active' ? 'status-active' : 'status-inactive';
+            const statusLabel = v.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
+            const url = _escVid(v.tiktok_url || '');
+            const urlShort = url.length > 50 ? url.slice(0, 50) + '…' : url;
+            return `
+                <tr data-id="${v.id}">
+                    <td>${v.id}</td>
+                    <td>${thumbHtml}</td>
+                    <td>${_escVid(v.title || '')}</td>
+                    <td><a href="${url}" target="_blank" rel="noopener noreferrer">${urlShort}</a></td>
+                    <td>${_escVid(v.views_count || '0')}</td>
+                    <td>${v.display_order || 0}</td>
+                    <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                    <td>
+                        <button class="btn-edit" onclick="editVideo(${v.id})"><i class="fas fa-edit"></i></button>
+                        ${v.status === 'active'
+                            ? `<button class="btn-cancel" onclick="softDeleteVideo(${v.id})" title="Ẩn"><i class="fas fa-eye-slash"></i></button>`
+                            : `<button class="btn-add" onclick="restoreVideoStatus(${v.id})" title="Hiện lại"><i class="fas fa-eye"></i></button>`}
+                        <button class="btn-cancel" onclick="hardDeleteVideo(${v.id})" title="Xóa vĩnh viễn"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        }).join('');
+    } catch (err) {
+        console.error('loadVideosAdmin:', err);
+        showToast('Error loading videos: ' + err.message, 'error');
+    }
+}
+
+function openVideoModal() {
+    document.getElementById('video-modal-title').textContent = 'Add Video';
+    document.getElementById('video-id').value = '';
+    document.getElementById('video-title-input').value = '';
+    document.getElementById('video-tiktok-url').value = '';
+    document.getElementById('video-views').value = '';
+    document.getElementById('video-order').value = '0';
+    document.getElementById('video-thumb-path').value = '';
+    document.getElementById('video-thumb-img').style.display = 'none';
+    document.getElementById('video-thumb-img').src = '';
+    document.getElementById('video-thumb-placeholder').style.display = 'flex';
+    document.getElementById('video-modal-admin').classList.add('active');
+}
+
+function closeVideoModalAdmin() {
+    document.getElementById('video-modal-admin').classList.remove('active');
+}
+
+async function editVideo(id) {
+    try {
+        const res = await fetch('/api/admin/videos/' + id);
+        const json = await res.json();
+        if (!json.success) { showToast('Không tải được video', 'error'); return; }
+        const v = json.data;
+        document.getElementById('video-modal-title').textContent = 'Edit Video #' + v.id;
+        document.getElementById('video-id').value = v.id;
+        document.getElementById('video-title-input').value = v.title || '';
+        document.getElementById('video-tiktok-url').value = v.tiktok_url || '';
+        document.getElementById('video-views').value = v.views_count || '';
+        document.getElementById('video-order').value = v.display_order || 0;
+        document.getElementById('video-thumb-path').value = v.thumbnail_path || '';
+        const img = document.getElementById('video-thumb-img');
+        const ph = document.getElementById('video-thumb-placeholder');
+        if (v.thumbnail_path) { img.src = v.thumbnail_path; img.style.display = 'block'; ph.style.display = 'none'; }
+        else { img.style.display = 'none'; ph.style.display = 'flex'; }
+        document.getElementById('video-modal-admin').classList.add('active');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+function pickVideoThumb() {
+    openMediaLibrary({
+        mode: 'single',
+        onSelect: ([url]) => {
+            document.getElementById('video-thumb-path').value = url;
+            const img = document.getElementById('video-thumb-img');
+            img.src = url;
+            img.style.display = 'block';
+            document.getElementById('video-thumb-placeholder').style.display = 'none';
+        }
+    });
+}
+
+async function saveVideo() {
+    const id = document.getElementById('video-id').value;
+    const title = document.getElementById('video-title-input').value.trim();
+    const tiktok_url = document.getElementById('video-tiktok-url').value.trim();
+    const views_count = document.getElementById('video-views').value.trim();
+    const display_order = parseInt(document.getElementById('video-order').value, 10) || 0;
+    const thumbnail_path = document.getElementById('video-thumb-path').value.trim();
+
+    if (!title) { showToast('Tiêu đề không được trống', 'error'); return; }
+    if (!TIKTOK_URL_RE.test(tiktok_url)) {
+        showToast('TikTok URL không hợp lệ — phải bắt đầu bằng https://(www.|vt.|m.)tiktok.com/', 'error');
+        return;
+    }
+    const payload = { title, tiktok_url, thumbnail_path, views_count, display_order };
+    try {
+        const res = await fetch(id ? '/api/admin/videos/' + id : '/api/admin/videos', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(id ? 'Cập nhật thành công' : 'Thêm video thành công', 'success');
+        closeVideoModalAdmin();
+        loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function softDeleteVideo(id) {
+    if (!confirm('Ẩn video này khỏi public site?')) return;
+    try {
+        const res = await fetch('/api/admin/videos/' + id + '/soft-delete', { method: 'PUT' });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã ẩn' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function restoreVideoStatus(id) {
+    try {
+        const res = await fetch('/api/admin/videos/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'active' })
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã hiện lại' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function hardDeleteVideo(id) {
+    if (!confirm('Xóa VĨNH VIỄN video này? Không thể hoàn tác.')) return;
+    try {
+        const res = await fetch('/api/admin/videos/' + id, { method: 'DELETE' });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast('Đã xóa', 'success');
+        loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
 }

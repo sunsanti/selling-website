@@ -41,6 +41,10 @@
                 <i class="fas fa-id-card"></i>
                 <span>Footer</span>
             </a>
+            <a href="#" class="nav-item" data-section="videos">
+                <i class="fas fa-video"></i>
+                <span>Videos</span>
+            </a>
             <a href="#" class="nav-item" data-section="accounts">
                 <i class="fas fa-users"></i>
                 <span>Account</span>
@@ -421,7 +425,87 @@
                 <iframe id="preview-iframe-footer" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
             </div>
         </section>
+
+        <!-- F08: Videos Section -->
+        <section id="videos" class="content-section">
+            <div class="section-header">
+                <h1>Videos Management</h1>
+                <button class="btn-add" onclick="openVideoModal()">
+                    <i class="fas fa-plus"></i> Add Video
+                </button>
+            </div>
+            <div class="table-wrapper">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Thumbnail</th>
+                            <th>Title</th>
+                            <th>TikTok URL</th>
+                            <th>Views</th>
+                            <th>Order</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="videos-table-body"></tbody>
+                </table>
+            </div>
+        </section>
     </main>
+</div>
+
+<!-- F08: Video Modal -->
+<div id="video-modal-admin" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="video-modal-title">Add Video</h2>
+            <span class="close-modal" onclick="closeVideoModalAdmin()">&times;</span>
+        </div>
+        <form id="video-form" onsubmit="event.preventDefault(); saveVideo();">
+            <input type="hidden" id="video-id">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="video-title-input" placeholder="e.g. SYDNEY MARKET UPDATE" required maxlength="255">
+            </div>
+            <div class="form-group">
+                <label>TikTok URL *</label>
+                <input type="text" id="video-tiktok-url" placeholder="https://www.tiktok.com/@user/video/..." required maxlength="500">
+                <small style="color:#888">Must start with https://www.tiktok.com/, https://vt.tiktok.com/, or https://m.tiktok.com/</small>
+            </div>
+            <div class="form-group">
+                <label>Thumbnail</label>
+                <div class="settings-image-area">
+                    <div class="settings-image-preview" id="video-thumb-preview-area">
+                        <img id="video-thumb-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                        <span id="video-thumb-placeholder" class="settings-preview-placeholder">
+                            <i class="fas fa-image"></i> No thumbnail
+                        </span>
+                    </div>
+                    <div class="settings-image-actions">
+                        <button type="button" class="btn-add" onclick="pickVideoThumb()">
+                            <i class="fas fa-images"></i> Chọn thumbnail
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="video-thumb-path">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Views Count</label>
+                    <input type="text" id="video-views" placeholder="e.g. 12.4K" maxlength="20">
+                </div>
+                <div class="form-group">
+                    <label>Display Order</label>
+                    <input type="number" id="video-order" value="0" min="0">
+                </div>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeVideoModalAdmin()">Cancel</button>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Project Modal -->

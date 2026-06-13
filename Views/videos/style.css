@@ -1,0 +1,62 @@
+/* F08: /videos page styling — reuses .video-item/.video-track from main */
+.videos-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 6rem 5% 4rem;
+}
+.videos-page-header {
+    text-align: center;
+    margin-bottom: 4rem;
+}
+.videos-page-title {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 3.6rem;
+    color: var(--color-navy, #000342);
+    margin: 1rem 0;
+}
+.videos-page-subtitle {
+    font-size: 1.4rem;
+    color: #666;
+    max-width: 620px;
+    margin: 0 auto;
+    line-height: 1.5;
+}
+.videos-grid-wrapper { margin-top: 2rem; }
+.videos-page-grid {
+    /* override main 6-col to comfortable browse 5-col */
+    display: grid;
+    grid-template-columns: repeat(5, 1fr);
+    gap: 1.6rem;
+}
+.videos-page .empty-state {
+    text-align: center;
+    padding: 6rem 0;
+    color: #666;
+}
+.btn-clear-filters {
+    display: inline-block;
+    margin-top: 1.5rem;
+    padding: 1rem 2rem;
+    border: 2px solid var(--color-gold, #ffcf00);
+    color: var(--color-gold, #ffcf00);
+    text-decoration: none;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    border-radius: 4px;
+    transition: background 0.25s, color 0.25s;
+}
+.btn-clear-filters:hover {
+    background: var(--color-gold, #ffcf00);
+    color: var(--color-navy, #000342);
+}
+.videos-page-footer {
+    text-align: center;
+    padding: 3rem 5%;
+    color: #888;
+    background: #fafafa;
+}
+.videos-page-footer a { color: var(--color-navy, #000342); }
+
+@media (max-width: 1200px) { .videos-page-grid { grid-template-columns: repeat(4, 1fr); } }
+@media (max-width: 900px)  { .videos-page-grid { grid-template-columns: repeat(3, 1fr); } }
+@media (max-width: 600px)  { .videos-page-grid { grid-template-columns: repeat(2, 1fr); } }

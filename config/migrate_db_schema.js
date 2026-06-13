@@ -208,6 +208,35 @@ const TABLES = [
         summaryCols: ['slot', 'title']
     },
 
+    // F08: videos table — TikTok external link cards
+    {
+        name: 'videos',
+        create: `
+            CREATE TABLE videos (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                thumbnail_path VARCHAR(255) NOT NULL DEFAULT '',
+                tiktok_url VARCHAR(500) NOT NULL,
+                views_count VARCHAR(20) NOT NULL DEFAULT '0',
+                display_order INT DEFAULT 0,
+                status ENUM('active','inactive') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_videos_status_order (status, display_order),
+                INDEX idx_videos_created (created_at DESC)
+            )
+        `,
+        seed: [
+            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                [1, 'SYDNEY MARKET UPDATE',   '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/1', '12.4K', 1]],
+            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                [2, 'INVESTMENT TIPS 2026',   '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/2', '8.2K',  2]],
+            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                [3, 'MELBOURNE INSIDE LOOK',  '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/3', '15.1K', 3]]
+        ],
+        summaryCols: ['id', 'title', 'status']
+    },
+
     {
         name: 'footer_persons',
         create: `
