@@ -454,6 +454,15 @@ async function editProject(id) {
         document.getElementById('project-year').value = p.year || '';
         document.getElementById('project-style').value = p.style || '';
         document.getElementById('project-content').value = p.small_content || '';
+        // F05d: 8 extended fields
+        document.getElementById('project-price').value = p.price || '';
+        document.getElementById('project-state').value = p.state || '';
+        document.getElementById('project-property-type').value = p.property_type || '';
+        document.getElementById('project-area-label').value = p.area_label || '';
+        document.getElementById('project-address').value = p.address || '';
+        document.getElementById('project-beds').value = p.beds || '';
+        document.getElementById('project-baths').value = p.baths || '';
+        document.getElementById('project-cars').value = p.cars || '';
 
         // Load images from tableimages
         await loadProjectImagesForEdit(id);
@@ -571,7 +580,16 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
         category: document.getElementById('project-category').value,
         year: document.getElementById('project-year').value,
         style: document.getElementById('project-style').value,
-        small_content: document.getElementById('project-content').value
+        small_content: document.getElementById('project-content').value,
+        // F05d: 8 extended fields
+        price: document.getElementById('project-price').value.trim(),
+        state: document.getElementById('project-state').value,
+        property_type: document.getElementById('project-property-type').value,
+        area_label: document.getElementById('project-area-label').value.trim(),
+        address: document.getElementById('project-address').value.trim(),
+        beds: document.getElementById('project-beds').value.trim(),
+        baths: document.getElementById('project-baths').value.trim(),
+        cars: document.getElementById('project-cars').value.trim()
     };
 
     try {
@@ -1716,7 +1734,16 @@ const AUDIT_FIELD_LABELS = {
     'phone1': 'SĐT 1',
     'phone2': 'SĐT 2',
     'facebook_url': 'Link Facebook',
-    'avatar_path': 'Ảnh đại diện'
+    'avatar_path': 'Ảnh đại diện',
+    // F05d: extended project fields
+    'price': 'Giá',
+    'beds': 'Số phòng ngủ',
+    'baths': 'Số phòng tắm',
+    'cars': 'Chỗ đậu xe',
+    'address': 'Địa chỉ',
+    'state': 'Bang (NSW/VIC/...)',
+    'property_type': 'Loại BĐS',
+    'area_label': 'Nhãn khu vực (badge)'
 };
 
 const AUDIT_AREA_LABELS = {

@@ -88,14 +88,27 @@ const getProjectById = async (req, res) => {
 
 const createProject = async (req, res) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path } = req.body;
+        const {
+            name, area, square_meters, category, year, style, small_content, image_path,
+            // F05d extended fields
+            price, beds, baths, cars, address, state, property_type, area_label
+        } = req.body;
         if (!name || !area) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
         }
         const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
         const id = await projectModel.createProject({
             name, area, square_meters, category, year, style,
-            small_content, image_path: cleanImagePath
+            small_content, image_path: cleanImagePath,
+            // F05d
+            price: price ? String(price).slice(0, 50) : null,
+            beds: beds ? String(beds).slice(0, 20) : null,
+            baths: baths ? String(baths).slice(0, 20) : null,
+            cars: cars ? String(cars).slice(0, 20) : null,
+            address: address ? String(address).slice(0, 255) : null,
+            state: state ? String(state).toUpperCase().slice(0, 20) : null,
+            property_type: property_type ? String(property_type).toLowerCase().slice(0, 50) : null,
+            area_label: area_label ? String(area_label).slice(0, 100) : null
         });
         auditLogModel.log({
             req, action: 'PROJECT_CREATE', target_type: 'project', target_id: id,
@@ -110,7 +123,11 @@ const createProject = async (req, res) => {
 
 const updateProject = async (req, res) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path, display_order } = req.body;
+        const {
+            name, area, square_meters, category, year, style, small_content, image_path, display_order,
+            // F05d extended fields
+            price, beds, baths, cars, address, state, property_type, area_label
+        } = req.body;
 
         // Build fields to update (only defined values)
         const fields = {};
@@ -125,6 +142,15 @@ const updateProject = async (req, res) => {
             fields.image_path = image_path.replace(/^\/images\//, '');
         }
         if (display_order !== undefined) fields.display_order = display_order;
+        // F05d extended
+        if (price !== undefined) fields.price = String(price).slice(0, 50);
+        if (beds !== undefined) fields.beds = String(beds).slice(0, 20);
+        if (baths !== undefined) fields.baths = String(baths).slice(0, 20);
+        if (cars !== undefined) fields.cars = String(cars).slice(0, 20);
+        if (address !== undefined) fields.address = String(address).slice(0, 255);
+        if (state !== undefined) fields.state = String(state).toUpperCase().slice(0, 20);
+        if (property_type !== undefined) fields.property_type = String(property_type).toLowerCase().slice(0, 50);
+        if (area_label !== undefined) fields.area_label = String(area_label).slice(0, 100);
 
         const success = await projectModel.updateProjectFields(req.params.id, fields);
         if (!success) {

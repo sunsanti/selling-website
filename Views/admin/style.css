@@ -679,6 +679,22 @@ body {
     margin-bottom: 18px;
 }
 
+/* F05d: section divider inside Projects modal */
+.form-section-divider {
+    margin: 22px 0 14px;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, #fff8e1 0%, #fffff5 100%);
+    border-left: 3px solid #ffcf00;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    color: #000342;
+}
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-2 .form-group { margin-bottom: 14px; }
+@media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
+
 .form-group label {
     display: block;
     font-size: 13px;
