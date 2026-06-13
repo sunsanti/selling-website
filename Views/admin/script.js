@@ -1356,7 +1356,7 @@ async function loadHomeServices() {
                 + '  <input type="text" class="svc-title" maxlength="255"></div>'
                 + '<div class="form-group"><label>Description</label>'
                 + '  <textarea class="svc-desc" rows="4" maxlength="2000"></textarea></div>'
-                + '<div class="form-group"><label>Image</label>'
+                + '<div class="form-group"><label>Image <small style="color:#888;font-weight:400">(F07: không dùng ở thiết kế mới — icon được lấy theo slot)</small></label>'
                 + '  <div class="settings-image-area">'
                 + '    <div class="settings-image-preview">'
                 + '      <img class="svc-img-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'

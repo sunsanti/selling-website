@@ -403,61 +403,45 @@ async function loadAboutSection() {
     }
 }
 
-// ========== MODULE 5: Services ==========
+// ========== MODULE 5: Services (F07 — 5-card grid, no popup) ==========
+const SERVICE_ICONS = {
+    1: 'fa-key',
+    2: 'fa-chart-line',
+    3: 'fa-building',
+    4: 'fa-hand-holding-dollar',
+    5: 'fa-shield-halved'
+};
+
 function renderServices(items) {
-    const wrap = document.getElementById('services-list');
-    if (!wrap) return;
-    wrap.innerHTML = '';
+    const list = document.getElementById('services-list');
+    if (!list) return;
+    list.innerHTML = '';
 
-    (items || []).forEach(svc => {
-        const item = document.createElement('div');
-        item.className = 'service-item';
+    const slots = (items || []).slice().sort((a, b) => (a.slot || 0) - (b.slot || 0));
+    if (slots.length === 0) {
+        list.innerHTML = '<p class="empty-state">No services configured.</p>';
+        return;
+    }
 
-        const content = document.createElement('div');
-        content.className = 'content';
-        const box = document.createElement('div');
-        box.className = 'box-content';
+    slots.forEach(s => {
+        const card = document.createElement('div');
+        card.className = 'service-card';
 
-        const main = document.createElement('div');
-        main.className = 'main-content';
-        const mainP = document.createElement('p');
-        mainP.textContent = svc.title || '';
-        main.appendChild(mainP);
-        box.appendChild(main);
+        const icon = document.createElement('i');
+        icon.className = 'fa-solid ' + (SERVICE_ICONS[s.slot] || 'fa-circle') + ' service-icon';
+        card.appendChild(icon);
 
-        const sub = document.createElement('div');
-        sub.className = 'sub-content';
-        const subP = document.createElement('p');
-        subP.textContent = svc.description || '';
-        sub.appendChild(subP);
-        box.appendChild(sub);
+        const title = document.createElement('h3');
+        title.className = 'service-title';
+        title.textContent = s.title || '';
+        card.appendChild(title);
 
-        const btnWrap = document.createElement('div');
-        btnWrap.innerHTML = ''
-            + '<a onclick="fillInfoPopup()" class="btn-get-in-touch">'
-            + '  <span class="btn-text">click here</span>'
-            + '  <span class="btn-icon">'
-            + '    <span class="dot"></span>'
-            + '    <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
-            + '      <line x1="7" y1="17" x2="17" y2="7"></line>'
-            + '      <polyline points="7 7 17 7 17 17"></polyline>'
-            + '    </svg>'
-            + '  </span>'
-            + '</a>';
-        box.appendChild(btnWrap);
-        content.appendChild(box);
-        item.appendChild(content);
+        const desc = document.createElement('p');
+        desc.className = 'service-desc';
+        desc.textContent = s.description || '';
+        card.appendChild(desc);
 
-        const imgWrap = document.createElement('div');
-        imgWrap.className = 'image';
-        const img = document.createElement('img');
-        img.alt = '';
-        img.onerror = function () { this.style.display = 'none'; };
-        if (svc.image_path) img.src = normalizeImageUrl(svc.image_path);
-        imgWrap.appendChild(img);
-        item.appendChild(imgWrap);
-
-        wrap.appendChild(item);
+        list.appendChild(card);
     });
 }
 

@@ -194,6 +194,15 @@ const TABLES = [
             [
                 'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
                 [3, 'Be confident to be one of our partner', 'Sell or buy properties from our company', '/uploads/service3_3.jpg']
+            ],
+            // F07: 2 more slots for 5-card grid (Loan & Finance + FIRB Support)
+            [
+                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
+                [4, 'Loan & Finance', 'Connect with trusted mortgage brokers to secure your investment.', '']
+            ],
+            [
+                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
+                [5, 'FIRB Support', 'We help overseas buyers comply with Foreign Investment Review Board rules.', '']
             ]
         ],
         summaryCols: ['slot', 'title']
@@ -302,6 +311,22 @@ async function hasColumn(table, column) {
     return rows.length > 0;
 }
 
+// F07: idempotent top-up for service slots 4-5
+async function ensureServiceSlots() {
+    if (!(await hasTable('services'))) return;
+    const slots = [
+        [4, 'Loan & Finance',  'Connect with trusted mortgage brokers to secure your investment.'],
+        [5, 'FIRB Support',    'We help overseas buyers comply with Foreign Investment Review Board rules.']
+    ];
+    for (const [slot, title, desc] of slots) {
+        const [r] = await pool.query(
+            'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
+            [slot, title, desc, '']
+        );
+        console.log(`   ${r.affectedRows ? '✅ Inserted' : '⏭️  Exists'} services.slot=${slot}`);
+    }
+}
+
 // F06: idempotent top-up for settings rows that may be added after first install
 async function ensureSettingsKeys() {
     if (!(await hasTable('settings'))) return;
@@ -388,6 +413,10 @@ async function dropAllTables() {
         // F06: top-up settings keys for purpose-invest video
         console.log('\n🔧 Ensuring settings keys (F06 purpose-invest)...');
         await ensureSettingsKeys();
+
+        // F07: top-up service slots 4-5 for 5-card grid
+        console.log('\n🔧 Ensuring service slots (F07 5-card grid)...');
+        await ensureServiceSlots();
 
         console.log('\n🎉 Migration hoàn tất.');
     } catch (err) {
