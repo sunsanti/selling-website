@@ -35,6 +35,18 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));
 
+// F05c: /projects list page + /projects/:id detail page
+// Explicit GET routes FIRST (pretty URLs) → static fallback for asset files
+// (style.css / list.js / detail.js). Express 5 path-to-regexp no longer
+// accepts inline :id([0-9]+) — use regex literal.
+app.get('/projects', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/projects/list.html'));
+});
+app.get(/^\/projects\/(\d+)\/?$/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/projects/detail.html'));
+});
+app.use('/projects', express.static(path.join(__dirname, 'Views/projects')));
+
 // Admin: gate the HTML entry behind login; static assets (CSS/JS) pass through
 // so the page can load styles after redirect bounce. API endpoints have their
 // own auth middleware further down.

@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project Detail — Sealand Property</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/main/style.css?v=f05c">
+    <link rel="stylesheet" href="/projects/style.css?v=f05c">
+</head>
+<body>
+    <!-- Shared header (mirrors /main) -->
+    <header class="header">
+        <div class="header-zone header-zone-left">
+            <a href="/main" class="logo" id="logo-link">
+                <span id="site-logo-text" class="logo-text">SEALAND PROPERTY</span>
+                <img id="site-logo-img" src="" alt="" style="display:none; height:40px; object-fit:contain;">
+            </a>
+        </div>
+        <nav class="navbar" id="main-navbar">
+            <div class="mobile-nav-header" style="display: none;">
+                <div id="mobile-site-phone" class="mobile-site-phone"></div>
+                <div id="mobile-account" class="mobile-account-name"></div>
+            </div>
+            <a class="nav-item" href="/main">HOME</a>
+            <a class="nav-item nav-active" href="/projects">PROJECTS</a>
+            <a class="nav-item" href="/main#about-us">ABOUT US</a>
+            <a class="nav-item" href="/main#services">SERVICES</a>
+            <a class="nav-item" href="/main#video">VIDEO</a>
+            <a class="nav-item" href="/main#news">NEWS</a>
+            <a class="nav-item" href="/main#footer">CONTACT</a>
+            <a class="nav-item desktop-admin-btn" id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">ADMIN</a>
+            <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()">LOGOUT</button>
+        </nav>
+        <div class="header-zone header-zone-right">
+            <a href="javascript:void(0)" class="btn-header-phone" id="header-phone-btn">
+                <i class="fa-solid fa-phone"></i>
+                <span id="site-phone">phone number</span>
+            </a>
+            <div class="header-cta logged-out-cta">
+                <a href="/main#footer" class="btn-book-consultation">BOOK CONSULTATION</a>
+            </div>
+            <div class="header-cta logged-in-cta" style="display: none;">
+                <div class="account-name" id="account">Name</div>
+                <button id="logout-btn" onclick="logoutAdmin()"><div>LOGOUT</div></button>
+            </div>
+        </div>
+        <button class="menu-btn" id="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+
+    <main class="project-detail-page">
+        <section class="detail-hero" id="detail-hero">
+            <img id="detail-image" src="/uploads/main_image.jpg" alt="">
+            <div class="detail-overlay-content">
+                <span class="detail-area-badge" id="detail-area-badge" style="display:none;"></span>
+                <h1 class="detail-name" id="detail-name"></h1>
+                <p class="detail-address" id="detail-address"></p>
+            </div>
+        </section>
+
+        <section class="detail-body">
+            <article class="detail-main">
+                <p class="detail-price" id="detail-price"></p>
+
+                <div class="detail-specs-row" id="detail-specs-row"></div>
+
+                <h2 style="font-family:'Playfair Display',serif; color:#0a1f3d; font-size:2rem; margin:0 0 1.4rem;">About this property</h2>
+                <p class="detail-description" id="detail-description"></p>
+            </article>
+
+            <aside class="detail-side">
+                <h3>Property Details</h3>
+                <dl id="detail-meta"></dl>
+                <a href="/main#footer" class="detail-cta">
+                    <i class="fa-solid fa-envelope"></i>
+                    Enquire Now
+                </a>
+            </aside>
+        </section>
+
+        <section class="detail-gallery" id="detail-gallery" style="display:none;">
+            <h3>Gallery</h3>
+            <div class="detail-gallery-grid" id="detail-gallery-grid"></div>
+        </section>
+
+        <section id="detail-not-found" style="display:none;">
+            <h2>Project not found</h2>
+            <p>The project you're looking for may have been removed.</p>
+            <p><a href="/projects">Browse all projects →</a></p>
+        </section>
+    </main>
+
+    <footer class="projects-page-footer">
+        <p>© 2026 Sealand Property. <a href="/main">Back to home</a></p>
+    </footer>
+
+    <script src="/main/render.js?v=f05c" defer></script>
+    <script src="/main/script.js?v=f05c" defer></script>
+    <script src="/projects/detail.js?v=f05c" defer></script>
+</body>
+</html>
