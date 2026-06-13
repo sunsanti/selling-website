@@ -528,6 +528,80 @@ function renderVideoCarousel() {
     }
 }
 
+// ========== MODULE 5c: News (F09 — carousel + /news pages) ==========
+let _allNews = [];
+let _newsStartIdx = 0;
+const NEWS_PER_VIEW = 3;
+
+async function loadNews() {
+    try {
+        const res = await fetch('/api/public/news?limit=12');
+        const data = await res.json();
+        _allNews = (data && data.success && Array.isArray(data.data)) ? data.data : [];
+    } catch (e) {
+        console.error('loadNews:', e);
+        _allNews = [];
+    }
+    _newsStartIdx = 0;
+    renderNewsCarousel();
+}
+
+function renderNewsCarousel() {
+    const track = document.getElementById('news-track');
+    const prevBtn = document.getElementById('btn-news-prev');
+    const nextBtn = document.getElementById('btn-news-next');
+    if (!track) return;
+
+    if (_allNews.length === 0) {
+        track.innerHTML = '<p class="empty-state">No news yet.</p>';
+        if (prevBtn) prevBtn.style.display = 'none';
+        if (nextBtn) nextBtn.style.display = 'none';
+        return;
+    }
+
+    const visible = _allNews.slice(_newsStartIdx, _newsStartIdx + NEWS_PER_VIEW);
+    track.innerHTML = visible.map(n => {
+        const id = parseInt(n.id, 10) || 0;
+        const cover = _escapeAttr(n.cover_image || '/uploads/main_image.jpg');
+        const title = _escapeHtml(n.title || '');
+        const summary = _escapeHtml(n.summary || '');
+        return `
+            <article class="news-item" data-id="${id}" onclick="goToNews(${id})">
+                <img class="news-bg" src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+                <div class="news-overlay">
+                    <h3 class="news-title">${title}</h3>
+                    <p class="news-summary">${summary}</p>
+                    <a class="news-read-more" href="/news/${id}" onclick="event.stopPropagation();">
+                        <span>READ MORE</span>
+                    </a>
+                </div>
+            </article>`;
+    }).join('');
+
+    const hideNav = _allNews.length <= NEWS_PER_VIEW;
+    if (prevBtn) { prevBtn.style.display = hideNav ? 'none' : 'inline-flex'; prevBtn.disabled = _newsStartIdx === 0; }
+    if (nextBtn) { nextBtn.style.display = hideNav ? 'none' : 'inline-flex'; nextBtn.disabled = _newsStartIdx + NEWS_PER_VIEW >= _allNews.length; }
+}
+
+function slideNewsNext() {
+    if (_newsStartIdx + NEWS_PER_VIEW < _allNews.length) {
+        _newsStartIdx++;
+        renderNewsCarousel();
+    }
+}
+function slideNewsPrev() {
+    if (_newsStartIdx > 0) {
+        _newsStartIdx--;
+        renderNewsCarousel();
+    }
+}
+function goToNews(id) {
+    if (id && Number.isInteger(id) && id > 0) window.location.href = '/news/' + id;
+}
+window.slideNewsNext = slideNewsNext;
+window.slideNewsPrev = slideNewsPrev;
+window.goToNews = goToNews;
+
 // ========== MODULE 6: Footer persons ==========
 function renderFooterPersons(items) {
     const container = document.getElementById('footer-container');
@@ -713,6 +787,7 @@ loadProjectsFromDB();
 loadAboutSection();
 loadServices();
 loadVideos();         // F08
+loadNews();           // F09
 loadFooterPersons();
 
 if (PREVIEW_MODE) {

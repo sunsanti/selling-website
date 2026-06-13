@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0E2A47">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=f08">
+    <link rel="stylesheet" href="style.css?v=f09">
 </head>
 <body>
     <!-- Header — 3-zone: logo / nav / CTA (F02 redesign) -->
@@ -258,6 +258,27 @@
         <div id="services-list" class="services-grid"></div>
     </section>
 
+    <!-- F09: News section + carousel + prev/next nav -->
+    <section id="news" class="news-section">
+        <div class="section-header section-header-split">
+            <div class="section-header-left">
+                <span class="section-tagline">LATEST NEWS</span>
+                <h2 class="section-heading">What's News Today</h2>
+            </div>
+            <div id="news-navigation">
+                <button id="btn-news-prev" class="news-nav-btn" type="button" onclick="slideNewsPrev()" aria-label="Previous">
+                    <i class="fa-solid fa-chevron-left"></i>
+                </button>
+                <button id="btn-news-next" class="news-nav-btn" type="button" onclick="slideNewsNext()" aria-label="Next">
+                    <i class="fa-solid fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+        <div id="news-carousel-container">
+            <div id="news-track" class="news-track"></div>
+        </div>
+    </section>
+
     <!-- footer -->
     <section id="footer" class="footer">
         <div class="footer-container" id="footer-container"></div>
@@ -384,7 +405,7 @@
         </div>
     </div>
 </div>
-    <script src="render.js?v=f08" defer></script>
-    <script src="script.js?v=f08" defer></script>
+    <script src="render.js?v=f09" defer></script>
+    <script src="script.js?v=f09" defer></script>
 </body>
 </html>

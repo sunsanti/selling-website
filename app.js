@@ -53,6 +53,16 @@ app.get('/videos', (req, res) => {
 });
 app.use('/videos', express.static(path.join(__dirname, 'Views/videos')));
 
+// F09: /news list + /news/:id detail pages.
+// Express 5 path-to-regexp no longer accepts inline :id([0-9]+) — use regex literal.
+app.get('/news', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/news/list.html'));
+});
+app.get(/^\/news\/(\d+)\/?$/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/news/detail.html'));
+});
+app.use('/news', express.static(path.join(__dirname, 'Views/news')));
+
 // Admin: gate the HTML entry behind login; static assets (CSS/JS) pass through
 // so the page can load styles after redirect bounce. API endpoints have their
 // own auth middleware further down.
@@ -87,6 +97,7 @@ const homeContentController = require('./Controllers/homeContentController');
 const mediaController = require('./Controllers/mediaController');
 const auditLogController = require('./Controllers/auditLogController');
 const videoController = require('./Controllers/videoController');
+const newsController = require('./Controllers/newsController');
 
 app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
@@ -102,6 +113,9 @@ app.get('/api/public/services', homeContentController.getServices);
 app.get('/api/public/footer-persons', homeContentController.getFooterPersons);
 // F08: public videos
 app.get('/api/public/videos', videoController.getPublic);
+// F09: public news
+app.get('/api/public/news', newsController.getPublic);
+app.get('/api/public/news/:id', newsController.getPublicById);
 
 app.use('/api/admin', requireAuth);
 
@@ -161,6 +175,14 @@ app.post('/api/admin/videos', videoController.create);
 app.put('/api/admin/videos/:id', videoController.update);
 app.put('/api/admin/videos/:id/soft-delete', videoController.softDelete);
 app.delete('/api/admin/videos/:id', requireAdmin, videoController.hardDelete);
+
+// F09: News admin endpoints
+app.get('/api/admin/news', newsController.getAll);
+app.get('/api/admin/news/:id', newsController.getById);
+app.post('/api/admin/news', newsController.create);
+app.put('/api/admin/news/:id', newsController.update);
+app.put('/api/admin/news/:id/soft-delete', newsController.softDelete);
+app.delete('/api/admin/news/:id', requireAdmin, newsController.hardDelete);
 
 app.post('/api/admin/translate', adminController.translateText);
 app.post('/api/admin/detect-language', adminController.detectTextLanguage);

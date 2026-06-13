@@ -103,6 +103,7 @@ function switchSection(section) {
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
         case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
         case 'videos': loadVideosAdmin(); break;
+        case 'news': loadNewsAdmin(); break;
     }
 }
 
@@ -1752,7 +1753,12 @@ const AUDIT_ACTION_LABELS = {
     'VIDEO_CREATE': 'Tạo video mới',
     'VIDEO_UPDATE': 'Cập nhật video',
     'VIDEO_SOFTDELETE': 'Ẩn video',
-    'VIDEO_DELETE': 'Xóa vĩnh viễn video'
+    'VIDEO_DELETE': 'Xóa vĩnh viễn video',
+    // F09: news actions
+    'NEWS_CREATE': 'Tạo tin tức mới',
+    'NEWS_UPDATE': 'Cập nhật tin tức',
+    'NEWS_SOFTDELETE': 'Ẩn tin tức',
+    'NEWS_DELETE': 'Xóa vĩnh viễn tin tức'
 };
 
 const AUDIT_TARGET_LABELS = {
@@ -1763,7 +1769,8 @@ const AUDIT_TARGET_LABELS = {
     'about_section': 'Phần About',
     'service': 'Service slot',
     'footer_person': 'Nhân viên Footer',
-    'video': 'Video'
+    'video': 'Video',
+    'news': 'Tin tức'
 };
 
 const AUDIT_FIELD_LABELS = {
@@ -1779,6 +1786,11 @@ const AUDIT_FIELD_LABELS = {
     'tiktok_url': 'Link TikTok',
     'thumbnail_path': 'Ảnh thumbnail',
     'views_count': 'Lượt xem',
+    // F09: news fields
+    'summary': 'Tóm tắt',
+    'content': 'Nội dung',
+    'cover_image': 'Ảnh bìa',
+    'status': 'Trạng thái',
     'description': 'Mô tả',
     'image_path': 'Ảnh',
     'banner': 'Banner',
@@ -2140,6 +2152,183 @@ async function hardDeleteVideo(id) {
         if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
         showToast('Đã xóa', 'success');
         loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+// ===================== F09 — NEWS ADMIN =====================
+function _escNews(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+}
+
+async function loadNewsAdmin(query) {
+    try {
+        const url = query
+            ? '/api/admin/news?q=' + encodeURIComponent(query)
+            : '/api/admin/news';
+        const res = await fetch(url);
+        const json = await res.json();
+        const tbody = document.getElementById('news-table-body');
+        if (!tbody) return;
+        if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:2rem">Chưa có tin tức</td></tr>';
+            return;
+        }
+        tbody.innerHTML = json.data.map(n => {
+            const statusClass = n.status === 'active' ? 'status-active' : 'status-inactive';
+            const statusLabel = n.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
+            const created = n.created_at ? new Date(n.created_at).toLocaleDateString('en-AU') : '';
+            return `
+                <tr data-id="${n.id}">
+                    <td>${n.id}</td>
+                    <td>${_escNews(n.title || '')}</td>
+                    <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                    <td>${n.display_order || 0}</td>
+                    <td>${created}</td>
+                    <td>
+                        <button class="btn-edit" onclick="editNewsItem(${n.id})" title="Sửa"><i class="fas fa-edit"></i></button>
+                        ${n.status === 'active'
+                            ? `<button class="btn-cancel" onclick="softDeleteNews(${n.id})" title="Ẩn"><i class="fas fa-eye-slash"></i></button>`
+                            : `<button class="btn-add" onclick="restoreNewsStatus(${n.id})" title="Hiện lại"><i class="fas fa-eye"></i></button>`}
+                        <button class="btn-cancel" onclick="hardDeleteNews(${n.id})" title="Xóa vĩnh viễn"><i class="fas fa-trash"></i></button>
+                    </td>
+                </tr>`;
+        }).join('');
+    } catch (err) {
+        console.error('loadNewsAdmin:', err);
+        showToast('Error loading news: ' + err.message, 'error');
+    }
+}
+
+function searchNews() {
+    const q = document.getElementById('news-search').value.trim();
+    loadNewsAdmin(q || undefined);
+}
+
+function openNewsModal() {
+    document.getElementById('news-modal-title').textContent = 'Add News';
+    document.getElementById('news-id').value = '';
+    document.getElementById('news-form-title').value = '';
+    document.getElementById('news-form-summary').value = '';
+    document.getElementById('news-form-content').value = '';
+    document.getElementById('news-form-cover').value = '';
+    document.getElementById('news-form-order').value = '0';
+    document.getElementById('news-form-status').value = 'active';
+    const img = document.getElementById('news-cover-img');
+    img.style.display = 'none'; img.src = '';
+    document.getElementById('news-cover-placeholder').style.display = 'flex';
+    document.getElementById('news-modal-admin').classList.add('active');
+}
+
+function closeNewsModalAdmin() {
+    document.getElementById('news-modal-admin').classList.remove('active');
+}
+
+async function editNewsItem(id) {
+    try {
+        const res = await fetch('/api/admin/news/' + id);
+        const json = await res.json();
+        if (!json.success) { showToast('Không tải được tin tức', 'error'); return; }
+        const n = json.data;
+        document.getElementById('news-modal-title').textContent = 'Edit News #' + n.id;
+        document.getElementById('news-id').value = n.id;
+        document.getElementById('news-form-title').value = n.title || '';
+        document.getElementById('news-form-summary').value = n.summary || '';
+        document.getElementById('news-form-content').value = n.content || '';
+        document.getElementById('news-form-cover').value = n.cover_image || '';
+        document.getElementById('news-form-order').value = n.display_order || 0;
+        document.getElementById('news-form-status').value = n.status || 'active';
+        const img = document.getElementById('news-cover-img');
+        const ph = document.getElementById('news-cover-placeholder');
+        if (n.cover_image) { img.src = n.cover_image; img.style.display = 'block'; ph.style.display = 'none'; }
+        else { img.style.display = 'none'; ph.style.display = 'flex'; }
+        document.getElementById('news-modal-admin').classList.add('active');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+function pickNewsCover() {
+    openMediaLibrary({
+        mode: 'single',
+        onSelect: ([url]) => {
+            document.getElementById('news-form-cover').value = url;
+            const img = document.getElementById('news-cover-img');
+            img.src = url; img.style.display = 'block';
+            document.getElementById('news-cover-placeholder').style.display = 'none';
+        }
+    });
+}
+
+async function saveNewsItem() {
+    const id = document.getElementById('news-id').value;
+    const title = document.getElementById('news-form-title').value.trim();
+    const summary = document.getElementById('news-form-summary').value;
+    const content = document.getElementById('news-form-content').value;
+    const cover_image = document.getElementById('news-form-cover').value.trim();
+    const display_order = parseInt(document.getElementById('news-form-order').value, 10) || 0;
+    const status = document.getElementById('news-form-status').value;
+
+    if (!title) { showToast('Tiêu đề bắt buộc', 'error'); return; }
+    if (title.length > 255) { showToast('Tiêu đề tối đa 255 ký tự', 'error'); return; }
+    if (summary.length > 500) { showToast('Tóm tắt tối đa 500 ký tự', 'error'); return; }
+
+    const payload = { title, summary, content, cover_image, display_order };
+    if (id) payload.status = status;
+    try {
+        const res = await fetch(id ? '/api/admin/news/' + id : '/api/admin/news', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(id ? 'Cập nhật thành công' : 'Tạo tin tức thành công', 'success');
+        closeNewsModalAdmin();
+        loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function softDeleteNews(id) {
+    if (!confirm('Ẩn tin tức này khỏi public site?')) return;
+    try {
+        const res = await fetch('/api/admin/news/' + id + '/soft-delete', { method: 'PUT' });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã ẩn' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function restoreNewsStatus(id) {
+    try {
+        const res = await fetch('/api/admin/news/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'active' })
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã hiện lại' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function hardDeleteNews(id) {
+    if (!confirm('Xóa VĨNH VIỄN tin tức này? Không thể hoàn tác.')) return;
+    try {
+        const res = await fetch('/api/admin/news/' + id, { method: 'DELETE' });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast('Đã xóa', 'success');
+        loadNewsAdmin();
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     }

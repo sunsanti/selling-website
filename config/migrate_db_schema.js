@@ -208,6 +208,44 @@ const TABLES = [
         summaryCols: ['slot', 'title']
     },
 
+    // F09: news table — articles + carousel + /news pages
+    {
+        name: 'news',
+        create: `
+            CREATE TABLE news (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                title VARCHAR(255) NOT NULL,
+                summary VARCHAR(500) NOT NULL DEFAULT '',
+                content TEXT,
+                cover_image VARCHAR(255) NOT NULL DEFAULT '',
+                display_order INT DEFAULT 0,
+                status ENUM('active','inactive') DEFAULT 'active',
+                created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                INDEX idx_news_status_order (status, display_order),
+                INDEX idx_news_created (created_at DESC)
+            )
+        `,
+        seed: [
+            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                [1, 'THE ALBANESE GOVERNMENT WILL DELIVER NEW HOUSING POLICY',
+                 'New federal policy expected to boost foreign investment in the Australian property market.',
+                 'The Albanese government has announced a new national housing policy designed to stimulate foreign investment while protecting first-home buyers.\n\nThe policy includes simplified FIRB processes, additional incentives for build-to-rent developments, and stronger oversight of foreign ownership in residential markets.\n\nIndustry analysts expect the changes to take effect in the second half of 2026.',
+                 '/uploads/main_image.jpg', 1]],
+            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                [2, 'SYDNEY HOUSE PRICES UP 8% IN Q1 2026',
+                 'Sydney property market shows strong growth despite global headwinds and rising rates.',
+                 'Sydney property prices rose 8% in the first quarter of 2026, outperforming all other capital cities. Key drivers include inner-city apartment demand, limited new supply, and renewed international migration.\n\nAnalysts predict continued growth through Q2.',
+                 '/uploads/main_image.jpg', 2]],
+            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                [3, 'FIRB UPDATES RULES FOR OVERSEAS BUYERS',
+                 'New compliance requirements coming into effect July 2026 — what investors need to know.',
+                 'The Foreign Investment Review Board has tightened compliance rules for overseas property buyers. Changes include mandatory pre-approval for off-the-plan apartments, stricter source-of-funds checks, and updated thresholds.\n\nContact our team for personalised advice.',
+                 '/uploads/main_image.jpg', 3]]
+        ],
+        summaryCols: ['id', 'title', 'status']
+    },
+
     // F08: videos table — TikTok external link cards
     {
         name: 'videos',
