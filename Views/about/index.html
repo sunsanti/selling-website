@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>About Us — Sealand Property</title>
+    <meta name="description" content="Sealand Property — Australian real-estate advisory for local and overseas investors. Our story, mission, values and team.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/main/style.css?v=v3">
+    <link rel="stylesheet" href="/about/style.css?v=v3">
+</head>
+<body>
+    <!-- Header (mirrors /main, ABOUT US active) -->
+    <header class="header">
+        <div class="header-zone header-zone-left">
+            <a href="/main" class="logo" id="logo-link">
+                <span id="site-logo-text" class="logo-text">SEALAND PROPERTY</span>
+                <img id="site-logo-img" src="" alt="" style="display:none; height:40px; object-fit:contain;">
+            </a>
+        </div>
+        <nav class="navbar" id="main-navbar">
+            <div class="mobile-nav-header" style="display: none;">
+                <div id="mobile-site-phone" class="mobile-site-phone"></div>
+                <div id="mobile-account" class="mobile-account-name"></div>
+            </div>
+            <a class="nav-item" href="/main">HOME</a>
+            <a class="nav-item" href="/projects">PROJECTS</a>
+            <div class="nav-item nav-dropdown" tabindex="0">
+                <span>BUY <i class="fa-solid fa-chevron-down nav-caret"></i></span>
+                <div class="nav-dropdown-menu">
+                    <a href="/projects?type=apartment">Apartments</a>
+                    <a href="/projects?type=house">Houses</a>
+                    <a href="/projects?type=townhouse">Townhouses</a>
+                    <a href="/projects?type=land">Land</a>
+                </div>
+            </div>
+            <div class="nav-item nav-dropdown" tabindex="0">
+                <span>SELL <i class="fa-solid fa-chevron-down nav-caret"></i></span>
+                <div class="nav-dropdown-menu">
+                    <a href="/main#footer">List Your Property</a>
+                    <a href="/main#footer">Market Appraisal</a>
+                    <a href="/main#footer">Sell with Us</a>
+                </div>
+            </div>
+            <div class="nav-item nav-dropdown" tabindex="0">
+                <span>SERVICES <i class="fa-solid fa-chevron-down nav-caret"></i></span>
+                <div class="nav-dropdown-menu">
+                    <a href="/main#services">Buyer Agent</a>
+                    <a href="/main#services">Investment Consulting</a>
+                    <a href="/main#services">Property Management</a>
+                    <a href="/main#services">Loan &amp; Finance</a>
+                    <a href="/main#services">FIRB Support</a>
+                </div>
+            </div>
+            <a class="nav-item nav-active" href="/about">ABOUT US</a>
+            <a class="nav-item" href="/news">NEWS</a>
+            <a class="nav-item" href="/main#footer">CONTACT</a>
+            <a class="nav-item desktop-admin-btn" id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">ADMIN</a>
+            <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()">LOGOUT</button>
+        </nav>
+        <div class="header-zone header-zone-right">
+            <a href="javascript:void(0)" class="btn-header-phone" id="header-phone-btn">
+                <i class="fa-solid fa-phone"></i>
+                <span id="site-phone">phone number</span>
+            </a>
+            <div class="header-cta logged-out-cta">
+                <a href="/main#footer" class="btn-book-consultation">BOOK CONSULTATION</a>
+            </div>
+            <div class="header-cta logged-in-cta" style="display: none;">
+                <div class="account-name" id="account">Name</div>
+                <button id="logout-btn" onclick="logoutAdmin()"><div>LOGOUT</div></button>
+            </div>
+        </div>
+        <button class="menu-btn" id="menu-btn">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </header>
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+
+    <main class="about-page">
+        <!-- Hero banner -->
+        <section class="about-hero">
+            <div class="about-hero-bg"></div>
+            <div class="about-hero-inner">
+                <span class="section-tagline">ABOUT SEALAND PROPERTY</span>
+                <h1 class="about-hero-title">Trusted Partners in<br>Australian Real Estate</h1>
+                <p class="about-hero-sub">
+                    Helping local and overseas investors find premium properties across Sydney,
+                    Melbourne, Brisbane and the Gold Coast — for over a decade.
+                </p>
+            </div>
+        </section>
+
+        <!-- Our Story -->
+        <section class="about-story">
+            <div class="about-story-grid">
+                <div class="about-story-text">
+                    <span class="section-tagline">OUR STORY</span>
+                    <h2 class="about-section-h2">Building wealth through trusted property advice.</h2>
+                    <p>
+                        Sealand Property was founded in Sydney with one belief: that real-estate
+                        decisions deserve clear, honest and data-driven advice — not a sales pitch.
+                        Over the years we have helped first-home buyers, seasoned investors and
+                        overseas clients secure premium properties across Australia's most
+                        desirable corridors.
+                    </p>
+                    <p>
+                        From off-the-plan apartments in inner-Sydney to family homes in Melbourne
+                        and build-to-rent opportunities on the Gold Coast, our team combines deep
+                        market knowledge with end-to-end service: search, due diligence,
+                        FIRB advisory, finance referrals and post-settlement management.
+                    </p>
+                </div>
+                <div class="about-story-image">
+                    <img src="/uploads/main_image.jpg" alt="Sydney skyline" loading="lazy" onerror="this.style.display='none'">
+                </div>
+            </div>
+        </section>
+
+        <!-- Why choose us -->
+        <section class="about-values">
+            <div class="about-values-header">
+                <span class="section-tagline">WHY CHOOSE US</span>
+                <h2 class="about-section-h2">What sets Sealand apart.</h2>
+            </div>
+            <div class="about-values-grid">
+                <div class="value-card">
+                    <i class="fa-solid fa-shield-halved value-icon"></i>
+                    <h3>Independent Advice</h3>
+                    <p>We work for buyers — not developers. Every recommendation is grounded in research, not commissions.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fa-solid fa-globe value-icon"></i>
+                    <h3>Global Reach</h3>
+                    <p>Multilingual team supporting overseas investors with FIRB compliance, finance and remote settlement.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fa-solid fa-chart-line value-icon"></i>
+                    <h3>Data-Driven</h3>
+                    <p>Suburb-level insights, capital-growth modelling and rental-yield analysis — clear numbers, every time.</p>
+                </div>
+                <div class="value-card">
+                    <i class="fa-solid fa-handshake value-icon"></i>
+                    <h3>End-to-End</h3>
+                    <p>From the first inspection to property management — one team across the entire ownership journey.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Stats -->
+        <section class="about-stats-page">
+            <div class="info" id="about-stats-info"></div>
+        </section>
+
+        <!-- Founders / Team -->
+        <section class="about-team">
+            <div class="about-team-header">
+                <span class="section-tagline">MEET OUR TEAM</span>
+                <h2 class="about-section-h2">The people behind Sealand Property.</h2>
+                <p class="about-team-sub">Our co-founders bring over 20 years of combined experience in Australian real estate, finance and overseas investor advisory.</p>
+            </div>
+            <div class="about-founders" id="about-founders"></div>
+        </section>
+
+        <!-- CTA -->
+        <section class="about-cta">
+            <div class="about-cta-inner">
+                <h2 class="about-cta-title">Ready to start your property journey?</h2>
+                <p class="about-cta-sub">Talk to our team about your goals — local or overseas, first-home or portfolio.</p>
+                <div class="about-cta-buttons">
+                    <a href="/main#footer" class="btn-cta-primary">BOOK A CONSULTATION <i class="fa-solid fa-arrow-right"></i></a>
+                    <a href="/projects" class="btn-cta-outline">EXPLORE PROJECTS <i class="fa-solid fa-arrow-right"></i></a>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Footer (same markup as /main; populated by render.js footer-persons API) -->
+    <section id="footer" class="footer">
+        <div id="footer-top">
+            <div class="footer-top-inner">
+                <h3 class="footer-form-title">Get in touch with us today</h3>
+                <form id="customer-contact-form" onsubmit="submitCustomerContact(event)" novalidate>
+                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" required autocomplete="name" maxlength="255">
+                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" autocomplete="tel" maxlength="20">
+                    <input type="email" id="customer-email" name="email" placeholder="Email Address" autocomplete="email" maxlength="255">
+                    <button type="submit" id="btn-submit-form" class="btn-footer-submit">SUBMIT</button>
+                </form>
+                <div id="footer-form-status" class="footer-form-status" role="status" aria-live="polite"></div>
+            </div>
+        </div>
+        <div id="footer-bottom">
+            <div class="footer-bottom-inner">
+                <div id="footer-col-brand">
+                    <span id="footer-logo" class="footer-logo">SEALAND PROPERTY</span>
+                    <p id="footer-desc">
+                        Helping investors and homeowners across Australia build long-term
+                        wealth through trusted real-estate guidance.
+                    </p>
+                    <p id="footer-desc-2">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Level 12, 1 Market Street, Sydney NSW 2000, Australia
+                    </p>
+                    <div id="footer-social-links">
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div id="footer-col-links">
+                    <h3 class="footer-col-title">QUICK LINKS</h3>
+                    <ul id="footer-nav-list">
+                        <li><a href="/main">Home</a></li>
+                        <li><a href="/projects">Projects</a></li>
+                        <li><a href="/main#services">Services</a></li>
+                        <li><a href="/videos">Video</a></li>
+                        <li><a href="/news">News</a></li>
+                        <li><a href="/about">About Us</a></li>
+                    </ul>
+                </div>
+                <div id="footer-col-contact">
+                    <h3 class="footer-col-title">CONTACT OUR TEAM</h3>
+                    <div class="footer-container" id="footer-container"></div>
+                </div>
+            </div>
+        </div>
+        <div id="footer-copyright">
+            <p id="copyright-text">© 2026 Sealand Property. All rights reserved.</p>
+        </div>
+    </section>
+
+    <script src="/main/render.js?v=v3" defer></script>
+    <script src="/main/script.js?v=v3" defer></script>
+</body>
+</html>

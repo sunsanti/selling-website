@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0E2A47">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=f11">
+    <link rel="stylesheet" href="style.css?v=v3">
 </head>
 <body>
     <!-- Header — 3-zone: logo / nav / CTA (F02 redesign) -->
@@ -32,10 +32,40 @@
             </div>
             <a class="nav-item nav-active" href="/main">HOME</a>
             <a class="nav-item" href="/projects">PROJECTS</a>
-            <a class="nav-item" href="#about-us">ABOUT US</a>
-            <a class="nav-item" href="#services">SERVICES</a>
-            <a class="nav-item" href="#video">VIDEO</a>
-            <a class="nav-item" href="#news">NEWS</a>
+
+            <!-- v3: BUY dropdown -->
+            <div class="nav-item nav-dropdown" tabindex="0">
+                <span>BUY <i class="fa-solid fa-chevron-down nav-caret"></i></span>
+                <div class="nav-dropdown-menu">
+                    <a href="/projects?type=apartment">Apartments</a>
+                    <a href="/projects?type=house">Houses</a>
+                    <a href="/projects?type=townhouse">Townhouses</a>
+                    <a href="/projects?type=land">Land</a>
+                </div>
+            </div>
+            <!-- v3: SELL dropdown -->
+            <div class="nav-item nav-dropdown" tabindex="0">
+                <span>SELL <i class="fa-solid fa-chevron-down nav-caret"></i></span>
+                <div class="nav-dropdown-menu">
+                    <a href="/main#footer">List Your Property</a>
+                    <a href="/main#footer">Market Appraisal</a>
+                    <a href="/main#footer">Sell with Us</a>
+                </div>
+            </div>
+            <!-- v3: SERVICES dropdown -->
+            <div class="nav-item nav-dropdown" tabindex="0">
+                <span>SERVICES <i class="fa-solid fa-chevron-down nav-caret"></i></span>
+                <div class="nav-dropdown-menu">
+                    <a href="/main#services">Buyer Agent</a>
+                    <a href="/main#services">Investment Consulting</a>
+                    <a href="/main#services">Property Management</a>
+                    <a href="/main#services">Loan &amp; Finance</a>
+                    <a href="/main#services">FIRB Support</a>
+                </div>
+            </div>
+
+            <a class="nav-item" href="/about">ABOUT US</a>
+            <a class="nav-item" href="/news">NEWS</a>
             <a class="nav-item" href="#footer">CONTACT</a>
             <a class="nav-item desktop-admin-btn" id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">ADMIN</a>
             <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()">LOGOUT</button>
@@ -101,7 +131,12 @@
                 </div>
             </div>
 
-            <!-- Property Search Bar -->
+        </div>
+    </section>
+
+    <!-- v3: Property Search bar — white card UNDER the hero (not inside) -->
+    <section id="property-search-section" class="property-search-section">
+        <div class="property-search-wrap">
             <form id="property-search" class="property-search" onsubmit="handleSearchSubmit(event)">
                 <div class="search-field">
                     <label>STATE</label>
@@ -149,21 +184,17 @@
                     </select>
                 </div>
                 <button type="submit" class="btn-search-property">
-                    <i class="fa-solid fa-magnifying-glass"></i>
                     SEARCH PROPERTY
+                    <i class="fa-solid fa-magnifying-glass"></i>
                 </button>
             </form>
         </div>
     </section>
 
-    <!-- about us -->
-    <section id="about-us" class="about-us">
-        <div class="section-header section-header-centered about-section-header">
-            <span class="section-tagline">ABOUT US</span>
-            <h2 class="section-heading about-section-heading">Who We Are</h2>
-        </div>
-
-        <div class="content" id="about-content">
+    <!-- v3: About-us = ONLY 4 stats + TRUSTED BY OUR CLIENTS strip
+              (heading + founders moved to dedicated /about page) -->
+    <section id="about-us" class="about-us about-us-slim">
+        <div class="content" id="about-content" style="display:none">
             <div class="banner" id="about-banner"></div>
             <div class="small-content">
                 <div class="left">
@@ -176,8 +207,17 @@
         </div>
         <div class="info" id="about-stats-info"></div>
 
-        <!-- v2: Founders block (rendered from footer-persons API) -->
-        <div class="about-founders" id="about-founders"></div>
+        <div class="trusted-strip">
+            <h3 class="trusted-label">TRUSTED BY OUR CLIENTS</h3>
+            <div class="trusted-logos">
+                <span class="trusted-logo trusted-logo--domain">domain</span>
+                <span class="trusted-logo trusted-logo--rea">realestate<span class="dot-com">.com.au</span></span>
+                <span class="trusted-logo">CoreLogic</span>
+                <span class="trusted-logo">REIV</span>
+                <span class="trusted-logo">Property Council<br><small>of Australia</small></span>
+                <span class="trusted-logo">my<strong>Australian</strong>Property</span>
+            </div>
+        </div>
     </section>
 
     <!-- feature -->
@@ -337,7 +377,7 @@
                         <li><a href="#services">Services</a></li>
                         <li><a href="/videos">Video</a></li>
                         <li><a href="/news">News</a></li>
-                        <li><a href="#about-us">About Us</a></li>
+                        <li><a href="/about">About Us</a></li>
                     </ul>
                 </div>
 
@@ -476,7 +516,7 @@
         </div>
     </div>
 </div>
-    <script src="render.js?v=f11" defer></script>
-    <script src="script.js?v=f11" defer></script>
+    <script src="render.js?v=v3" defer></script>
+    <script src="script.js?v=v3" defer></script>
 </body>
 </html>

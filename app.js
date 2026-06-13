@@ -53,6 +53,12 @@ app.get('/videos', (req, res) => {
 });
 app.use('/videos', express.static(path.join(__dirname, 'Views/videos')));
 
+// v3: /about page (explicit GET → static fallback for assets)
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/about/index.html'));
+});
+app.use('/about', express.static(path.join(__dirname, 'Views/about')));
+
 // F09: /news list + /news/:id detail pages.
 // Express 5 path-to-regexp no longer accepts inline :id([0-9]+) — use regex literal.
 app.get('/news', (req, res) => {

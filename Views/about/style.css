@@ -1,0 +1,245 @@
+/* v3: /about page — story + values + stats + team + CTA */
+.about-page {
+    background: var(--color-cream, #EBE9E8);
+    color: var(--color-navy, #1B2635);
+}
+
+/* ===== HERO ===== */
+.about-hero {
+    position: relative;
+    min-height: 56vh;
+    overflow: hidden;
+    margin-top: -80px;          /* sit under fixed header */
+    background: var(--color-navy);
+    display: flex;
+    align-items: center;
+}
+.about-hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(27,38,53,0.85) 0%, rgba(27,38,53,0.55) 60%, rgba(27,38,53,0.45) 100%),
+        url('/uploads/main_image.jpg') center/cover;
+    z-index: 0;
+}
+.about-hero-inner {
+    position: relative;
+    z-index: 1;
+    max-width: 1300px;
+    margin: 0 auto;
+    padding: calc(80px + 6rem) 6% 6rem;
+    color: #fff;
+}
+.about-hero-inner .section-tagline {
+    color: var(--color-gold);
+    display: inline-block;
+    margin-bottom: 1.4rem;
+}
+.about-hero-title {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(3.2rem, 5vw, 5rem);
+    line-height: 1.15;
+    margin: 0 0 1.4rem;
+    color: #fff;
+}
+.about-hero-sub {
+    font-size: 1.5rem;
+    max-width: 640px;
+    color: rgba(255,255,255,0.85);
+    line-height: 1.6;
+    margin: 0;
+}
+
+/* ===== Section h2 ===== */
+.about-section-h2 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(2.6rem, 3.5vw, 3.6rem);
+    color: var(--color-navy);
+    line-height: 1.2;
+    margin: 1rem 0 2rem;
+}
+
+/* ===== Our Story ===== */
+.about-story {
+    padding: 6rem 5%;
+    background: #fff;
+}
+.about-story-grid {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1.1fr 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+.about-story-text p {
+    font-size: 1.35rem;
+    line-height: 1.7;
+    color: rgba(27,38,53,0.85);
+    margin: 0 0 1.4rem;
+}
+.about-story-image img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 20px 50px rgba(27,38,53,0.18);
+}
+
+/* ===== Why Choose Us / Values ===== */
+.about-values {
+    padding: 6rem 5%;
+    background: var(--color-cream, #EBE9E8);
+}
+.about-values-header {
+    text-align: center;
+    margin-bottom: 4rem;
+    max-width: 800px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.about-values-grid {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 1.6rem;
+}
+.value-card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2.4rem 1.8rem;
+    text-align: center;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.value-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 30px rgba(27,38,53,0.08);
+}
+.value-icon {
+    font-size: 3rem;
+    color: var(--color-gold);
+    margin-bottom: 1.4rem;
+}
+.value-card h3 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1.7rem;
+    color: var(--color-navy);
+    margin: 0 0 0.8rem;
+    line-height: 1.25;
+}
+.value-card p {
+    font-size: 1.2rem;
+    color: rgba(27,38,53,0.7);
+    line-height: 1.55;
+    margin: 0;
+}
+
+/* ===== Stats reuse .info from main ===== */
+.about-stats-page {
+    padding: 5rem 5%;
+    background: #fff;
+}
+.about-stats-page .info { max-width: 1300px; margin: 0 auto; }
+
+/* ===== Team / Founders ===== */
+.about-team {
+    padding: 6rem 5%;
+    background: var(--color-cream, #EBE9E8);
+}
+.about-team-header {
+    text-align: center;
+    max-width: 760px;
+    margin: 0 auto 4rem;
+}
+.about-team-header .section-tagline { display: inline-block; }
+.about-team-sub {
+    font-size: 1.35rem;
+    color: rgba(27,38,53,0.7);
+    line-height: 1.6;
+}
+.about-team .about-founders {
+    max-width: 1300px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+
+/* ===== CTA ===== */
+.about-cta {
+    background: var(--color-navy);
+    color: #fff;
+    padding: 6rem 5%;
+    position: relative;
+    overflow: hidden;
+}
+.about-cta::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--color-gold), rgba(209,174,107,0.5), var(--color-gold));
+}
+.about-cta-inner {
+    max-width: 900px;
+    margin: 0 auto;
+    text-align: center;
+}
+.about-cta-title {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(2.6rem, 4vw, 3.8rem);
+    color: #fff;
+    margin: 0 0 1.2rem;
+    line-height: 1.2;
+}
+.about-cta-sub {
+    font-size: 1.4rem;
+    color: rgba(255,255,255,0.8);
+    margin: 0 0 2.8rem;
+}
+.about-cta-buttons {
+    display: flex;
+    gap: 1.2rem;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.btn-cta-primary, .btn-cta-outline {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.8rem;
+    padding: 1.4rem 2.4rem;
+    font-size: 1.2rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border-radius: 6px;
+    text-decoration: none;
+    transition: transform 0.2s, background 0.2s, color 0.2s;
+}
+.btn-cta-primary {
+    background: var(--color-gold);
+    color: var(--color-navy);
+}
+.btn-cta-primary:hover { transform: translateY(-2px); }
+.btn-cta-outline {
+    background: transparent;
+    color: #fff;
+    border: 1.5px solid rgba(255,255,255,0.4);
+}
+.btn-cta-outline:hover {
+    background: rgba(255,255,255,0.08);
+    border-color: var(--color-gold);
+    color: var(--color-gold);
+}
+
+@media (max-width: 1024px) {
+    .about-story-grid { grid-template-columns: 1fr; gap: 2.5rem; }
+    .about-values-grid { grid-template-columns: repeat(2, 1fr); }
+    .about-team .about-founders { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+    .about-values-grid { grid-template-columns: 1fr; }
+    .about-cta-buttons { flex-direction: column; align-items: stretch; }
+    .btn-cta-primary, .btn-cta-outline { justify-content: center; }
+}
