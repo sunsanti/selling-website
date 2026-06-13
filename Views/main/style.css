@@ -501,64 +501,7 @@ section{
     font-weight: 500;
 }
 
-/* v3: header dropdown menus (BUY / SELL / SERVICES) */
-.nav-dropdown {
-    position: relative;
-    cursor: pointer;
-    user-select: none;
-    color: inherit;
-}
-.nav-dropdown > span {
-    display: inline-flex;
-    align-items: center;
-    gap: 0.4rem;
-    font-size: 1.35rem;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    font-weight: 500;
-    color: inherit;
-    padding: inherit;
-}
-.nav-caret { font-size: 0.85rem; transition: transform 0.2s; }
-.nav-dropdown:hover .nav-caret,
-.nav-dropdown:focus-within .nav-caret { transform: rotate(180deg); }
-.nav-dropdown-menu {
-    position: absolute;
-    top: 100%;
-    left: 50%;
-    transform: translateX(-50%) translateY(8px);
-    background: #fff;
-    border: 1px solid rgba(27,38,53,0.08);
-    border-radius: 8px;
-    box-shadow: 0 12px 28px rgba(27,38,53,0.14);
-    min-width: 220px;
-    padding: 0.6rem 0;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.18s ease, transform 0.18s ease;
-    z-index: 50;
-}
-.nav-dropdown:hover .nav-dropdown-menu,
-.nav-dropdown:focus-within .nav-dropdown-menu {
-    opacity: 1;
-    pointer-events: auto;
-    transform: translateX(-50%) translateY(0);
-}
-.nav-dropdown-menu a {
-    display: block;
-    padding: 0.8rem 1.4rem;
-    color: var(--color-navy);
-    text-transform: none !important;
-    letter-spacing: 0 !important;
-    font-size: 1.25rem !important;
-    font-weight: 500 !important;
-    text-decoration: none;
-    transition: background 0.15s, color 0.15s;
-}
-.nav-dropdown-menu a:hover {
-    background: rgba(209,174,107,0.12);
-    color: var(--color-gold);
-}
+/* v3 reverted: dropdown nav removed per user request — keep nav simple/flat */
 
 .nav-item {
   position: relative;

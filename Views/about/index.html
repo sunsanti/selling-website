@@ -4,10 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>About Us — Sealand Property</title>
-    <meta name="description" content="Sealand Property — Australian real-estate advisory for local and overseas investors. Our story, mission, values and team.">
+    <meta name="description" content="About Sealand Property — trusted Australian real-estate agency for local and overseas investors. Our story, leadership and offices.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/main/style.css?v=v3">
-    <link rel="stylesheet" href="/about/style.css?v=v3">
+    <link rel="stylesheet" href="/main/style.css?v=v4">
+    <link rel="stylesheet" href="/about/style.css?v=v4">
 </head>
 <body>
     <!-- Header (mirrors /main, ABOUT US active) -->
@@ -25,34 +25,9 @@
             </div>
             <a class="nav-item" href="/main">HOME</a>
             <a class="nav-item" href="/projects">PROJECTS</a>
-            <div class="nav-item nav-dropdown" tabindex="0">
-                <span>BUY <i class="fa-solid fa-chevron-down nav-caret"></i></span>
-                <div class="nav-dropdown-menu">
-                    <a href="/projects?type=apartment">Apartments</a>
-                    <a href="/projects?type=house">Houses</a>
-                    <a href="/projects?type=townhouse">Townhouses</a>
-                    <a href="/projects?type=land">Land</a>
-                </div>
-            </div>
-            <div class="nav-item nav-dropdown" tabindex="0">
-                <span>SELL <i class="fa-solid fa-chevron-down nav-caret"></i></span>
-                <div class="nav-dropdown-menu">
-                    <a href="/main#footer">List Your Property</a>
-                    <a href="/main#footer">Market Appraisal</a>
-                    <a href="/main#footer">Sell with Us</a>
-                </div>
-            </div>
-            <div class="nav-item nav-dropdown" tabindex="0">
-                <span>SERVICES <i class="fa-solid fa-chevron-down nav-caret"></i></span>
-                <div class="nav-dropdown-menu">
-                    <a href="/main#services">Buyer Agent</a>
-                    <a href="/main#services">Investment Consulting</a>
-                    <a href="/main#services">Property Management</a>
-                    <a href="/main#services">Loan &amp; Finance</a>
-                    <a href="/main#services">FIRB Support</a>
-                </div>
-            </div>
             <a class="nav-item nav-active" href="/about">ABOUT US</a>
+            <a class="nav-item" href="/main#services">SERVICES</a>
+            <a class="nav-item" href="/videos">VIDEO</a>
             <a class="nav-item" href="/news">NEWS</a>
             <a class="nav-item" href="/main#footer">CONTACT</a>
             <a class="nav-item desktop-admin-btn" id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">ADMIN</a>
@@ -78,104 +53,121 @@
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
     <main class="about-page">
-        <!-- Hero banner -->
+        <!-- 1. Hero/Banner -->
         <section class="about-hero">
             <div class="about-hero-bg"></div>
             <div class="about-hero-inner">
-                <span class="section-tagline">ABOUT SEALAND PROPERTY</span>
-                <h1 class="about-hero-title">Trusted Partners in<br>Australian Real Estate</h1>
-                <p class="about-hero-sub">
-                    Helping local and overseas investors find premium properties across Sydney,
-                    Melbourne, Brisbane and the Gold Coast — for over a decade.
+                <span class="about-hero-tag">SEALAND PROPERTY</span>
+                <h1 class="about-hero-title">ABOUT US</h1>
+            </div>
+        </section>
+
+        <!-- 2. Mission statement (centered, single column) -->
+        <section class="about-mission">
+            <div class="about-mission-inner">
+                <p class="about-mission-text">
+                    Our core mission is to become <strong>a trusted agency for buyers, sellers
+                    and investors</strong> looking to achieve property ownership in Australia —
+                    connecting people, knowledge and opportunity across Sydney, Melbourne,
+                    Brisbane and the Gold Coast.
                 </p>
             </div>
         </section>
 
-        <!-- Our Story -->
-        <section class="about-story">
-            <div class="about-story-grid">
-                <div class="about-story-text">
-                    <span class="section-tagline">OUR STORY</span>
-                    <h2 class="about-section-h2">Building wealth through trusted property advice.</h2>
-                    <p>
-                        Sealand Property was founded in Sydney with one belief: that real-estate
-                        decisions deserve clear, honest and data-driven advice — not a sales pitch.
-                        Over the years we have helped first-home buyers, seasoned investors and
-                        overseas clients secure premium properties across Australia's most
-                        desirable corridors.
-                    </p>
-                    <p>
-                        From off-the-plan apartments in inner-Sydney to family homes in Melbourne
-                        and build-to-rent opportunities on the Gold Coast, our team combines deep
-                        market knowledge with end-to-end service: search, due diligence,
-                        FIRB advisory, finance referrals and post-settlement management.
-                    </p>
+        <!-- 3. Leadership — Director + Co-Founder, rendered from footer-persons API -->
+        <section class="about-leadership" id="about-leadership">
+            <!-- populated by about/about.js: 2 leadership blocks, each with portrait + quote -->
+        </section>
+
+        <!-- 4. Team members grid -->
+        <section class="about-team-grid">
+            <div class="about-section-header">
+                <span class="about-tag">OUR TEAM</span>
+                <h2 class="about-section-h2">Meet the people behind Sealand.</h2>
+            </div>
+            <div class="team-grid">
+                <div class="team-member">
+                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
+                    <h4>Anh Tran</h4>
+                    <p>Office Manager</p>
                 </div>
-                <div class="about-story-image">
-                    <img src="/uploads/main_image.jpg" alt="Sydney skyline" loading="lazy" onerror="this.style.display='none'">
+                <div class="team-member">
+                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
+                    <h4>Helen Nguyen</h4>
+                    <p>Marketing Manager</p>
+                </div>
+                <div class="team-member">
+                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
+                    <h4>Aley Nguyen</h4>
+                    <p>Creative Specialist</p>
+                </div>
+                <div class="team-member">
+                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
+                    <h4>Anny Vu</h4>
+                    <p>Property Consultant</p>
+                </div>
+                <div class="team-member">
+                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
+                    <h4>Lucas Doan</h4>
+                    <p>Property Consultant</p>
+                </div>
+                <div class="team-member">
+                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
+                    <h4>Apollo Raymundo</h4>
+                    <p>Property Consultant</p>
                 </div>
             </div>
         </section>
 
-        <!-- Why choose us -->
-        <section class="about-values">
-            <div class="about-values-header">
-                <span class="section-tagline">WHY CHOOSE US</span>
-                <h2 class="about-section-h2">What sets Sealand apart.</h2>
+        <!-- 5. Services 3-column -->
+        <section class="about-services">
+            <div class="about-section-header about-section-header--centered">
+                <span class="about-tag">OUR SERVICES</span>
+                <h2 class="about-section-h2">What we do for our clients.</h2>
             </div>
-            <div class="about-values-grid">
-                <div class="value-card">
-                    <i class="fa-solid fa-shield-halved value-icon"></i>
-                    <h3>Independent Advice</h3>
-                    <p>We work for buyers — not developers. Every recommendation is grounded in research, not commissions.</p>
+            <div class="about-services-grid">
+                <div class="about-service-card">
+                    <i class="fa-solid fa-house-chimney about-service-icon"></i>
+                    <h3>Real Estate Consultation &amp; Brokerage</h3>
+                    <p>Buyer agent advisory, off-the-plan apartments, established homes and investment-grade properties — independent advice grounded in market data.</p>
                 </div>
-                <div class="value-card">
-                    <i class="fa-solid fa-globe value-icon"></i>
-                    <h3>Global Reach</h3>
-                    <p>Multilingual team supporting overseas investors with FIRB compliance, finance and remote settlement.</p>
+                <div class="about-service-card">
+                    <i class="fa-solid fa-scale-balanced about-service-icon"></i>
+                    <h3>Legal &amp; Financial Services Support</h3>
+                    <p>Conveyancing referrals, mortgage broker introductions, FIRB compliance and finance structuring for overseas investors.</p>
                 </div>
-                <div class="value-card">
-                    <i class="fa-solid fa-chart-line value-icon"></i>
-                    <h3>Data-Driven</h3>
-                    <p>Suburb-level insights, capital-growth modelling and rental-yield analysis — clear numbers, every time.</p>
-                </div>
-                <div class="value-card">
-                    <i class="fa-solid fa-handshake value-icon"></i>
-                    <h3>End-to-End</h3>
-                    <p>From the first inspection to property management — one team across the entire ownership journey.</p>
+                <div class="about-service-card">
+                    <i class="fa-solid fa-suitcase-rolling about-service-icon"></i>
+                    <h3>Resettlement Assistance</h3>
+                    <p>Settling-in support for overseas families relocating to Australia — schools, neighbourhoods, banking, healthcare and post-purchase management.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Stats -->
-        <section class="about-stats-page">
-            <div class="info" id="about-stats-info"></div>
-        </section>
-
-        <!-- Founders / Team -->
-        <section class="about-team">
-            <div class="about-team-header">
-                <span class="section-tagline">MEET OUR TEAM</span>
-                <h2 class="about-section-h2">The people behind Sealand Property.</h2>
-                <p class="about-team-sub">Our co-founders bring over 20 years of combined experience in Australian real estate, finance and overseas investor advisory.</p>
+        <!-- 6. Contact / Offices -->
+        <section class="about-offices">
+            <div class="about-section-header about-section-header--centered">
+                <span class="about-tag">OUR OFFICES</span>
+                <h2 class="about-section-h2">Get in touch.</h2>
             </div>
-            <div class="about-founders" id="about-founders"></div>
-        </section>
-
-        <!-- CTA -->
-        <section class="about-cta">
-            <div class="about-cta-inner">
-                <h2 class="about-cta-title">Ready to start your property journey?</h2>
-                <p class="about-cta-sub">Talk to our team about your goals — local or overseas, first-home or portfolio.</p>
-                <div class="about-cta-buttons">
-                    <a href="/main#footer" class="btn-cta-primary">BOOK A CONSULTATION <i class="fa-solid fa-arrow-right"></i></a>
-                    <a href="/projects" class="btn-cta-outline">EXPLORE PROJECTS <i class="fa-solid fa-arrow-right"></i></a>
+            <div class="offices-grid">
+                <div class="office-card">
+                    <h3 class="office-city">Sydney <span class="office-flag" aria-hidden="true">🇦🇺</span></h3>
+                    <p class="office-row"><i class="fa-solid fa-location-dot"></i> Level 20, 135 King Street, Sydney NSW 2000</p>
+                    <p class="office-row"><i class="fa-solid fa-phone"></i> <a href="tel:+61432285678">+61 432 285 678</a></p>
+                    <p class="office-row"><i class="fa-solid fa-envelope"></i> <a href="mailto:hello@sealandproperty.com.au">hello@sealandproperty.com.au</a></p>
+                </div>
+                <div class="office-card">
+                    <h3 class="office-city">Ho Chi Minh City <span class="office-flag" aria-hidden="true">🇻🇳</span></h3>
+                    <p class="office-row"><i class="fa-solid fa-location-dot"></i> Level 18, 72 Le Thanh Ton, Ben Nghe Ward, District 1, HCMC</p>
+                    <p class="office-row"><i class="fa-solid fa-phone"></i> <a href="tel:+84905160805">+84 905 160 805</a></p>
+                    <p class="office-row"><i class="fa-solid fa-envelope"></i> <a href="mailto:vn@sealandproperty.com.au">vn@sealandproperty.com.au</a></p>
                 </div>
             </div>
         </section>
     </main>
 
-    <!-- Footer (same markup as /main; populated by render.js footer-persons API) -->
+    <!-- Footer (same markup as /main) -->
     <section id="footer" class="footer">
         <div id="footer-top">
             <div class="footer-top-inner">
@@ -199,7 +191,7 @@
                     </p>
                     <p id="footer-desc-2">
                         <i class="fa-solid fa-location-dot"></i>
-                        Level 12, 1 Market Street, Sydney NSW 2000, Australia
+                        Level 20, 135 King Street, Sydney NSW 2000, Australia
                     </p>
                     <div id="footer-social-links">
                         <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
@@ -230,7 +222,8 @@
         </div>
     </section>
 
-    <script src="/main/render.js?v=v3" defer></script>
-    <script src="/main/script.js?v=v3" defer></script>
+    <script src="/main/render.js?v=v4" defer></script>
+    <script src="/main/script.js?v=v4" defer></script>
+    <script src="/about/about.js?v=v4" defer></script>
 </body>
 </html>
