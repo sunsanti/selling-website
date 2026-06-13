@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0E2A47">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=v5">
+    <link rel="stylesheet" href="style.css?v=v6">
 </head>
 <body>
     <!-- Header — 3-zone: logo / nav / CTA (F02 redesign) -->
@@ -70,14 +70,17 @@
     <div class="mobile-overlay" id="mobile-overlay"></div>
 
 
-    <!-- F03: Home hero redesign — bg image cover + left-overlay + premium tagline -->
-    <section id="home-section">
-        <div class="home" id="home">
+    <!-- v6: ONE combined hero section = image-box + search-bar + stats-box.
+              Image full-bleed (no header gap, edge-to-edge horizontal).
+              Soft radial gradient ONLY around title/subtitle area. -->
+    <section id="home-section" class="home-section">
+        <!-- BOX 1: image with title overlay -->
+        <div class="hero-image-box" id="home">
             <div class="home-bg">
                 <img id="hero-image" src="/uploads/main_image.jpg" alt="">
+                <!-- soft halo localised behind text only -->
                 <div class="home-overlay"></div>
             </div>
-
             <div class="home-content-wrapper">
                 <div class="content">
                     <span class="hero-tagline">
@@ -100,12 +103,9 @@
                     </div>
                 </div>
             </div>
-
         </div>
-    </section>
 
-    <!-- v3: Property Search bar — white card UNDER the hero (not inside) -->
-    <section id="property-search-section" class="property-search-section">
+        <!-- BETWEEN: property search bar -->
         <div class="property-search-wrap">
             <form id="property-search" class="property-search" onsubmit="handleSearchSubmit(event)">
                 <div class="search-field">
@@ -159,23 +159,18 @@
                 </button>
             </form>
         </div>
-    </section>
 
-    <!-- v3: About-us = ONLY 4 stats + TRUSTED BY OUR CLIENTS strip
-              (heading + founders moved to dedicated /about page) -->
-    <section id="about-us" class="about-us about-us-slim">
-        <div class="content" id="about-content" style="display:none">
-            <div class="banner" id="about-banner"></div>
-            <div class="small-content">
-                <div class="left">
-                    <div class="text" id="about-paragraph-left"></div>
-                </div>
-                <div class="right">
-                    <div class="text" id="about-paragraph-right"></div>
+        <!-- BOX 2: about stats -->
+        <div class="about-stats-box" id="about-us">
+            <div class="content" id="about-content" style="display:none">
+                <div class="banner" id="about-banner"></div>
+                <div class="small-content">
+                    <div class="left"><div class="text" id="about-paragraph-left"></div></div>
+                    <div class="right"><div class="text" id="about-paragraph-right"></div></div>
                 </div>
             </div>
+            <div class="info" id="about-stats-info"></div>
         </div>
-        <div class="info" id="about-stats-info"></div>
     </section>
 
     <!-- feature -->
@@ -474,7 +469,7 @@
         </div>
     </div>
 </div>
-    <script src="render.js?v=v5" defer></script>
-    <script src="script.js?v=v5" defer></script>
+    <script src="render.js?v=v6" defer></script>
+    <script src="script.js?v=v6" defer></script>
 </body>
 </html>

@@ -556,22 +556,23 @@ section{
 .mobile-nav-header {
     display: block;
 }
-/* F03 v2 — Home hero: full-bleed image (covers entire section, under fixed header).
-   Pulls itself up by 80px to cancel body padding-top reserved for the header,
-   so the photo touches the very top of the viewport with no gap. Horizontal
-   inset is 0 so the image extends edge-to-edge with no white margins. The
-   left-split gradient overlay is replaced by a small frosted card behind the
-   hero text only (no full-section wash). */
-#home-section {
+/* v6: ONE combined hero section = image-box + search-bar + stats-box.
+   Layout: image full-bleed (touches header, edge-to-edge), search bar
+   sits BETWEEN image-box and stats-box, stats-box wraps the section.
+   No frosted rectangular card — a soft RADIAL gradient localised around
+   the title area provides text contrast. */
+.home-section {
     position: relative;
-    overflow: hidden;
-    background: transparent;
-    margin-top: -80px;               /* cancel body padding-top: 80px */
+    margin-top: -80px;                /* cancel body padding-top: 80px */
+    background: var(--color-cream, #EBE9E8);
+    padding: 0 !important;            /* override global `section { padding: 3rem 3% }` */
 }
-.home {
+
+/* BOX 1 — hero image with title overlay */
+.hero-image-box {
     position: relative;
-    min-height: calc(78vh + 80px);   /* keep visible area ~78vh below header */
-    display: block;
+    min-height: calc(78vh + 80px);    /* full viewport-ish height, image fills */
+    overflow: hidden;
 }
 .home-bg {
     position: absolute;
@@ -584,27 +585,39 @@ section{
     object-fit: cover;
     display: block;
 }
+/* Soft radial halo — concentrated behind title+subtitle, fades outward.
+   Left-anchored ellipse so the right portion of the image stays clean. */
 .home-overlay {
-    /* keep node for legacy markup but drop the full-width split wash */
-    display: none;
+    display: block;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    pointer-events: none;
+    background: radial-gradient(
+        ellipse 50% 45% at 28% 55%,
+        rgba(235,233,232,0.78) 0%,
+        rgba(235,233,232,0.55) 35%,
+        rgba(235,233,232,0.20) 60%,
+        rgba(235,233,232,0) 80%
+    );
 }
 .home-content-wrapper {
     position: relative;
     z-index: 2;
     max-width: 1400px;
     margin: 0 auto;
-    padding: calc(80px + 7rem) 6% 9rem;   /* header offset + hero breathing (search bar moved out) */
+    padding: calc(80px + 7rem) 6% 8rem;
     display: flex;
     align-items: center;
 }
 .home-content-wrapper .content {
     max-width: 620px;
-    padding: 3rem 3.4rem;
-    background: rgba(235,233,232,0.92);              /* solid cream card */
-    backdrop-filter: blur(6px) saturate(110%);
-    -webkit-backdrop-filter: blur(6px) saturate(110%);
-    border-radius: 8px;
-    box-shadow: 0 20px 48px rgba(27,38,53,0.22);
+    padding: 0;                       /* no card — gradient on .home-overlay provides contrast */
+    background: transparent;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border-radius: 0;
+    box-shadow: none;
 }
 .hero-tagline {
     display: inline-flex;
@@ -758,23 +771,20 @@ section{
 .about-us.about-us-slim { padding: 5rem 5% 4.5rem; }
 .about-us-slim #about-content { display: none !important; }
 
-/* v3: Property search section — white card under hero on cream */
-.property-search-section {
-    background: var(--color-cream, #EBE9E8);
-    padding: 0 5%;
-    margin-top: -7rem;          /* lift card so it overlaps hero bottom */
+/* v6: Property search bar sits BETWEEN image-box and stats-box inside #home-section.
+   White card overlaps image bottom on desktop (negative margin-top), then flows
+   into stats-box on cream bg. */
+.home-section .property-search-wrap {
+    max-width: 1400px;
+    margin: -7rem auto 0;            /* lift over image-box bottom edge */
     position: relative;
     z-index: 5;
-}
-.property-search-wrap {
-    max-width: 1400px;
-    margin: 0 auto;
     background: #fff;
     border-radius: 14px;
     box-shadow: 0 18px 40px rgba(27,38,53,0.15);
     padding: 1.8rem 2rem;
 }
-.property-search-wrap .property-search {
+.home-section .property-search {
     display: grid;
     grid-template-columns: repeat(4, 1fr) auto;
     gap: 1.4rem;
@@ -783,7 +793,7 @@ section{
     box-shadow: none;
     padding: 0;
 }
-.property-search-wrap .btn-search-property {
+.home-section .btn-search-property {
     background: var(--color-navy);
     color: #fff;
     border: none;
@@ -801,15 +811,22 @@ section{
     align-self: end;
     height: 50px;
 }
-.property-search-wrap .btn-search-property:hover { background: var(--color-gold); color: var(--color-navy); }
+.home-section .btn-search-property:hover { background: var(--color-gold); color: var(--color-navy); }
+
+/* BOX 2 — about stats inside the combined hero section */
+.about-stats-box {
+    background: var(--color-cream, #EBE9E8);
+    padding: 4.5rem 5% 5.5rem;
+}
+.about-stats-box .info { max-width: 1300px; margin: 0 auto; }
 
 @media (max-width: 1024px) {
-    .property-search-section { margin-top: 1.5rem; padding: 0 4%; }
-    .property-search-wrap .property-search { grid-template-columns: repeat(2, 1fr); }
-    .property-search-wrap .btn-search-property { grid-column: 1 / -1; justify-content: center; }
+    .home-section .property-search-wrap { margin: 1.5rem 4% 0; padding: 1.6rem 1.4rem; }
+    .home-section .property-search { grid-template-columns: repeat(2, 1fr); }
+    .home-section .btn-search-property { grid-column: 1 / -1; justify-content: center; }
 }
 @media (max-width: 600px) {
-    .property-search-wrap .property-search { grid-template-columns: 1fr; }
+    .home-section .property-search { grid-template-columns: 1fr; }
 }
 
 /* v5: TRUSTED BY OUR CLIENTS section removed per user request */
