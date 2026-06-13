@@ -72,52 +72,123 @@ async function loadProjectsFromDB() {
     }
 }
 
-let currentFilter = 'sydney';
 let allProjects = [];
 
-function renderProjects(projects) {
-    allProjects = projects;
-    filterProjects(currentFilter);
+// F05b: XSS-safe HTML attribute escape (for src/alt where setAttribute is overkill)
+function escapeAttr(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    }[c]));
 }
 
-function filterProjects(area) {
-    currentFilter = area;
+function renderProjects(projects) {
+    allProjects = projects || [];
     const grid = document.getElementById('project-grid');
     if (!grid) return;
 
-    const filtered = allProjects.filter(p => p.area === area).slice(0, 6);
+    // F05b: top 4 active projects, sorted by display_order then id
+    const top4 = allProjects.slice(0, 4);
 
-    if (filtered.length === 0) {
-        grid.innerHTML = '<p style="text-align:center; padding:2rem;">No projects in this area.</p>';
+    if (top4.length === 0) {
+        grid.innerHTML = '<p class="empty-state" style="grid-column: 1 / -1; text-align:center; padding:3rem; color:#888;">No featured projects yet.</p>';
         return;
     }
 
-    grid.innerHTML = filtered.map(p => `
-        <div class="feature-item ${p.area}">
-            <div class="feature-image" data-type="${p.name}" data-id="${p.id}" onclick="openPopupFromDB(this)">
-                ${p.image_path ? `<img src="${p.image_path}" alt="${p.name}">` : ''}
-                <div class="overlay-text"></div>
-            </div>
-        </div>
-    `).join('');
+    grid.innerHTML = '';
+    top4.forEach(p => {
+        // Build card as an anchor — click anywhere on the card navigates to detail page
+        const card = document.createElement('a');
+        card.className = 'project-card';
+        card.href = '/projects/' + encodeURIComponent(p.id);
 
-    // Fallback: fetch first image from tableimages for projects with empty image_path
-    filtered.filter(p => !p.image_path).forEach(p => {
-        fetch('/api/public/projects/' +p.id)
-            .then(res => res.json())
-            .then(data => {
-                if (data.success && data.data && data.data.images && data.data.images.length > 0) {
-                    const firstImg = data.data.images[0].image_path;
-                    const el = document.querySelector('.feature-image[data-id="' + p.id + '"]');
-                    if (el) {
-                        el.innerHTML = '<img src="' + firstImg + '" alt="' + p.name + '"><div class="overlay-text"></div>';
-                    }
-                }
+        // Image area + area badge
+        const imgWrap = document.createElement('div');
+        imgWrap.className = 'project-card-image';
+        if (p.image_path) {
+            const img = document.createElement('img');
+            img.src = p.image_path;
+            img.alt = p.name || '';
+            img.loading = 'lazy';
+            imgWrap.appendChild(img);
+        }
+        const areaLabel = (p.area_label || p.area || '').toString().trim();
+        if (areaLabel) {
+            const badge = document.createElement('span');
+            badge.className = 'project-badge';
+            badge.textContent = areaLabel.toUpperCase();
+            imgWrap.appendChild(badge);
+        }
+        card.appendChild(imgWrap);
+
+        // Info section: name, address, price
+        const info = document.createElement('div');
+        info.className = 'project-card-info';
+
+        const name = document.createElement('h3');
+        name.className = 'project-name';
+        name.textContent = p.name || '';
+        info.appendChild(name);
+
+        if (p.address) {
+            const addr = document.createElement('p');
+            addr.className = 'project-address';
+            addr.textContent = p.address;
+            info.appendChild(addr);
+        }
+        if (p.price) {
+            const price = document.createElement('p');
+            price.className = 'project-price';
+            price.textContent = p.price;
+            info.appendChild(price);
+        }
+        card.appendChild(info);
+
+        // Specs strip: beds / baths / cars (only show present fields)
+        if (p.beds || p.baths || p.cars) {
+            const specs = document.createElement('div');
+            specs.className = 'project-specs';
+            const items = [
+                ['fa-bed', p.beds, 'Beds'],
+                ['fa-bath', p.baths, 'Baths'],
+                ['fa-car', p.cars, 'Car']
+            ];
+            items.forEach(([icon, value, label]) => {
+                if (!value) return;
+                const item = document.createElement('span');
+                item.className = 'spec-item';
+                item.innerHTML = '<i class="fa-solid ' + icon + '"></i> '
+                    + escapeAttr(value) + ' ' + label;
+                specs.appendChild(item);
             });
-    });
+            card.appendChild(specs);
+        }
 
-    attachHoverEvents();
+        // Fallback: if no image_path, fetch first tableimages entry async
+        if (!p.image_path) {
+            fetch('/api/public/projects/' + encodeURIComponent(p.id))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success && data.data && Array.isArray(data.data.images) && data.data.images.length > 0) {
+                        const first = data.data.images[0].image_path;
+                        if (first) {
+                            const img = document.createElement('img');
+                            img.src = first;
+                            img.alt = p.name || '';
+                            img.loading = 'lazy';
+                            imgWrap.appendChild(img);
+                        }
+                    }
+                })
+                .catch(() => {});
+        }
+
+        grid.appendChild(card);
+    });
 }
+
+// Legacy filterProjects kept for backwards compat with .region click handler
+// in script.js — now no-op when called (region filter buttons removed from HTML).
+function filterProjects() { /* deprecated by F05b */ }
 
 // ========== MODULE 3: Popup slider ==========
 let currentSlide = 0;
