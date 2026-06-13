@@ -585,9 +585,10 @@ section{
     object-fit: cover;
     display: block;
 }
-/* v8: DIAGONAL cream panel — gradient flows from top-left down to bottom-right
-   along the axis the user sketched. Solid cream up to 50%, then fades to
-   transparent so the right + lower portion of the image stays visible. */
+/* v9: Diagonal cream panel — top-left → half-bottom-right (135deg classic
+   diagonal). Solid cream up to 50% (fade starts at 50%), reaching full
+   transparency by ~halfway to the lower-right corner so the right and
+   bottom portion of the image stays clean. */
 .home-overlay {
     display: block;
     position: absolute;
@@ -595,13 +596,12 @@ section{
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(
-        165deg,
+        135deg,
         var(--color-cream, #EBE9E8) 0%,
-        var(--color-cream, #EBE9E8) 50%,
-        rgba(235,233,232,0.82) 60%,
-        rgba(235,233,232,0.48) 72%,
-        rgba(235,233,232,0.18) 84%,
-        rgba(235,233,232,0) 96%
+        var(--color-cream, #EBE9E8) 72%,
+        rgba(235,233,232,0.65) 82%,
+        rgba(235,233,232,0.28) 92%,
+        rgba(235,233,232,0) 100%
     );
 }
 .home-content-wrapper {
@@ -774,27 +774,39 @@ section{
 .about-us.about-us-slim { padding: 5rem 5% 4.5rem; }
 .about-us-slim #about-content { display: none !important; }
 
-/* v8: Property search bar sits BETWEEN image-box and stats-box.
-   No overlap into the image — sits cleanly on the cream gap between them. */
+/* v9: Property search bar straddles EXACTLY the hero/stats boundary.
+   Half above the dividing line, half below. Wrap padding is snug so the
+   inner form fills the card (no excess whitespace on the sides). */
 .home-section .property-search-wrap {
-    max-width: 1400px;
-    margin: 2.5rem auto;             /* sit between image-box and stats-box */
+    max-width: 1300px;
+    margin: -4.4rem auto 0;           /* lift so wrap center sits ON the hero/stats boundary */
     position: relative;
-    z-index: 5;
+    z-index: 10;
     background: #fff;
     border-radius: 14px;
-    box-shadow: 0 18px 40px rgba(27,38,53,0.15);
-    padding: 1.8rem 2rem;
+    box-shadow: 0 18px 40px rgba(27,38,53,0.18);
+    padding: 1.4rem 1.6rem;
 }
 .home-section .property-search {
     display: grid;
     grid-template-columns: repeat(4, 1fr) auto;
-    gap: 1.4rem;
+    gap: 1.2rem;
     align-items: end;
     background: transparent;
     box-shadow: none;
     padding: 0;
+    margin: 0;                        /* override legacy .property-search { margin: 0 6% } */
+    border: none;
+    border-radius: 0;
+    overflow: visible;
+    width: 100%;
 }
+/* hairline divider between fields (replaces the wrap's outer divider) */
+.home-section .search-field {
+    padding: 0.3rem 1rem;
+    border-right: 1px solid #ececec;
+}
+.home-section .property-search > :last-child { border-right: none; }
 .home-section .btn-search-property {
     background: var(--color-navy);
     color: #fff;
