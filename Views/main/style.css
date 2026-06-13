@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,700;0,900;1,400;1,700&family=Poppins:wght@300;400;500;600;700&display=swap');
 
 :root{
-    --main-color: #f7f7ed;
+    --main-color: var(--color-cream, #EBE9E8);
     --primary-color: #0E2A47;
     --gray: #BEBEBE;
     --black:#13131a;
@@ -35,7 +35,7 @@ h1, h2, h3, .heading,
 }
 body{
   padding-top: 80px;
-  background-color: #f7f7ed;
+  background-color: var(--color-cream, #EBE9E8);
   overflow-x: hidden;
   scrollbar-width: none;
   -ms-overflow-style: none;
@@ -210,7 +210,7 @@ section{
   right: 29.5px;
   width: 15px;
   height: 15px;
-  background-color: #f7f7ed;
+  background-color: var(--color-cream, #EBE9E8);
   border-radius: 50%;
 
   transform: translateY(-50%) scale(0);
@@ -599,18 +599,18 @@ section{
 }
 .home-content-wrapper .content {
     max-width: 620px;
-    padding: 2.8rem 3rem 2.8rem 3rem;
-    background: rgba(235,233,232,0.72);              /* soft cream blur */
-    backdrop-filter: blur(10px) saturate(120%);
-    -webkit-backdrop-filter: blur(10px) saturate(120%);
-    border-radius: 14px;
-    box-shadow: 0 18px 40px rgba(27,38,53,0.18);
+    padding: 3rem 3.4rem;
+    background: rgba(235,233,232,0.92);              /* solid cream card */
+    backdrop-filter: blur(6px) saturate(110%);
+    -webkit-backdrop-filter: blur(6px) saturate(110%);
+    border-radius: 8px;
+    box-shadow: 0 20px 48px rgba(27,38,53,0.22);
 }
 .hero-tagline {
     display: inline-flex;
     align-items: center;
     gap: 0.8rem;
-    color: #c89a1f;                  /* darker gold like reference */
+    color: var(--color-gold, #D1AE6B);                  /* darker gold like reference */
     font-size: 1.25rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -625,7 +625,7 @@ section{
     font-family: 'Playfair Display', serif;
     font-size: clamp(3.6rem, 5.6vw, 5.8rem);
     line-height: 1.05;
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
     text-transform: uppercase;
     margin-bottom: 2.4rem;
     font-weight: 700;
@@ -662,23 +662,23 @@ section{
     text-decoration: none;
 }
 .btn-explore-projects {
-    background: #0a1f3d;
+    background: var(--color-navy, #1B2635);
     color: #fff;
-    border: 1.5px solid #0a1f3d;
+    border: 1.5px solid var(--color-navy, #1B2635);
 }
 .btn-explore-projects:hover {
     transform: translateY(-2px);
-    box-shadow: 0 10px 24px rgba(10,31,61,0.3);
+    box-shadow: 0 10px 24px rgba(27,38,53,0.3);
 }
 .btn-book-outline {
     background: transparent;
-    color: #0a1f3d;
-    border: 1.5px solid rgba(10,31,61,0.3);
+    color: var(--color-navy, #1B2635);
+    border: 1.5px solid rgba(27,38,53,0.3);
 }
 .btn-book-outline:hover {
-    background: #0a1f3d;
+    background: var(--color-navy, #1B2635);
     color: #fff;
-    border-color: #0a1f3d;
+    border-color: var(--color-navy, #1B2635);
 }
 .btn-explore-projects i,
 .btn-book-outline i {
@@ -692,11 +692,11 @@ section{
     margin: 0 6% -3.5rem;
     background: #fff;
     border-radius: 8px;
-    box-shadow: 0 4px 24px rgba(10,31,61,0.08);
+    box-shadow: 0 4px 24px rgba(27,38,53,0.08);
     display: grid;
     grid-template-columns: repeat(4, 1fr) auto;
     overflow: hidden;
-    border: 1px solid rgba(10,31,61,0.06);
+    border: 1px solid rgba(27,38,53,0.06);
 }
 .search-field {
     padding: 1.4rem 2rem;
@@ -716,7 +716,7 @@ section{
     border: none;
     background: transparent;
     font-size: 1.35rem;
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
     font-weight: 500;
     cursor: pointer;
     appearance: none;
@@ -726,7 +726,7 @@ section{
     background-position: right 0 center;
 }
 .btn-search-property {
-    background: #0a1f3d;
+    background: var(--color-navy, #1B2635);
     color: #fff;
     border: none;
     padding: 0 3rem;
@@ -743,7 +743,7 @@ section{
 }
 .btn-search-property:hover {
     background: var(--color-gold);
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
 }
 
 
@@ -812,50 +812,7 @@ section{
     .property-search-wrap .property-search { grid-template-columns: 1fr; }
 }
 
-/* v3: TRUSTED BY OUR CLIENTS strip */
-.trusted-strip {
-    max-width: 1300px;
-    margin: 4rem auto 0;
-    text-align: center;
-    padding-top: 3rem;
-    border-top: 1px solid rgba(27,38,53,0.10);
-}
-.trusted-label {
-    font-size: 1.05rem;
-    font-family: 'Playfair Display', 'Georgia', serif;
-    color: rgba(27,38,53,0.6);
-    letter-spacing: 0.25em;
-    margin: 0 0 2.4rem;
-    text-transform: uppercase;
-    font-weight: 500;
-}
-.trusted-logos {
-    display: flex;
-    justify-content: space-around;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 2rem 3rem;
-}
-.trusted-logo {
-    font-family: 'Poppins', sans-serif;
-    font-size: 1.4rem;
-    color: rgba(27,38,53,0.55);
-    font-weight: 500;
-    letter-spacing: 0.02em;
-    transition: color 0.2s;
-}
-.trusted-logo:hover { color: var(--color-navy); }
-.trusted-logo--domain { font-family: 'Playfair Display', serif; font-size: 2rem; font-weight: 700; }
-.trusted-logo--rea { color: #1f6bdc; font-weight: 600; }
-.trusted-logo--rea .dot-com { color: #ff5a3c; }
-.trusted-logo small { font-size: 0.75em; opacity: 0.7; }
-.trusted-logo strong { font-weight: 700; color: var(--color-gold); }
-
-@media (max-width: 768px) {
-    .trusted-logos { gap: 1.4rem 2rem; }
-    .trusted-logo { font-size: 1.15rem; }
-    .trusted-logo--domain { font-size: 1.6rem; }
-}
+/* v5: TRUSTED BY OUR CLIENTS section removed per user request */
 /* Hide legacy banner + 2 paragraphs (still rendered for admin preview but not visible) */
 #about-content {
     display: none;
@@ -1043,7 +1000,7 @@ section{
 .section-header-split .section-heading {
     font-family: 'Playfair Display', serif;
     font-size: clamp(2.6rem, 3.4vw, 3.6rem);
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
     line-height: 1.15;
     margin: 0;
     text-transform: none;
@@ -1055,7 +1012,7 @@ section{
     gap: 0.8rem;
     padding: 1.2rem 2rem;
     background: transparent;
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
     font-size: 1.15rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -1080,7 +1037,7 @@ section{
     background: #fff;
     border-radius: 10px;
     overflow: hidden;
-    box-shadow: 0 4px 16px rgba(10,31,61,0.06);
+    box-shadow: 0 4px 16px rgba(27,38,53,0.06);
     transition: transform 0.25s ease, box-shadow 0.25s ease;
     display: flex;
     flex-direction: column;
@@ -1089,7 +1046,7 @@ section{
 }
 .project-card:hover {
     transform: translateY(-4px);
-    box-shadow: 0 14px 36px rgba(10,31,61,0.14);
+    box-shadow: 0 14px 36px rgba(27,38,53,0.14);
 }
 .project-card-image {
     position: relative;
@@ -1111,7 +1068,7 @@ section{
     position: absolute;
     top: 1rem;
     left: 1rem;
-    background: rgba(10,31,61,0.92);
+    background: rgba(27,38,53,0.92);
     color: #fff;
     padding: 0.4rem 1.1rem;
     border-radius: 4px;
@@ -1127,7 +1084,7 @@ section{
 .project-name {
     font-family: 'Playfair Display', serif;
     font-size: 1.8rem;
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
     font-weight: 700;
     margin: 0 0 0.4rem;
     line-height: 1.2;
@@ -1151,7 +1108,7 @@ section{
     padding: 1rem 1.8rem 1.4rem;
     border-top: 1px solid #eee;
     font-size: 1.15rem;
-    color: #0a1f3d;
+    color: var(--color-navy, #1B2635);
 }
 .spec-item {
     display: inline-flex;
@@ -2465,7 +2422,7 @@ img{
 
 .popup-content{
   position: relative;
-  background: #f7f7ed;
+  background: var(--color-cream, #EBE9E8);
   width:85%;
   max-height: 98vh;
   display: flex;
@@ -2663,7 +2620,7 @@ img{
 }
 .fill-popup-content{
   position: relative;
-  background: #f7f7ed;
+  background: var(--color-cream, #EBE9E8);
   width:80%;
   height: 75%;
   padding:20px;
