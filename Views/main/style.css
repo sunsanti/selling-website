@@ -585,11 +585,9 @@ section{
     object-fit: cover;
     display: block;
 }
-/* v7: LEFT-HALF cream panel — solid cream covering the left ~40% of the
-   image-box, soft fade to transparent across mid-section (~50-65%). The
-   right portion of the image stays fully visible. Matches the reference
-   layout: text content sits on the cream panel side, image breathes on
-   the right. */
+/* v8: DIAGONAL cream panel — gradient flows from top-left down to bottom-right
+   along the axis the user sketched. Solid cream up to 50%, then fades to
+   transparent so the right + lower portion of the image stays visible. */
 .home-overlay {
     display: block;
     position: absolute;
@@ -597,13 +595,13 @@ section{
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(
-        90deg,
+        165deg,
         var(--color-cream, #EBE9E8) 0%,
-        var(--color-cream, #EBE9E8) 40%,
-        rgba(235,233,232,0.90) 48%,
-        rgba(235,233,232,0.55) 56%,
-        rgba(235,233,232,0.20) 64%,
-        rgba(235,233,232,0) 72%
+        var(--color-cream, #EBE9E8) 50%,
+        rgba(235,233,232,0.82) 60%,
+        rgba(235,233,232,0.48) 72%,
+        rgba(235,233,232,0.18) 84%,
+        rgba(235,233,232,0) 96%
     );
 }
 .home-content-wrapper {
@@ -776,12 +774,11 @@ section{
 .about-us.about-us-slim { padding: 5rem 5% 4.5rem; }
 .about-us-slim #about-content { display: none !important; }
 
-/* v6: Property search bar sits BETWEEN image-box and stats-box inside #home-section.
-   White card overlaps image bottom on desktop (negative margin-top), then flows
-   into stats-box on cream bg. */
+/* v8: Property search bar sits BETWEEN image-box and stats-box.
+   No overlap into the image — sits cleanly on the cream gap between them. */
 .home-section .property-search-wrap {
     max-width: 1400px;
-    margin: -7rem auto 0;            /* lift over image-box bottom edge */
+    margin: 2.5rem auto;             /* sit between image-box and stats-box */
     position: relative;
     z-index: 5;
     background: #fff;
@@ -821,12 +818,12 @@ section{
 /* BOX 2 — about stats inside the combined hero section */
 .about-stats-box {
     background: var(--color-cream, #EBE9E8);
-    padding: 4.5rem 5% 5.5rem;
+    padding: 2rem 5% 5.5rem;
 }
 .about-stats-box .info { max-width: 1300px; margin: 0 auto; }
 
 @media (max-width: 1024px) {
-    .home-section .property-search-wrap { margin: 1.5rem 4% 0; padding: 1.6rem 1.4rem; }
+    .home-section .property-search-wrap { margin: 2rem 4%; padding: 1.6rem 1.4rem; }
     .home-section .property-search { grid-template-columns: repeat(2, 1fr); }
     .home-section .btn-search-property { grid-column: 1 / -1; justify-content: center; }
 }
