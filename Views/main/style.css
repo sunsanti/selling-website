@@ -598,10 +598,10 @@ section{
     background: linear-gradient(
         135deg,
         var(--color-cream, #EBE9E8) 0%,
-        var(--color-cream, #EBE9E8) 72%,
-        rgba(235,233,232,0.65) 82%,
-        rgba(235,233,232,0.28) 92%,
-        rgba(235,233,232,0) 100%
+        var(--color-cream, #EBE9E8) 33%,
+        rgba(235,233,232,0.62) 42%,
+        rgba(235,233,232,0.25) 47%,
+        rgba(235,233,232,0) 50%
     );
 }
 .home-content-wrapper {
