@@ -585,20 +585,25 @@ section{
     object-fit: cover;
     display: block;
 }
-/* Soft radial halo — concentrated behind title+subtitle, fades outward.
-   Left-anchored ellipse so the right portion of the image stays clean. */
+/* v7: LEFT-HALF cream panel — solid cream covering the left ~40% of the
+   image-box, soft fade to transparent across mid-section (~50-65%). The
+   right portion of the image stays fully visible. Matches the reference
+   layout: text content sits on the cream panel side, image breathes on
+   the right. */
 .home-overlay {
     display: block;
     position: absolute;
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: radial-gradient(
-        ellipse 50% 45% at 28% 55%,
-        rgba(235,233,232,0.78) 0%,
-        rgba(235,233,232,0.55) 35%,
-        rgba(235,233,232,0.20) 60%,
-        rgba(235,233,232,0) 80%
+    background: linear-gradient(
+        90deg,
+        var(--color-cream, #EBE9E8) 0%,
+        var(--color-cream, #EBE9E8) 40%,
+        rgba(235,233,232,0.90) 48%,
+        rgba(235,233,232,0.55) 56%,
+        rgba(235,233,232,0.20) 64%,
+        rgba(235,233,232,0) 72%
     );
 }
 .home-content-wrapper {
