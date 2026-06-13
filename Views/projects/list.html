@@ -8,8 +8,8 @@
     <meta property="og:title" content="All Projects — Sealand Property">
     <meta property="og:type" content="website">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/main/style.css?v=f05c">
-    <link rel="stylesheet" href="/projects/style.css?v=f05c">
+    <link rel="stylesheet" href="/main/style.css?v=v2">
+    <link rel="stylesheet" href="/projects/style.css?v=v2">
 </head>
 <body>
     <!-- Header shared markup (mirrors /main) — light placeholder; full template share is F10 scope -->
@@ -61,6 +61,61 @@
             <p class="projects-page-subtitle">Browse our complete portfolio of premium properties across Australia.</p>
         </section>
 
+        <!-- v2: Property search bar (mirrors /main hero search bar) -->
+        <section class="projects-page-search">
+            <form id="property-search" class="property-search" onsubmit="handleProjectsSearch(event)">
+                <div class="search-field">
+                    <label>STATE</label>
+                    <select name="state" id="search-state">
+                        <option value="">All States</option>
+                        <option value="NSW">NSW</option>
+                        <option value="VIC">VIC</option>
+                        <option value="QLD">QLD</option>
+                        <option value="WA">WA</option>
+                        <option value="SA">SA</option>
+                        <option value="TAS">TAS</option>
+                        <option value="ACT">ACT</option>
+                        <option value="NT">NT</option>
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label>SUBURB</label>
+                    <select name="suburb" id="search-suburb">
+                        <option value="">All Suburbs</option>
+                        <option value="liverpool">Liverpool</option>
+                        <option value="parramatta">Parramatta</option>
+                        <option value="chatswood">Chatswood</option>
+                        <option value="south-yarra">South Yarra</option>
+                        <option value="surfers-paradise">Surfers Paradise</option>
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label>PROPERTY TYPE</label>
+                    <select name="type" id="search-type">
+                        <option value="">All Types</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="house">House</option>
+                        <option value="townhouse">Townhouse</option>
+                        <option value="land">Land</option>
+                    </select>
+                </div>
+                <div class="search-field">
+                    <label>PRICE RANGE</label>
+                    <select name="price" id="search-price">
+                        <option value="">Any Price</option>
+                        <option value="500k-800k">$500k – $800k</option>
+                        <option value="800k-1m">$800k – $1M</option>
+                        <option value="1m-2m">$1M – $2M</option>
+                        <option value="2m+">$2M+</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn-search-property">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    SEARCH
+                </button>
+            </form>
+        </section>
+
         <!-- Active filter chips (populated by JS from query string) -->
         <section id="projects-filter-chips" class="projects-filter-chips"></section>
 
@@ -77,8 +132,8 @@
         <p>© 2026 Sealand Property. <a href="/main">Back to home</a></p>
     </footer>
 
-    <script src="/main/render.js?v=f05c" defer></script>
-    <script src="/main/script.js?v=f05c" defer></script>
-    <script src="/projects/list.js?v=f05c" defer></script>
+    <script src="/main/render.js?v=v2" defer></script>
+    <script src="/main/script.js?v=v2" defer></script>
+    <script src="/projects/list.js?v=v2" defer></script>
 </body>
 </html>

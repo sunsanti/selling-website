@@ -144,5 +144,35 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', loadProjects);
+    // v2: prefill search bar from current query string, then on submit
+    // rebuild the URL and reload so chips + grid refresh.
+    function prefillSearchBar() {
+        const f = getFilters();
+        ['state','suburb','type','price'].forEach(k => {
+            const el = document.getElementById('search-' + k);
+            if (el && f[k] !== undefined) el.value = f[k];
+        });
+    }
+
+    window.handleProjectsSearch = function (event) {
+        event.preventDefault();
+        const params = new URLSearchParams();
+        const state = document.getElementById('search-state').value;
+        const suburb = document.getElementById('search-suburb').value;
+        const type = document.getElementById('search-type').value;
+        const price = document.getElementById('search-price').value;
+        if (state) params.set('state', state);
+        if (suburb) params.set('suburb', suburb);
+        if (type) params.set('type', type);
+        if (price) params.set('price', price);
+        const qs = params.toString();
+        const next = '/projects' + (qs ? '?' + qs : '');
+        window.history.replaceState(null, '', next);
+        loadProjects();
+    };
+
+    document.addEventListener('DOMContentLoaded', () => {
+        prefillSearchBar();
+        loadProjects();
+    });
 })();

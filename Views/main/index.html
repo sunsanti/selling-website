@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0E2A47">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=f10">
+    <link rel="stylesheet" href="style.css?v=f11">
 </head>
 <body>
     <!-- Header — 3-zone: logo / nav / CTA (F02 redesign) -->
@@ -158,7 +158,10 @@
 
     <!-- about us -->
     <section id="about-us" class="about-us">
-        <h1 class="heading">About us</h1>
+        <div class="section-header section-header-centered about-section-header">
+            <span class="section-tagline">ABOUT US</span>
+            <h2 class="section-heading about-section-heading">Who We Are</h2>
+        </div>
 
         <div class="content" id="about-content">
             <div class="banner" id="about-banner"></div>
@@ -172,6 +175,9 @@
             </div>
         </div>
         <div class="info" id="about-stats-info"></div>
+
+        <!-- v2: Founders block (rendered from footer-persons API) -->
+        <div class="about-founders" id="about-founders"></div>
     </section>
 
     <!-- feature -->
@@ -249,11 +255,13 @@
         </div>
     </section>
 
-    <!-- services F07: 5-card grid with icon + title + description -->
+    <!-- services F07 / v2 header: left-aligned tagline + big heading (matches feature-projects) -->
     <section id="services" class="services">
-        <div class="section-header section-header-centered">
-            <span class="section-tagline">OUR SERVICES</span>
-            <h2 class="section-heading">How We Can Help You</h2>
+        <div class="section-header section-header-split services-section-header">
+            <div class="section-header-left">
+                <span class="section-tagline">OUR SERVICES</span>
+                <h2 class="section-heading services-heading-lg">How We Can Help You</h2>
+            </div>
         </div>
         <div id="services-list" class="services-grid"></div>
     </section>
@@ -302,8 +310,15 @@
                 <div id="footer-col-brand">
                     <span id="footer-logo" class="footer-logo">SEALAND PROPERTY</span>
                     <p id="footer-desc">
-                        Helping investors and homeowners across Australia build
-                        long-term wealth through trusted real estate guidance.
+                        Helping investors and homeowners across Australia build long-term
+                        wealth through trusted real-estate guidance. We specialise in
+                        Sydney and Melbourne premium projects, FIRB advisory for overseas
+                        buyers, build-to-rent partnerships and end-to-end property
+                        management.
+                    </p>
+                    <p id="footer-desc-2">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Level 12, 1 Market Street, Sydney NSW 2000, Australia
                     </p>
                     <div id="footer-social-links">
                         <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
@@ -461,7 +476,7 @@
         </div>
     </div>
 </div>
-    <script src="render.js?v=f10" defer></script>
-    <script src="script.js?v=f10" defer></script>
+    <script src="render.js?v=f11" defer></script>
+    <script src="script.js?v=f11" defer></script>
 </body>
 </html>

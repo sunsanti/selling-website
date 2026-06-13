@@ -2,9 +2,9 @@
 
 /* F03: Sealand Premium colors */
 :root {
-    --color-navy: #000342;
-    --color-gold: #ffcf00;
-    --color-cream: #fffff5;
+    --color-navy: #1B2635;
+    --color-gold: #D1AE6B;
+    --color-cream: #EBE9E8;
 }
 
 * {
@@ -27,8 +27,8 @@ section::before {
     content: '';
     position: absolute;
     inset: 0;
-    background: radial-gradient(ellipse at top right, rgba(255,207,0,0.12), transparent 50%),
-                radial-gradient(ellipse at bottom left, rgba(255,207,0,0.08), transparent 50%);
+    background: radial-gradient(ellipse at top right, rgba(209,174,107,0.12), transparent 50%),
+                radial-gradient(ellipse at bottom left, rgba(209,174,107,0.08), transparent 50%);
     pointer-events: none;
 }
 .login-box{
@@ -37,7 +37,7 @@ section::before {
     width: 400px;
     min-height: 450px;
     background: rgba(255,255,255,0.04);
-    border: 1px solid rgba(255,207,0,0.25);
+    border: 1px solid rgba(209,174,107,0.25);
     border-radius: 16px;
     display: flex;
     justify-content: center;
@@ -138,7 +138,7 @@ button{
 }
 button:hover{
     transform: translateY(-2px);
-    box-shadow: 0 8px 24px rgba(255,207,0,0.45);
+    box-shadow: 0 8px 24px rgba(209,174,107,0.45);
 }
 .register-link{
     font-size: .9em;

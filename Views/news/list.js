@@ -22,13 +22,20 @@
             const cover = esc(n.cover_image || '/uploads/main_image.jpg');
             const title = esc(n.title || '');
             const summary = esc(n.summary || '');
+            const ext = (n.external_url || '').trim();
+            const isExt = /^https?:\/\//i.test(ext);
+            const href = isExt ? esc(ext) : `/news/${id}`;
+            const target = isExt ? ' target="_blank" rel="noopener noreferrer"' : '';
+            const cardClick = isExt
+                ? `window.open('${href}','_blank','noopener,noreferrer')`
+                : `location.href='/news/${id}'`;
             return `
-                <article class="news-item" data-id="${id}" onclick="location.href='/news/${id}'">
+                <article class="news-item" data-id="${id}" onclick="${cardClick}">
                     <img class="news-bg" src="${cover}" alt="" onerror="this.style.visibility='hidden'">
                     <div class="news-overlay">
                         <h3 class="news-title">${title}</h3>
                         <p class="news-summary">${summary}</p>
-                        <a class="news-read-more" href="/news/${id}" onclick="event.stopPropagation();">
+                        <a class="news-read-more" href="${href}"${target} onclick="event.stopPropagation();">
                             <span>READ MORE</span>
                         </a>
                     </div>

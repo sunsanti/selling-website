@@ -40,6 +40,47 @@ const getAllProjects = async (includeInactive = false) => {
     }
 };
 
+// v2: featured projects (up to 4) for /main carousel
+const getFeaturedProjects = async (limit = 4) => {
+    const lim = Math.min(Math.max(parseInt(limit, 10) || 4, 1), 4);
+    const [rows] = await pool.query(
+        `SELECT * FROM projects
+         WHERE status = 'active' AND is_featured = 1
+         ORDER BY display_order ASC, id DESC
+         LIMIT ?`,
+        [lim]
+    );
+    rows.forEach(p => {
+        if (!p.image_path) return;
+        if (p.image_path.startsWith('/images/')) {
+            p.image_path = '/uploads/' + p.image_path.slice('/images/'.length);
+        } else if (!p.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(p.image_path) && !p.image_path.startsWith('data:') && !p.image_path.startsWith('/')) {
+            p.image_path = '/uploads/' + p.image_path;
+        }
+    });
+    return rows;
+};
+
+// v2: enforce max 4 featured projects atomically
+const setFeaturedIds = async (ids) => {
+    const sanitized = (Array.isArray(ids) ? ids : []).map(n => parseInt(n, 10)).filter(n => Number.isInteger(n) && n > 0).slice(0, 4);
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+        await conn.query('UPDATE projects SET is_featured = 0');
+        if (sanitized.length > 0) {
+            await conn.query(`UPDATE projects SET is_featured = 1 WHERE id IN (${sanitized.map(() => '?').join(',')})`, sanitized);
+        }
+        await conn.commit();
+        return sanitized;
+    } catch (err) {
+        await conn.rollback();
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
 const getProjectById = async (id) => {
     try {
         const [rows] = await pool.query('SELECT * FROM projects WHERE id = ?', [id]);
@@ -277,6 +318,9 @@ module.exports = {
     restoreProject,
     getInactiveProjects,
     deleteProject,
+    // v2: featured
+    getFeaturedProjects,
+    setFeaturedIds,
     // F05a
     searchProjects,
     ALLOWED_STATES,

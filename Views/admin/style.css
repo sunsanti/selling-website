@@ -683,13 +683,13 @@ body {
 .form-section-divider {
     margin: 22px 0 14px;
     padding: 10px 14px;
-    background: linear-gradient(90deg, #fff8e1 0%, #fffff5 100%);
-    border-left: 3px solid #ffcf00;
+    background: linear-gradient(90deg, #fff8e1 0%, #EBE9E8 100%);
+    border-left: 3px solid #D1AE6B;
     border-radius: 4px;
     font-size: 13px;
     font-weight: 600;
     letter-spacing: .3px;
-    color: #000342;
+    color: #1B2635;
 }
 .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
 .form-row-2 .form-group { margin-bottom: 14px; }
@@ -1545,9 +1545,9 @@ body {
    sidebar sticky / drawer / grid / spacing all preserved.
    ============================================================ */
 :root {
-    --color-navy: #000342;
-    --color-gold: #ffcf00;
-    --color-cream: #fffff5;
+    --color-navy: #1B2635;
+    --color-gold: #D1AE6B;
+    --color-cream: #EBE9E8;
 }
 
 body { background: var(--color-cream); }
@@ -1570,11 +1570,11 @@ body { background: var(--color-cream); }
     border-left: 3px solid transparent;
 }
 .sidebar-nav .nav-item:hover {
-    background: rgba(255,207,0,0.08);
+    background: rgba(209,174,107,0.08);
     color: var(--color-gold);
 }
 .sidebar-nav .nav-item.active {
-    background: rgba(255,207,0,0.15);
+    background: rgba(209,174,107,0.15);
     color: var(--color-gold);
     border-left-color: var(--color-gold);
 }
@@ -1641,7 +1641,7 @@ body { background: var(--color-cream); }
 .form-group select:focus,
 input.text-input:focus {
     border-color: var(--color-gold);
-    outline: 2px solid rgba(255,207,0,0.18);
+    outline: 2px solid rgba(209,174,107,0.18);
 }
 
 /* Status pills tinted */
@@ -1655,3 +1655,71 @@ input.text-input:focus {
 }
 
 /* Audit log badges keep their semantic colors (don't override) */
+
+/* v2: Featured projects selection panel */
+.featured-panel {
+    background: #fff;
+    border: 1px solid rgba(27,38,53,0.08);
+    border-radius: 10px;
+    padding: 1.6rem;
+    margin-bottom: 1.6rem;
+}
+.featured-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+}
+.featured-panel-header h3 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1.6rem;
+    color: var(--color-navy);
+    margin: 0;
+}
+.featured-panel-header h3 i { color: var(--color-gold); margin-right: 0.4rem; }
+.featured-counter { color: #6a6a6a; font-size: 1.2rem; margin: 0 0 1rem; }
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+}
+.featured-card {
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.featured-card:hover { transform: translateY(-2px); }
+.featured-card.selected {
+    border-color: var(--color-gold);
+    box-shadow: 0 6px 18px rgba(209,174,107,0.3);
+}
+.featured-card.selected::after {
+    content: '\f005';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 8px; right: 8px;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+.featured-card.disabled { opacity: 0.4; cursor: not-allowed; }
+.featured-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.featured-card-body { padding: 0.8rem; }
+.featured-card-name {
+    font-size: 1.2rem; font-weight: 600; color: var(--color-navy);
+    margin: 0 0 0.2rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.featured-card-area { font-size: 1rem; color: #888; }

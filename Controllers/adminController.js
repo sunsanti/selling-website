@@ -64,6 +64,36 @@ const updateSettings = async (req, res) => {
 };
 
 // ===================== PROJECTS =====================
+// v2: featured projects (up to 4) — used by /main carousel
+const getFeaturedProjects = async (req, res) => {
+    try {
+        const list = await projectModel.getFeaturedProjects(4);
+        res.json({ success: true, data: list });
+    } catch (err) {
+        console.error('getFeaturedProjects:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// v2: replace featured selection (max 4)
+const setFeaturedProjects = async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+        if (ids.length > 4) {
+            return res.status(400).json({ success: false, message: 'Tối đa 4 projects featured' });
+        }
+        const applied = await projectModel.setFeaturedIds(ids);
+        auditLogModel.log({
+            req, action: 'PROJECT_FEATURED_SET', target_type: 'project',
+            details: { ids: applied }
+        });
+        res.json({ success: true, message: 'Đã cập nhật featured projects', ids: applied });
+    } catch (err) {
+        console.error('setFeaturedProjects:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
 const getProjects = async (req, res) => {
     try {
         const { state, suburb, type, price, area, includeInactive } = req.query;
@@ -500,6 +530,9 @@ module.exports = {
     restoreProject,
     deleteProject,
     searchProjects,
+    // v2
+    getFeaturedProjects,
+    setFeaturedProjects,
     getContacts,
     searchContacts,
     deleteContact,

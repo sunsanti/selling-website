@@ -768,6 +768,90 @@ async function searchProjects() {
 function loadProjects() {
     loadActiveProjects();
     loadInactiveProjects();
+    loadFeaturedPanel();   // v2
+}
+
+// ===================== v2: FEATURED PROJECTS PANEL =====================
+let _featuredSelection = new Set();
+async function loadFeaturedPanel() {
+    const grid = document.getElementById('featured-grid');
+    if (!grid) return;
+    try {
+        const [allRes, featRes] = await Promise.all([
+            fetch('/api/admin/projects'),
+            fetch('/api/admin/projects/featured')
+        ]);
+        const allJson = await allRes.json();
+        const featJson = await featRes.json();
+        const all = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(p => p.status === 'active') : [];
+        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(p => p.id) : [];
+        _featuredSelection = new Set(featuredIds);
+        renderFeaturedGrid(all);
+    } catch (err) {
+        console.error('loadFeaturedPanel:', err);
+    }
+}
+
+function renderFeaturedGrid(projects) {
+    const grid = document.getElementById('featured-grid');
+    if (!grid) return;
+    grid.innerHTML = projects.map(p => {
+        const isSel = _featuredSelection.has(p.id);
+        const cover = (p.image_path || '/uploads/main_image.jpg');
+        return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${p.id}" onclick="toggleFeatured(${p.id})">
+            <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+            <div class="featured-card-body">
+                <p class="featured-card-name">${(p.name || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+                <span class="featured-card-area">${(p.area || '').toString()}</span>
+            </div>
+        </div>`;
+    }).join('');
+    updateFeaturedCounter();
+}
+
+function updateFeaturedCounter() {
+    const c = document.getElementById('featured-counter');
+    if (c) c.textContent = `${_featuredSelection.size} / 4 selected`;
+    // disable cards if 4 selected and they're not currently selected
+    document.querySelectorAll('.featured-card').forEach(card => {
+        const id = parseInt(card.dataset.id, 10);
+        if (_featuredSelection.size >= 4 && !_featuredSelection.has(id)) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
+        }
+    });
+}
+
+function toggleFeatured(id) {
+    if (_featuredSelection.has(id)) {
+        _featuredSelection.delete(id);
+    } else {
+        if (_featuredSelection.size >= 4) {
+            showToast('Tối đa 4 projects featured', 'error');
+            return;
+        }
+        _featuredSelection.add(id);
+    }
+    const card = document.querySelector(`.featured-card[data-id="${id}"]`);
+    if (card) card.classList.toggle('selected', _featuredSelection.has(id));
+    updateFeaturedCounter();
+}
+
+async function saveFeaturedProjects() {
+    try {
+        const ids = Array.from(_featuredSelection);
+        const res = await fetch('/api/admin/projects/featured', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(`Đã lưu ${ids.length} featured projects`, 'success');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
 }
 
 // ===================== CONTACTS =====================
@@ -1354,22 +1438,33 @@ async function loadHomeServices() {
             card.className = 'settings-panel';
             card.style.marginBottom = '20px';
             card.dataset.slot = svc.slot;
+            // v2: icon picker (FA class) replaces image picker
+            const ICON_OPTIONS = [
+                ['fa-key', 'Key'],
+                ['fa-chart-line', 'Chart'],
+                ['fa-building', 'Building'],
+                ['fa-hand-holding-dollar', 'Finance'],
+                ['fa-shield-halved', 'Shield'],
+                ['fa-house', 'House'],
+                ['fa-handshake', 'Handshake'],
+                ['fa-magnifying-glass', 'Search'],
+                ['fa-briefcase', 'Briefcase'],
+                ['fa-globe', 'Globe'],
+                ['fa-people-arrows', 'Network'],
+                ['fa-map-location-dot', 'Location']
+            ];
+            const iconOptionsHtml = ICON_OPTIONS.map(([cls, lbl]) =>
+                `<option value="${cls}">${lbl} (${cls})</option>`).join('');
             card.innerHTML = ''
                 + '<h2><i class="fas fa-concierge-bell"></i> Service ' + svc.slot + '</h2>'
                 + '<div class="form-group"><label>Title</label>'
                 + '  <input type="text" class="svc-title" maxlength="255"></div>'
                 + '<div class="form-group"><label>Description</label>'
                 + '  <textarea class="svc-desc" rows="4" maxlength="2000"></textarea></div>'
-                + '<div class="form-group"><label>Image <small style="color:#888;font-weight:400">(F07: không dùng ở thiết kế mới — icon được lấy theo slot)</small></label>'
-                + '  <div class="settings-image-area">'
-                + '    <div class="settings-image-preview">'
-                + '      <img class="svc-img-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
-                + '      <span class="settings-preview-placeholder svc-img-placeholder">'
-                + '        <i class="fas fa-image"></i> No image</span>'
-                + '    </div>'
-                + '    <div class="settings-image-actions">'
-                + '      <button type="button" class="btn-add svc-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
-                + '    </div>'
+                + '<div class="form-group"><label>Icon <small style="color:#888;font-weight:400">(Font Awesome 6 — chọn 1 trong danh sách)</small></label>'
+                + '  <div style="display:flex;gap:1rem;align-items:center">'
+                + '    <i class="svc-icon-preview fa-solid" style="font-size:2.6rem;color:var(--color-gold);width:48px;text-align:center"></i>'
+                + '    <select class="svc-icon-select" style="flex:1">' + iconOptionsHtml + '</select>'
                 + '  </div></div>'
                 + '<div class="form-actions">'
                 + '  <button type="button" class="btn-save svc-save-btn"><i class="fas fa-save"></i> Save Service ' + svc.slot + '</button>'
@@ -1378,27 +1473,18 @@ async function loadHomeServices() {
 
             card.querySelector('.svc-title').value = svc.title || '';
             card.querySelector('.svc-desc').value = svc.description || '';
-            const imgEl = card.querySelector('.svc-img-preview');
-            const placeholderEl = card.querySelector('.svc-img-placeholder');
-            if (svc.image_path) {
-                imgEl.src = svc.image_path;
-                imgEl.style.display = 'block';
-                placeholderEl.style.display = 'none';
-            }
-            card.dataset.imagePath = svc.image_path || '';
-
-            card.querySelector('.svc-pick-btn').addEventListener('click', () => {
-                openMediaLibrary({
-                    mode: 'single',
-                    onSelect: ([url]) => {
-                        imgEl.src = url;
-                        imgEl.style.display = 'block';
-                        placeholderEl.style.display = 'none';
-                        card.dataset.imagePath = url;
-                        postPreviewData('services');
-                        showToast('Đã chọn ảnh — bấm Save để lưu', 'success');
-                    }
-                });
+            const iconSelect = card.querySelector('.svc-icon-select');
+            const iconPreview = card.querySelector('.svc-icon-preview');
+            const DEFAULT_ICONS = { 1:'fa-key', 2:'fa-chart-line', 3:'fa-building', 4:'fa-hand-holding-dollar', 5:'fa-shield-halved' };
+            const currentIcon = svc.icon || DEFAULT_ICONS[svc.slot] || 'fa-key';
+            iconSelect.value = currentIcon;
+            iconPreview.classList.add(currentIcon);
+            iconSelect.addEventListener('change', () => {
+                iconPreview.className = 'svc-icon-preview fa-solid ' + iconSelect.value;
+                iconPreview.style.fontSize = '2.6rem';
+                iconPreview.style.color = 'var(--color-gold)';
+                iconPreview.style.width = '48px';
+                iconPreview.style.textAlign = 'center';
             });
 
             card.querySelector('.svc-save-btn').addEventListener('click', async () => {
@@ -1407,10 +1493,9 @@ async function loadHomeServices() {
                 try {
                     const payload = {
                         title: card.querySelector('.svc-title').value,
-                        description: card.querySelector('.svc-desc').value
+                        description: card.querySelector('.svc-desc').value,
+                        icon: iconSelect.value
                     };
-                    const currentPath = card.dataset.imagePath;
-                    if (currentPath) payload.image_path = currentPath;
                     const res = await fetch('/api/admin/services/' + svc.slot, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -1451,17 +1536,14 @@ async function loadHomeFooter() {
             card.dataset.slot = person.slot;
             card.innerHTML = ''
                 + '<h2><i class="fas fa-id-card"></i> Person ' + person.slot + '</h2>'
-                + '<div class="form-group"><label>Avatar</label>'
-                + '  <div class="settings-image-area">'
-                + '    <div class="settings-image-preview">'
-                + '      <img class="fp-avatar-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
-                + '      <span class="settings-preview-placeholder fp-avatar-placeholder">'
-                + '        <i class="fas fa-user"></i> No avatar</span>'
-                + '    </div>'
-                + '    <div class="settings-image-actions">'
-                + '      <button type="button" class="btn-add fp-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
-                + '    </div>'
-                + '  </div></div>'
+                // v2: avatar picker hidden (footer is text-only; existing avatars still
+                // appear in the About-us founders block on /main). Hidden span keeps the
+                // existing path stored on the card dataset on save.
+                + '<div class="form-group" style="display:none">'
+                + '  <img class="fp-avatar-preview">'
+                + '  <span class="fp-avatar-placeholder"></span>'
+                + '  <button type="button" class="fp-pick-btn">hidden</button>'
+                + '</div>'
                 + '<div class="form-row">'
                 + '  <div class="form-group"><label>Name</label>'
                 + '    <input type="text" class="fp-name" maxlength="255"></div>'
@@ -1744,6 +1826,7 @@ const AUDIT_ACTION_LABELS = {
     'PROJECT_SOFTDELETE': 'Ngừng kinh doanh dự án',
     'PROJECT_RESTORE': 'Khôi phục dự án',
     'PROJECT_DELETE': 'Xóa vĩnh viễn dự án',
+    'PROJECT_FEATURED_SET': 'Cập nhật Featured Projects (trang chủ)',
     'CONTACT_DELETE': 'Xóa liên hệ',
     'ACCOUNT_CREATE': 'Tạo tài khoản',
     'ACCOUNT_UPDATE': 'Cập nhật tài khoản',
@@ -1793,6 +1876,9 @@ const AUDIT_FIELD_LABELS = {
     'content': 'Nội dung',
     'cover_image': 'Ảnh bìa',
     'status': 'Trạng thái',
+    'external_url': 'Link bài báo gốc',
+    'is_featured': 'Hiển thị ở trang chủ',
+    'icon': 'Icon',
     'description': 'Mô tả',
     'image_path': 'Ảnh',
     'banner': 'Banner',
@@ -2046,11 +2132,11 @@ function openVideoModal() {
     document.getElementById('video-thumb-img').style.display = 'none';
     document.getElementById('video-thumb-img').src = '';
     document.getElementById('video-thumb-placeholder').style.display = 'flex';
-    document.getElementById('video-modal-admin').classList.add('active');
+    document.getElementById('video-modal-admin').style.display = 'flex';
 }
 
 function closeVideoModalAdmin() {
-    document.getElementById('video-modal-admin').classList.remove('active');
+    document.getElementById('video-modal-admin').style.display = 'none';
 }
 
 async function editVideo(id) {
@@ -2070,7 +2156,7 @@ async function editVideo(id) {
         const ph = document.getElementById('video-thumb-placeholder');
         if (v.thumbnail_path) { img.src = v.thumbnail_path; img.style.display = 'block'; ph.style.display = 'none'; }
         else { img.style.display = 'none'; ph.style.display = 'flex'; }
-        document.getElementById('video-modal-admin').classList.add('active');
+        document.getElementById('video-modal-admin').style.display = 'flex';
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     }
@@ -2219,14 +2305,15 @@ function openNewsModal() {
     document.getElementById('news-form-cover').value = '';
     document.getElementById('news-form-order').value = '0';
     document.getElementById('news-form-status').value = 'active';
+    const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = '';
     const img = document.getElementById('news-cover-img');
     img.style.display = 'none'; img.src = '';
     document.getElementById('news-cover-placeholder').style.display = 'flex';
-    document.getElementById('news-modal-admin').classList.add('active');
+    document.getElementById('news-modal-admin').style.display = 'flex';
 }
 
 function closeNewsModalAdmin() {
-    document.getElementById('news-modal-admin').classList.remove('active');
+    document.getElementById('news-modal-admin').style.display = 'none';
 }
 
 async function editNewsItem(id) {
@@ -2243,11 +2330,12 @@ async function editNewsItem(id) {
         document.getElementById('news-form-cover').value = n.cover_image || '';
         document.getElementById('news-form-order').value = n.display_order || 0;
         document.getElementById('news-form-status').value = n.status || 'active';
+        const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = n.external_url || '';
         const img = document.getElementById('news-cover-img');
         const ph = document.getElementById('news-cover-placeholder');
         if (n.cover_image) { img.src = n.cover_image; img.style.display = 'block'; ph.style.display = 'none'; }
         else { img.style.display = 'none'; ph.style.display = 'flex'; }
-        document.getElementById('news-modal-admin').classList.add('active');
+        document.getElementById('news-modal-admin').style.display = 'flex';
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     }
@@ -2273,12 +2361,18 @@ async function saveNewsItem() {
     const cover_image = document.getElementById('news-form-cover').value.trim();
     const display_order = parseInt(document.getElementById('news-form-order').value, 10) || 0;
     const status = document.getElementById('news-form-status').value;
+    const extInp = document.getElementById('news-form-external-url');
+    const external_url = extInp ? extInp.value.trim() : '';
 
     if (!title) { showToast('Tiêu đề bắt buộc', 'error'); return; }
     if (title.length > 255) { showToast('Tiêu đề tối đa 255 ký tự', 'error'); return; }
     if (summary.length > 500) { showToast('Tóm tắt tối đa 500 ký tự', 'error'); return; }
+    if (external_url && !/^https?:\/\//i.test(external_url)) {
+        showToast('External URL phải bắt đầu bằng http:// hoặc https://', 'error');
+        return;
+    }
 
-    const payload = { title, summary, content, cover_image, display_order };
+    const payload = { title, summary, content, cover_image, display_order, external_url };
     if (id) payload.status = status;
     try {
         const res = await fetch(id ? '/api/admin/news/' + id : '/api/admin/news', {

@@ -58,16 +58,17 @@ const getServiceBySlot = async (req, res) => {
 const updateService = async (req, res) => {
     try {
         const slot = parseInt(req.params.slot, 10);
-        const { title, description, image_path } = req.body;
-        const ok = await serviceModel.updateService(slot, { title, description, image_path });
+        const { title, description, image_path, icon } = req.body;
+        const ok = await serviceModel.updateService(slot, { title, description, image_path, icon });
         if (!ok) return res.status(400).json({ success: false, message: 'Không có thay đổi nào' });
         auditLogModel.log({
-            req, action: 'SERVICE_UPDATE', target_type: 'service', target_id: slot
+            req, action: 'SERVICE_UPDATE', target_type: 'service', target_id: slot,
+            details: { fields: Object.keys(req.body || {}) }
         });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (err) {
         console.error('updateService:', err.message);
-        const isValidation = err.message.startsWith('slot must');
+        const isValidation = (err.status === 400) || err.message.startsWith('slot must');
         res.status(isValidation ? 400 : 500).json({ success: false, message: isValidation ? err.message : 'Lỗi server' });
     }
 };

@@ -107,6 +107,7 @@ app.get('/main', loginController.getMainPage);
 // Public read-only API (no auth) - used by /main public page
 app.get('/api/public/settings', adminController.getSettings);
 app.get('/api/public/projects', adminController.getProjects);
+app.get('/api/public/projects/featured', adminController.getFeaturedProjects);
 app.get('/api/public/projects/:id', adminController.getProjectById);
 app.get('/api/public/about', homeContentController.getAbout);
 app.get('/api/public/services', homeContentController.getServices);
@@ -124,6 +125,8 @@ app.put('/api/admin/settings', adminController.updateSettings);
 
 app.get('/api/admin/projects', adminController.getProjects);
 app.get('/api/admin/projects/search', adminController.searchProjects);
+app.get('/api/admin/projects/featured', adminController.getFeaturedProjects);
+app.put('/api/admin/projects/featured', adminController.setFeaturedProjects);
 app.get('/api/admin/projects/:id', adminController.getProjectById);
 app.post('/api/admin/projects', adminController.createProject);
 app.put('/api/admin/projects/:id', adminController.updateProject);

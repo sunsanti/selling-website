@@ -11,7 +11,7 @@
 .news-page-title {
     font-family: 'Playfair Display', 'Georgia', serif;
     font-size: 3.6rem;
-    color: var(--color-navy, #000342);
+    color: var(--color-navy, #1B2635);
     margin: 1rem 0;
 }
 .news-page-subtitle {
@@ -30,8 +30,8 @@
     display: inline-block;
     margin-top: 1.5rem;
     padding: 1rem 2rem;
-    border: 2px solid var(--color-gold, #ffcf00);
-    color: var(--color-gold, #ffcf00);
+    border: 2px solid var(--color-gold, #D1AE6B);
+    color: var(--color-gold, #D1AE6B);
     text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -39,11 +39,11 @@
     transition: background 0.25s, color 0.25s;
 }
 .btn-clear-filters:hover {
-    background: var(--color-gold, #ffcf00);
-    color: var(--color-navy, #000342);
+    background: var(--color-gold, #D1AE6B);
+    color: var(--color-navy, #1B2635);
 }
 .news-page-footer { text-align: center; padding: 3rem 5%; color: #888; background: #fafafa; }
-.news-page-footer a { color: var(--color-navy, #000342); }
+.news-page-footer a { color: var(--color-navy, #1B2635); }
 
 /* Detail page */
 .news-detail-page {
@@ -64,16 +64,16 @@
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     font-size: 1.15rem;
     text-decoration: none;
     margin-bottom: 1.5rem;
 }
-.news-back-link:hover { color: var(--color-navy, #000342); }
+.news-back-link:hover { color: var(--color-navy, #1B2635); }
 .news-detail-title {
     font-family: 'Playfair Display', 'Georgia', serif;
     font-size: 3rem;
-    color: var(--color-navy, #000342);
+    color: var(--color-navy, #1B2635);
     line-height: 1.25;
     margin: 0 0 1rem;
 }
@@ -95,7 +95,7 @@
 .news-detail-content {
     font-size: 1.4rem;
     line-height: 1.7;
-    color: var(--color-navy, #000342);
+    color: var(--color-navy, #1B2635);
     white-space: pre-line;
 }
 .news-not-found {
@@ -105,7 +105,7 @@
 .news-not-found h2 {
     font-family: 'Playfair Display', 'Georgia', serif;
     font-size: 2.4rem;
-    color: var(--color-navy, #000342);
+    color: var(--color-navy, #1B2635);
     margin: 0 0 1rem;
 }
 .news-not-found p { color: #666; font-size: 1.3rem; margin-bottom: 1.5rem; }

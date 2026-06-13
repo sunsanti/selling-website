@@ -11,7 +11,7 @@
 .videos-page-title {
     font-family: 'Playfair Display', 'Georgia', serif;
     font-size: 3.6rem;
-    color: var(--color-navy, #000342);
+    color: var(--color-navy, #1B2635);
     margin: 1rem 0;
 }
 .videos-page-subtitle {
@@ -37,8 +37,8 @@
     display: inline-block;
     margin-top: 1.5rem;
     padding: 1rem 2rem;
-    border: 2px solid var(--color-gold, #ffcf00);
-    color: var(--color-gold, #ffcf00);
+    border: 2px solid var(--color-gold, #D1AE6B);
+    color: var(--color-gold, #D1AE6B);
     text-decoration: none;
     text-transform: uppercase;
     letter-spacing: 0.08em;
@@ -46,8 +46,8 @@
     transition: background 0.25s, color 0.25s;
 }
 .btn-clear-filters:hover {
-    background: var(--color-gold, #ffcf00);
-    color: var(--color-navy, #000342);
+    background: var(--color-gold, #D1AE6B);
+    color: var(--color-navy, #1B2635);
 }
 .videos-page-footer {
     text-align: center;
@@ -55,7 +55,7 @@
     color: #888;
     background: #fafafa;
 }
-.videos-page-footer a { color: var(--color-navy, #000342); }
+.videos-page-footer a { color: var(--color-navy, #1B2635); }
 
 @media (max-width: 1200px) { .videos-page-grid { grid-template-columns: repeat(4, 1fr); } }
 @media (max-width: 900px)  { .videos-page-grid { grid-template-columns: repeat(3, 1fr); } }

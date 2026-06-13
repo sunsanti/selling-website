@@ -204,6 +204,19 @@
                     <i class="fas fa-plus"></i> Add Project
                 </button>
             </div>
+
+            <!-- v2: Featured selection (up to 4 shown on /main carousel) -->
+            <div class="featured-panel">
+                <div class="featured-panel-header">
+                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 projects sẽ hiển thị ở trang chủ)</small></h3>
+                    <button type="button" class="btn-save" onclick="saveFeaturedProjects()">
+                        <i class="fas fa-check"></i> Lưu chọn
+                    </button>
+                </div>
+                <p id="featured-counter" class="featured-counter">0 / 4 selected</p>
+                <div id="featured-grid" class="featured-grid"></div>
+            </div>
+
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="project-search" placeholder="Search projects by name or area...">
@@ -351,27 +364,20 @@
                 <h1>About Section</h1>
             </div>
             <form id="home-about-form" class="settings-form">
-                <div class="form-group">
-                    <label>Banner Heading</label>
-                    <textarea id="about-input-banner" rows="2" maxlength="500" placeholder="MANY BEAUTIFUL PLACES ARE WAITING FOR YOU TO SEE"></textarea>
-                </div>
-                <div class="form-row">
-                    <div class="form-group">
-                        <label>Paragraph Left</label>
-                        <textarea id="about-input-left" rows="6" maxlength="2000"></textarea>
-                    </div>
-                    <div class="form-group">
-                        <label>Paragraph Right</label>
-                        <textarea id="about-input-right" rows="6" maxlength="2000"></textarea>
-                    </div>
-                </div>
+                <!-- v2: only 4 stats remain; banner + paragraphs deprecated (kept as hidden inputs
+                     so saveAbout() still posts an empty payload + audit trail is intact). -->
+                <textarea id="about-input-banner" style="display:none"></textarea>
+                <textarea id="about-input-left" style="display:none"></textarea>
+                <textarea id="about-input-right" style="display:none"></textarea>
+
                 <div class="project-section-title">
                     <h3><i class="fas fa-chart-bar"></i> Stats (4 blocks)</h3>
+                    <p style="color:#888;font-size:1.15rem;margin:0.3rem 0 0">Đây là 4 con số hiển thị ngay dưới heading ABOUT US ở trang chủ.</p>
                 </div>
                 <div class="form-row" id="about-stats-grid">
                 </div>
                 <div class="form-actions">
-                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save About</button>
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Stats</button>
                 </div>
             </form>
 
@@ -577,7 +583,11 @@
                 <input type="hidden" id="news-form-cover">
             </div>
             <div class="form-group">
-                <label>Content <small style="color:#888">(plain text — line breaks preserved)</small></label>
+                <label>External Article URL <small style="color:#888">(optional — when set, READ MORE opens this link in a new tab)</small></label>
+                <input type="url" id="news-form-external-url" placeholder="https://www.example.com/full-article" maxlength="500">
+            </div>
+            <div class="form-group">
+                <label>Content <small style="color:#888">(plain text — line breaks preserved; shown on /news/:id when no external URL)</small></label>
                 <textarea id="news-form-content" rows="12" placeholder="Full article body"></textarea>
             </div>
             <div class="form-row">

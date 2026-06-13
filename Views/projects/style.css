@@ -1,7 +1,7 @@
 /* F05c — /projects list + /projects/:id detail page styles */
 
 .projects-page {
-    background: var(--color-cream, #fffff5);
+    background: var(--color-cream, #EBE9E8);
     padding: 12rem 5% 6rem;
     min-height: calc(100vh - 200px);
 }
@@ -13,7 +13,7 @@
 }
 .projects-page-header .section-tagline {
     display: inline-block;
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     font-size: 1.15rem;
     font-weight: 700;
     letter-spacing: 0.22em;
@@ -33,6 +33,19 @@
     margin: 0;
     max-width: 600px;
     margin: 0 auto;
+}
+
+/* v2: search bar wrapper on /projects (reuses .property-search styles from /main) */
+.projects-page-search {
+    max-width: 1400px;
+    margin: 0 auto 2.5rem;
+    padding: 0 2%;
+}
+.projects-page-search .property-search {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(27,38,53,0.06);
+    padding: 1.2rem 1.4rem;
 }
 
 /* Active filter chips */
@@ -61,7 +74,7 @@
     font-weight: 700;
 }
 .filter-chip-clear {
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     font-size: 1.15rem;
     font-weight: 600;
     text-transform: uppercase;
@@ -90,7 +103,7 @@
     display: inline-block;
     margin-top: 1.4rem;
     padding: 1rem 2rem;
-    border: 2px solid var(--color-gold, #ffcf00);
+    border: 2px solid var(--color-gold, #D1AE6B);
     color: #0a1f3d;
     border-radius: 6px;
     text-decoration: none;
@@ -100,25 +113,25 @@
     font-size: 1.15rem;
     transition: background 0.25s;
 }
-.btn-clear-filters:hover { background: var(--color-gold, #ffcf00); }
+.btn-clear-filters:hover { background: var(--color-gold, #D1AE6B); }
 
 .projects-page-footer {
     text-align: center;
     padding: 2rem 5%;
-    background: var(--color-cream, #fffff5);
+    background: var(--color-cream, #EBE9E8);
     color: rgba(10,31,61,0.55);
     font-size: 1.15rem;
     border-top: 1px solid rgba(10,31,61,0.06);
 }
 .projects-page-footer a {
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     text-decoration: none;
     margin-left: 0.4rem;
 }
 
 /* ============== /projects/:id DETAIL ============== */
 .project-detail-page {
-    background: var(--color-cream, #fffff5);
+    background: var(--color-cream, #EBE9E8);
     padding: 10rem 0 6rem;
     min-height: calc(100vh - 200px);
 }
@@ -152,7 +165,7 @@
 .detail-area-badge {
     display: inline-block;
     background: rgba(10,31,61,0.85);
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     padding: 0.5rem 1.4rem;
     border-radius: 4px;
     font-size: 1.15rem;
@@ -190,7 +203,7 @@
     box-shadow: 0 10px 36px rgba(10,31,61,0.08);
 }
 .detail-main .detail-price {
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     font-size: 2.4rem;
     font-weight: 700;
     margin: 0 0 2rem;
@@ -212,7 +225,7 @@
     font-size: 1.4rem;
 }
 .detail-specs-row .detail-spec i {
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     font-size: 1.5rem;
 }
 .detail-specs-row .detail-spec strong {
@@ -277,7 +290,7 @@
     transition: background 0.25s;
 }
 .detail-cta:hover {
-    background: var(--color-gold, #ffcf00);
+    background: var(--color-gold, #D1AE6B);
     color: #0a1f3d;
 }
 
@@ -319,7 +332,7 @@
     margin: 0 0 1rem;
 }
 #detail-not-found a {
-    color: var(--color-gold, #ffcf00);
+    color: var(--color-gold, #D1AE6B);
     font-weight: 600;
     text-decoration: none;
 }

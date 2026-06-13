@@ -114,9 +114,19 @@ window.closeVideoModalIfBackdrop = closeVideoModalIfBackdrop;
 // ========== MODULE 2: Projects (grid + filter) ==========
 async function loadProjectsFromDB() {
     try {
-        const res = await fetch('/api/public/projects');
-        const data = await res.json();
-        renderProjects((data && data.success && Array.isArray(data.data)) ? data.data : []);
+        // v2: prefer featured selection (up to 4 admin-picked); fall back to active list
+        let list = [];
+        try {
+            const fr = await fetch('/api/public/projects/featured');
+            const fd = await fr.json();
+            if (fd && fd.success && Array.isArray(fd.data)) list = fd.data;
+        } catch (_) {}
+        if (!list.length) {
+            const res = await fetch('/api/public/projects');
+            const data = await res.json();
+            list = (data && data.success && Array.isArray(data.data)) ? data.data.slice(0, 4) : [];
+        }
+        renderProjects(list);
     } catch (e) {
         console.error('Projects not loaded:', e);
         renderProjects([]);
@@ -428,7 +438,9 @@ function renderServices(items) {
         card.className = 'service-card';
 
         const icon = document.createElement('i');
-        icon.className = 'fa-solid ' + (SERVICE_ICONS[s.slot] || 'fa-circle') + ' service-icon';
+        // v2: prefer admin-supplied icon column; fall back to slot default
+        const iconClass = (s.icon && /^fa-[a-z0-9-]{2,40}$/i.test(s.icon)) ? s.icon : (SERVICE_ICONS[s.slot] || 'fa-circle');
+        icon.className = 'fa-solid ' + iconClass + ' service-icon';
         card.appendChild(icon);
 
         const title = document.createElement('h3');
@@ -565,13 +577,21 @@ function renderNewsCarousel() {
         const cover = _escapeAttr(n.cover_image || '/uploads/main_image.jpg');
         const title = _escapeHtml(n.title || '');
         const summary = _escapeHtml(n.summary || '');
+        // v2: READ MORE prefers external article URL when present; falls back to /news/:id
+        const ext = (n.external_url || '').trim();
+        const isExt = /^https?:\/\//i.test(ext);
+        const href = isExt ? _escapeAttr(ext) : `/news/${id}`;
+        const target = isExt ? ' target="_blank" rel="noopener noreferrer"' : '';
+        const cardOnclick = isExt
+            ? `window.open('${href}', '_blank', 'noopener,noreferrer')`
+            : `goToNews(${id})`;
         return `
-            <article class="news-item" data-id="${id}" onclick="goToNews(${id})">
+            <article class="news-item" data-id="${id}" onclick="${cardOnclick}">
                 <img class="news-bg" src="${cover}" alt="" onerror="this.style.visibility='hidden'">
                 <div class="news-overlay">
                     <h3 class="news-title">${title}</h3>
                     <p class="news-summary">${summary}</p>
-                    <a class="news-read-more" href="/news/${id}" onclick="event.stopPropagation();">
+                    <a class="news-read-more" href="${href}"${target} onclick="event.stopPropagation();">
                         <span>READ MORE</span>
                     </a>
                 </div>
@@ -699,9 +719,79 @@ async function loadFooterPersons() {
         const json = await res.json();
         if (!json.success) return;
         renderFooterPersons(json.data);
+        renderAboutFounders(json.data);   // v2: show 2 founders in about-us section
     } catch (e) {
         console.error('loadFooterPersons:', e);
     }
+}
+
+// v2: Founders showcase in about-us section (uses same persons data as footer)
+function renderAboutFounders(persons) {
+    const wrap = document.getElementById('about-founders');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    const FOUNDER_BIOS = {
+        1: 'Co-founder & Senior Property Strategist. Over a decade helping local and overseas buyers secure premium investments across Sydney and Melbourne.',
+        2: 'Co-founder & Investment Director. Specialises in build-to-rent and off-the-plan opportunities, FIRB advisory and long-term portfolio growth.'
+    };
+    (persons || []).slice(0, 2).forEach(p => {
+        const card = document.createElement('article');
+        card.className = 'founder-card';
+
+        const photoWrap = document.createElement('div');
+        photoWrap.className = 'founder-photo';
+        if (p.avatar_path) {
+            const img = document.createElement('img');
+            img.src = normalizeImageUrl(p.avatar_path);
+            img.alt = p.name || '';
+            img.onerror = function () { this.style.display = 'none'; };
+            photoWrap.appendChild(img);
+        }
+        card.appendChild(photoWrap);
+
+        const info = document.createElement('div');
+        info.className = 'founder-info';
+
+        const name = document.createElement('h3');
+        name.className = 'founder-name';
+        name.textContent = p.name || '';
+        info.appendChild(name);
+
+        const role = document.createElement('span');
+        role.className = 'founder-role';
+        role.textContent = p.slot === 1 ? 'Co-Founder & Director' : 'Co-Founder & Investment Director';
+        info.appendChild(role);
+
+        const bio = document.createElement('p');
+        bio.className = 'founder-bio';
+        bio.textContent = FOUNDER_BIOS[p.slot] || '';
+        info.appendChild(bio);
+
+        const contact = document.createElement('div');
+        contact.className = 'founder-contact';
+        const rows = [];
+        if (p.email)   rows.push(['fa-envelope', p.email, 'mailto:' + p.email]);
+        if (p.phone1)  rows.push(['fa-phone', p.phone1, 'tel:' + p.phone1.replace(/\s+/g, '')]);
+        if (p.phone2)  rows.push(['fa-phone', p.phone2, 'tel:' + p.phone2.replace(/\s+/g, '')]);
+        if (p.facebook_url && /^https:\/\//i.test(p.facebook_url)) {
+            rows.push(['fa-brands fa-facebook', 'Facebook', p.facebook_url]);
+        }
+        rows.forEach(([icn, label, href]) => {
+            const a = document.createElement('a');
+            a.href = href;
+            const i = document.createElement('i');
+            i.className = 'fa-solid ' + icn;
+            const span = document.createElement('span');
+            span.textContent = label;
+            a.appendChild(i); a.appendChild(span);
+            if (href.startsWith('http')) { a.target = '_blank'; a.rel = 'noopener noreferrer'; }
+            contact.appendChild(a);
+        });
+        info.appendChild(contact);
+
+        card.appendChild(info);
+        wrap.appendChild(card);
+    });
 }
 
 // F10: Footer contact form (POST /api/contact) — shared rate-limited endpoint

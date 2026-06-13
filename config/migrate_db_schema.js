@@ -429,6 +429,45 @@ async function normalizeMediaPaths() {
     }
 }
 
+// v2: idempotent ALTER for news.external_url + projects.is_featured
+async function ensureNewsExternalUrl() {
+    if (!(await hasTable('news'))) return;
+    if (await hasColumn('news', 'external_url')) {
+        console.log('   ⏭️  news.external_url already exists');
+    } else {
+        await pool.query("ALTER TABLE news ADD COLUMN external_url VARCHAR(500) NOT NULL DEFAULT ''");
+        console.log('   ✅ Added news.external_url');
+    }
+}
+async function ensureProjectFeatured() {
+    if (!(await hasTable('projects'))) return;
+    if (await hasColumn('projects', 'is_featured')) {
+        console.log('   ⏭️  projects.is_featured already exists');
+    } else {
+        await pool.query("ALTER TABLE projects ADD COLUMN is_featured TINYINT(1) NOT NULL DEFAULT 0, ADD INDEX idx_projects_featured (is_featured)");
+        console.log('   ✅ Added projects.is_featured + index');
+    }
+}
+// v2: idempotent ALTER for services.icon (font-awesome class) — replace image picker
+async function ensureServiceIcon() {
+    if (!(await hasTable('services'))) return;
+    if (await hasColumn('services', 'icon')) {
+        console.log('   ⏭️  services.icon already exists');
+    } else {
+        await pool.query("ALTER TABLE services ADD COLUMN icon VARCHAR(50) NOT NULL DEFAULT ''");
+        console.log('   ✅ Added services.icon');
+        // Seed default icons per slot (matches SERVICE_ICONS in render.js)
+        const defaults = [
+            [1, 'fa-key'], [2, 'fa-chart-line'], [3, 'fa-building'],
+            [4, 'fa-hand-holding-dollar'], [5, 'fa-shield-halved']
+        ];
+        for (const [slot, icn] of defaults) {
+            await pool.query('UPDATE services SET icon = ? WHERE slot = ? AND (icon IS NULL OR icon = "")', [icn, slot]);
+        }
+        console.log('   ✅ Seeded default icons for slots 1-5');
+    }
+}
+
 // F07: idempotent top-up for service slots 4-5
 async function ensureServiceSlots() {
     if (!(await hasTable('services'))) return;
@@ -535,6 +574,12 @@ async function dropAllTables() {
         // F07: top-up service slots 4-5 for 5-card grid
         console.log('\n🔧 Ensuring service slots (F07 5-card grid)...');
         await ensureServiceSlots();
+
+        // v2: ALTER for news.external_url + projects.is_featured + services.icon
+        console.log('\n🔧 v2: extending news / projects / services schema...');
+        await ensureNewsExternalUrl();
+        await ensureProjectFeatured();
+        await ensureServiceIcon();
 
         // F10.fix: normalize all legacy /images/ + bare-filename media paths to /uploads/
         console.log('\n🔧 Normalizing media paths to /uploads/...');
