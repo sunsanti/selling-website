@@ -1538,3 +1538,120 @@ body {
     background: rgba(243, 156, 18, 0.12);
     color: #d68910;
 }
+
+/* ============================================================
+   F10 — Admin recolor pass (navy/gold theme)
+   Constraint: ONLY recolor + typography. NO layout changes:
+   sidebar sticky / drawer / grid / spacing all preserved.
+   ============================================================ */
+:root {
+    --color-navy: #000342;
+    --color-gold: #ffcf00;
+    --color-cream: #fffff5;
+}
+
+body { background: var(--color-cream); }
+
+/* Sidebar navy + gold accents */
+.sidebar {
+    background: var(--color-navy);
+    color: #fff;
+}
+.sidebar-header h2,
+.sidebar-header .brand-text,
+.sidebar-header span {
+    color: var(--color-gold);
+    font-family: 'Playfair Display', 'Georgia', serif;
+    letter-spacing: 0.08em;
+}
+.sidebar-nav .nav-item {
+    color: rgba(255,255,255,0.85);
+    transition: background 0.2s, color 0.2s;
+    border-left: 3px solid transparent;
+}
+.sidebar-nav .nav-item:hover {
+    background: rgba(255,207,0,0.08);
+    color: var(--color-gold);
+}
+.sidebar-nav .nav-item.active {
+    background: rgba(255,207,0,0.15);
+    color: var(--color-gold);
+    border-left-color: var(--color-gold);
+}
+.sidebar-nav .nav-item i { color: inherit; }
+.sidebar-footer .back-to-site,
+.sidebar-footer .logout-btn {
+    color: rgba(255,255,255,0.8);
+}
+.sidebar-footer .back-to-site:hover { color: var(--color-gold); }
+
+/* Headings — Playfair navy */
+.content-section h1,
+.content-section h2,
+.section-header h1,
+.section-header h2 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    color: var(--color-navy);
+    letter-spacing: 0.01em;
+}
+
+/* Primary "save" buttons */
+.btn-save {
+    background: var(--color-navy);
+    color: #fff;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-save:hover {
+    background: var(--color-gold);
+    color: var(--color-navy);
+}
+
+/* Add buttons gold */
+.btn-add {
+    background: var(--color-gold);
+    color: var(--color-navy);
+    transition: background 0.2s, color 0.2s;
+}
+.btn-add:hover {
+    background: var(--color-navy);
+    color: var(--color-gold);
+}
+
+/* Search bar accents */
+.btn-search {
+    background: var(--color-navy);
+    color: #fff;
+}
+.btn-search:hover { background: var(--color-gold); color: var(--color-navy); }
+
+/* Tables: navy header + gold column titles */
+.data-table thead {
+    background: var(--color-navy);
+    color: #fff;
+}
+.data-table thead th {
+    color: var(--color-gold);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* Input focus ring (preserve existing border-radius/spacing) */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+input.text-input:focus {
+    border-color: var(--color-gold);
+    outline: 2px solid rgba(255,207,0,0.18);
+}
+
+/* Status pills tinted */
+.status-pill.status-active {
+    background: rgba(76,175,80,0.12);
+    color: #2e7d32;
+}
+.status-pill.status-inactive {
+    background: rgba(120,120,120,0.15);
+    color: #555;
+}
+
+/* Audit log badges keep their semantic colors (don't override) */

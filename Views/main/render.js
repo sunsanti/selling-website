@@ -704,6 +704,62 @@ async function loadFooterPersons() {
     }
 }
 
+// F10: Footer contact form (POST /api/contact) — shared rate-limited endpoint
+async function submitCustomerContact(event) {
+    event.preventDefault();
+    const status = document.getElementById('footer-form-status');
+    if (!status) return;
+    status.textContent = '';
+    status.className = 'footer-form-status';
+
+    const name = document.getElementById('customer-name').value.trim();
+    const phone = document.getElementById('customer-phone').value.trim();
+    const email = document.getElementById('customer-email').value.trim();
+
+    if (!name) {
+        status.textContent = 'Vui lòng nhập họ tên';
+        status.classList.add('error');
+        return;
+    }
+    if (!phone && !email) {
+        status.textContent = 'Cần ít nhất số điện thoại hoặc email';
+        status.classList.add('error');
+        return;
+    }
+
+    const btn = document.getElementById('btn-submit-form');
+    const prevText = btn ? btn.textContent : '';
+    if (btn) { btn.disabled = true; btn.textContent = 'SENDING…'; }
+    try {
+        const res = await fetch('/api/contact', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name, phone, email })
+        });
+        if (res.status === 429) {
+            status.textContent = 'Gửi liên hệ quá nhanh. Vui lòng đợi 1 phút.';
+            status.classList.add('error');
+            return;
+        }
+        const data = await res.json();
+        if (!data.success) {
+            status.textContent = data.message || 'Gửi thất bại';
+            status.classList.add('error');
+            return;
+        }
+        status.textContent = 'Cảm ơn! Chúng tôi sẽ liên hệ sớm.';
+        status.classList.add('success');
+        document.getElementById('customer-contact-form').reset();
+    } catch (e) {
+        console.error('contact submit:', e);
+        status.textContent = 'Lỗi kết nối, vui lòng thử lại.';
+        status.classList.add('error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.textContent = prevText; }
+    }
+}
+window.submitCustomerContact = submitCustomerContact;
+
 // ========== PREVIEW MODE (admin iframe with ?preview=1&scope=X) ==========
 // When loaded inside the admin's live-preview iframe, /main hides every
 // section except the one being edited and listens for postMessage from
