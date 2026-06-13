@@ -11,7 +11,7 @@
     <meta property="og:type" content="website">
     <meta name="theme-color" content="#0E2A47">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="style.css?v=f05b">
+    <link rel="stylesheet" href="style.css?v=f06">
 </head>
 <body>
     <!-- Header — 3-zone: logo / nav / CTA (F02 redesign) -->
@@ -190,6 +190,47 @@
         <div class="project-grid" id="project-grid"></div>
     </section>
 
+    <!-- F06: Purpose-Invest section -->
+    <section id="purpose-invest" class="purpose-invest">
+        <div class="purpose-grid">
+            <div id="purpose-content-left">
+                <span class="section-tagline purpose-tagline">
+                    <i class="fa-solid fa-arrow-right"></i> WHY INVEST IN AUSTRALIA
+                </span>
+                <h2 class="purpose-heading">A Strong Market.<br>A Brighter Future.</h2>
+                <ul class="purpose-list">
+                    <li><i class="fa-solid fa-check"></i> Stable economy and secure legal system</li>
+                    <li><i class="fa-solid fa-check"></i> High rental demand and low vacancy rates</li>
+                    <li><i class="fa-solid fa-check"></i> Capital growth in key locations</li>
+                    <li><i class="fa-solid fa-check"></i> Foreign ownership opportunities</li>
+                </ul>
+                <a href="#about-us" class="btn-learn-more">
+                    LEARN MORE ABOUT AUSTRALIA
+                    <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+            <div id="purpose-video-right">
+                <div class="video-thumbnail-container">
+                    <img id="purpose-thumbnail" src="" alt="Why invest in Australia">
+                    <button id="btn-play-video" class="btn-play-video" type="button" onclick="openPurposeVideo()" aria-label="Play video">
+                        <i class="fa-solid fa-play"></i>
+                    </button>
+                    <p class="video-caption">Discover why Australia is one of the world's most trusted property markets.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- F06: Video Modal -->
+    <div id="video-modal" class="video-modal" style="display: none;" onclick="closeVideoModalIfBackdrop(event)">
+        <button id="btn-close-video" class="btn-close-video" type="button" onclick="closePurposeVideo()" aria-label="Close video">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+        <div class="video-wrapper">
+            <video id="purpose-video-player" controls playsinline></video>
+        </div>
+    </div>
+
     <!-- services -->
     <section id="services" class="services">
         <h1 class="heading">Services</h1>
@@ -322,7 +363,7 @@
         </div>
     </div>
 </div>
-    <script src="render.js?v=f05b" defer></script>
-    <script src="script.js?v=f05b" defer></script>
+    <script src="render.js?v=f06" defer></script>
+    <script src="script.js?v=f06" defer></script>
 </body>
 </html>

@@ -35,7 +35,10 @@ const TABLES = [
         seed: [
             ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['logo', 'LOGO']],
             ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['phone', 'phone number']],
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['main_image', 'service3.jpg']]
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['main_image', 'service3.jpg']],
+            // F06 — Purpose-Invest video keys
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_url', '']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_thumbnail', '']]
         ],
         summaryCols: ['setting_key', 'setting_value']
     },
@@ -299,6 +302,22 @@ async function hasColumn(table, column) {
     return rows.length > 0;
 }
 
+// F06: idempotent top-up for settings rows that may be added after first install
+async function ensureSettingsKeys() {
+    if (!(await hasTable('settings'))) return;
+    const keys = [
+        ['purpose_video_url', ''],
+        ['purpose_video_thumbnail', '']
+    ];
+    for (const [k, v] of keys) {
+        const [r] = await pool.query(
+            'INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)',
+            [k, v]
+        );
+        console.log(`   ${r.affectedRows ? '✅ Inserted' : '⏭️  Exists'} settings.${k}`);
+    }
+}
+
 async function ensureProjectColumns() {
     if (!(await hasTable('projects'))) return;
     const cols = [
@@ -365,6 +384,10 @@ async function dropAllTables() {
         // F05a: ensure projects has 8 extended columns (idempotent ALTER)
         console.log('\n🔧 Ensuring extended columns on projects...');
         await ensureProjectColumns();
+
+        // F06: top-up settings keys for purpose-invest video
+        console.log('\n🔧 Ensuring settings keys (F06 purpose-invest)...');
+        await ensureSettingsKeys();
 
         console.log('\n🎉 Migration hoàn tất.');
     } catch (err) {

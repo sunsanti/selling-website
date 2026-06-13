@@ -30,11 +30,25 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
     try {
-        const { logo, phone, main_image } = req.body;
+        const { logo, phone, main_image, purpose_video_url, purpose_video_thumbnail } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
         if (main_image !== undefined) {
             await settingModel.updateSetting('main_image', main_image.replace(/^\/images\//, ''));
+        }
+        // F06: Purpose-Invest video — thumbnail (image path) + url (mp4)
+        if (purpose_video_thumbnail !== undefined) {
+            const thumb = String(purpose_video_thumbnail).slice(0, 500);
+            await settingModel.updateSetting('purpose_video_thumbnail', thumb);
+        }
+        if (purpose_video_url !== undefined) {
+            const url = String(purpose_video_url).slice(0, 500);
+            // Allow empty (clear), relative /uploads/..., or http(s)
+            if (url === '' || /^(\/uploads\/|https?:\/\/)/i.test(url)) {
+                await settingModel.updateSetting('purpose_video_url', url);
+            } else {
+                return res.status(400).json({ success: false, message: 'Video URL phải bắt đầu bằng /uploads/ hoặc https://' });
+            }
         }
         auditLogModel.log({
             req,

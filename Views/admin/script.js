@@ -161,6 +161,24 @@ async function loadDashboard() {
                 document.getElementById('main-image-remove-btn').style.display = 'none';
             }
             currentMainImageFile = null;
+
+            // F06: Purpose-Invest video
+            window._currentPurposeThumb = settingsData.data.purpose_video_thumbnail || '';
+            document.getElementById('setting-purpose-video-url').value = settingsData.data.purpose_video_url || '';
+            const thumbVal = window._currentPurposeThumb;
+            const thumbImg = document.getElementById('current-purpose-thumb-img');
+            const thumbPh = document.getElementById('purpose-thumb-preview-placeholder');
+            const thumbRm = document.getElementById('purpose-thumb-remove-btn');
+            if (thumbVal && thumbImg) {
+                thumbImg.src = thumbVal.startsWith('/') ? thumbVal : '/' + thumbVal;
+                thumbImg.style.display = 'block';
+                if (thumbPh) thumbPh.style.display = 'none';
+                if (thumbRm) thumbRm.style.display = 'inline-flex';
+            } else if (thumbImg) {
+                thumbImg.style.display = 'none';
+                if (thumbPh) thumbPh.style.display = 'flex';
+                if (thumbRm) thumbRm.style.display = 'none';
+            }
         }
     } catch (error) {
         console.error('Error loading dashboard:', error);
@@ -208,6 +226,36 @@ function setupSettingsUpload() {
             });
         });
     }
+
+    // F06: Purpose-Invest video thumbnail picker
+    const purposeThumbBtn = document.getElementById('purpose-thumb-pick-btn');
+    if (purposeThumbBtn) {
+        purposeThumbBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    window._currentPurposeThumb = url;
+                    const img = document.getElementById('current-purpose-thumb-img');
+                    const ph = document.getElementById('purpose-thumb-preview-placeholder');
+                    const rm = document.getElementById('purpose-thumb-remove-btn');
+                    if (img) { img.src = url; img.style.display = 'block'; }
+                    if (ph) ph.style.display = 'none';
+                    if (rm) rm.style.display = 'inline-flex';
+                    postPreviewData('settings');
+                }
+            });
+        });
+    }
+}
+
+function removePurposeThumb() {
+    window._currentPurposeThumb = '';
+    const img = document.getElementById('current-purpose-thumb-img');
+    const ph = document.getElementById('purpose-thumb-preview-placeholder');
+    const rm = document.getElementById('purpose-thumb-remove-btn');
+    if (img) img.style.display = 'none';
+    if (ph) ph.style.display = 'flex';
+    if (rm) rm.style.display = 'none';
 }
 
 function removeLogoImage() {
@@ -268,7 +316,10 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
     const data = {
         logo: logoValue,
         phone: document.getElementById('setting-phone').value,
-        main_image: mainImageValue
+        main_image: mainImageValue,
+        // F06: Purpose-Invest video keys
+        purpose_video_thumbnail: window._currentPurposeThumb || '',
+        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
     };
 
     try {
@@ -1735,6 +1786,9 @@ const AUDIT_FIELD_LABELS = {
     'phone2': 'SĐT 2',
     'facebook_url': 'Link Facebook',
     'avatar_path': 'Ảnh đại diện',
+    // F06: Purpose-Invest video
+    'purpose_video_thumbnail': 'Ảnh thumbnail video Purpose',
+    'purpose_video_url': 'URL video Purpose',
     // F05d: extended project fields
     'price': 'Giá',
     'beds': 'Số phòng ngủ',

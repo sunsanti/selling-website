@@ -43,7 +43,58 @@ function renderSettings(s) {
         const heroImg = document.getElementById('hero-image') || document.querySelector('.home-image img');
         if (heroImg) heroImg.src = normalizeImageUrl(s.main_image);
     }
+    // F06: Purpose-Invest video — thumbnail + URL stored on body dataset
+    if (s.purpose_video_thumbnail !== undefined) {
+        const thumb = document.getElementById('purpose-thumbnail');
+        if (thumb) {
+            const url = normalizeImageUrl(s.purpose_video_thumbnail);
+            // fallback: reuse hero/main image so the section never renders blank
+            thumb.src = url || normalizeImageUrl(s.main_image) || '/uploads/main_image.jpg';
+        }
+    }
+    if (s.purpose_video_url !== undefined) {
+        document.body.dataset.purposeVideoUrl = s.purpose_video_url || '';
+    }
 }
+
+// F06: Video modal handlers (exposed on window because onclick attrs reference them)
+function openPurposeVideo() {
+    const modal = document.getElementById('video-modal');
+    const player = document.getElementById('purpose-video-player');
+    if (!modal || !player) return;
+    const url = (document.body.dataset.purposeVideoUrl || '').trim();
+    if (!url) {
+        alert('Video chưa được cấu hình. Vui lòng liên hệ admin.');
+        return;
+    }
+    player.src = url;
+    modal.style.display = 'flex';
+    modal.classList.add('is-open');
+    const p = player.play();
+    if (p && typeof p.catch === 'function') p.catch(e => console.warn('autoplay blocked:', e && e.message));
+}
+function closePurposeVideo() {
+    const modal = document.getElementById('video-modal');
+    const player = document.getElementById('purpose-video-player');
+    if (!modal || !player) return;
+    try { player.pause(); } catch (_) {}
+    player.removeAttribute('src');
+    player.load();
+    modal.style.display = 'none';
+    modal.classList.remove('is-open');
+}
+function closeVideoModalIfBackdrop(event) {
+    if (event && event.target && event.target.id === 'video-modal') closePurposeVideo();
+}
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+        const modal = document.getElementById('video-modal');
+        if (modal && modal.classList.contains('is-open')) closePurposeVideo();
+    }
+});
+window.openPurposeVideo = openPurposeVideo;
+window.closePurposeVideo = closePurposeVideo;
+window.closeVideoModalIfBackdrop = closeVideoModalIfBackdrop;
 
 (async function loadSettings() {
     try {
