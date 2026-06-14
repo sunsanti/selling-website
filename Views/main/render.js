@@ -390,15 +390,9 @@ function attachHoverEvents() {
 }
 
 // ========== MODULE 4: About section ==========
-function renderAbout(d) {
-    if (!d) return;
-    const content = document.getElementById('about-content');
-    if (content) content.style.display = '';
-    setText('about-banner', d.banner);
-    setText('about-paragraph-left', d.paragraph_left);
-    setText('about-paragraph-right', d.paragraph_right);
-    hideIfEmpty('about-content', d.banner, d.paragraph_left, d.paragraph_right);
-
+// v13: stats rendering split out — #about-stats-info lives inside #home-section,
+// so the settings-scope preview (Dashboard) needs to render stats too.
+function renderAboutStats(stats) {
     const info = document.getElementById('about-stats-info');
     if (!info) return;
     info.innerHTML = '';
@@ -412,7 +406,7 @@ function renderAbout(d) {
         4: 'fa-city'            // Projects Completed
     };
 
-    (d.stats || []).forEach((s, idx) => {
+    (stats || []).forEach((s, idx) => {
         const slot = s.slot || (idx + 1);
         const block = document.createElement('div');
         block.className = 'block-num';
@@ -439,9 +433,20 @@ function renderAbout(d) {
     });
 
     // Empty state: hide the bar if all stats blank
-    if ((d.stats || []).every(s => !s.num && !s.label)) {
+    if ((stats || []).every(s => !s.num && !s.label)) {
         info.style.display = 'none';
     }
+}
+
+function renderAbout(d) {
+    if (!d) return;
+    const content = document.getElementById('about-content');
+    if (content) content.style.display = '';
+    setText('about-banner', d.banner);
+    setText('about-paragraph-left', d.paragraph_left);
+    setText('about-paragraph-right', d.paragraph_right);
+    hideIfEmpty('about-content', d.banner, d.paragraph_left, d.paragraph_right);
+    renderAboutStats(d.stats);
 }
 
 async function loadAboutSection() {
@@ -961,7 +966,7 @@ window.addEventListener('message', (event) => {
     if (msg.type === 'preview-data') {
         const { target, data } = msg;
         if (!data) return;
-        if (target === 'settings') renderSettings(data);
+        if (target === 'settings') { renderSettings(data); renderAboutStats(data.stats); }
         else if (target === 'about') renderAbout(data);
         else if (target === 'services') renderServices(data.services || []);
         else if (target === 'footer') {

@@ -38,7 +38,11 @@ const updateSettings = async (req, res) => {
             // v12 — /about page content
             about_hero_tag, about_hero_title, about_mission,
             about_office_sydney_address, about_office_sydney_phone, about_office_sydney_email,
-            about_office_hcm_address, about_office_hcm_phone, about_office_hcm_email
+            about_office_hcm_address, about_office_hcm_phone, about_office_hcm_email,
+            // v13 — /about Our Services (3 cards × icon/title/desc)
+            about_service_1_icon, about_service_1_title, about_service_1_desc,
+            about_service_2_icon, about_service_2_title, about_service_2_desc,
+            about_service_3_icon, about_service_3_title, about_service_3_desc
         } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
@@ -93,6 +97,17 @@ const updateSettings = async (req, res) => {
             await setFooterText('about_office_hcm_address',    about_office_hcm_address,    300);
             await setFooterText('about_office_hcm_phone',      about_office_hcm_phone,      50);
             await setFooterText('about_office_hcm_email',      about_office_hcm_email,      255);
+            // v13 — /about Our Services (3 cards × 3 fields)
+            const svc = {
+                1: { icon: about_service_1_icon, title: about_service_1_title, desc: about_service_1_desc },
+                2: { icon: about_service_2_icon, title: about_service_2_title, desc: about_service_2_desc },
+                3: { icon: about_service_3_icon, title: about_service_3_title, desc: about_service_3_desc }
+            };
+            for (const i of [1, 2, 3]) {
+                await setFooterText(`about_service_${i}_icon`,  svc[i].icon,  60);
+                await setFooterText(`about_service_${i}_title`, svc[i].title, 200);
+                await setFooterText(`about_service_${i}_desc`,  svc[i].desc,  1000);
+            }
         } catch (e) {
             if (e.status === 400) return res.status(400).json({ success: false, message: e.message });
             throw e;

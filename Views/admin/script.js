@@ -94,12 +94,15 @@ function switchSection(section) {
     document.getElementById(section).classList.add('active');
 
     switch (section) {
-        case 'dashboard': loadDashboard(); ensurePreviewLoaded('settings'); break;
+        case 'dashboard': loadDashboard(); loadHomeAbout(); ensurePreviewLoaded('settings'); break;
         case 'projects': loadProjects(); break;
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
         case 'audit-log': loadAuditLog(); break;
-        case 'home-about': loadHomeAbout(); loadAboutContent(); ensurePreviewLoaded('about'); break;
+        case 'home-about':
+            loadAboutContent(); loadAboutServices(); loadAboutLeadership(); loadAboutTeam();
+            ensurePreviewLoaded('about');
+            break;
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
         case 'home-footer': loadHomeFooter(); loadFooterContent(); ensurePreviewLoaded('footer'); break;
         case 'videos': loadVideosAdmin(); break;
@@ -1208,6 +1211,16 @@ function postPreviewData(target) {
 function gatherPreviewData(target) {
     if (target === 'settings') {
         const v = id => (document.getElementById(id) || {}).value || '';
+        // v13: About Stats grid (now in Dashboard) — #about-stats-info lives inside
+        // #home-section, so it's visible in the settings-scope preview.
+        const stats = [];
+        document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
+            const slot = parseInt(inp.dataset.slot, 10);
+            const field = inp.dataset.field;
+            let entry = stats.find(s => s.slot === slot);
+            if (!entry) { entry = { slot }; stats.push(entry); }
+            entry[field] = inp.value;
+        });
         return {
             logo: window._pendingLogoDataUrl || currentLogoPath || '',
             phone: v('setting-phone'),
@@ -1220,7 +1233,8 @@ function gatherPreviewData(target) {
             footer_facebook_url: v('setting-footer-facebook'),
             footer_linkedin_url: v('setting-footer-linkedin'),
             footer_youtube_url:  v('setting-footer-youtube'),
-            footer_tiktok_url:   v('setting-footer-tiktok')
+            footer_tiktok_url:   v('setting-footer-tiktok'),
+            stats
         };
     }
     if (target === 'about') {
@@ -1233,19 +1247,43 @@ function gatherPreviewData(target) {
             if (!entry) { entry = { slot }; stats.push(entry); }
             entry[field] = inp.value;
         });
-        // also include the 2 footer_persons so /about?preview can re-render leadership
+        // v13: pull Leadership (Director/Co-Founder) from About-tab editor first, fall back to Footer-tab editor
         const footer_persons = [];
-        document.querySelectorAll('#home-footer-cards .settings-panel').forEach(card => {
+        const aboutLead = document.querySelectorAll('#about-leadership-cards .settings-panel');
+        const src = aboutLead.length ? aboutLead : document.querySelectorAll('#home-footer-cards .settings-panel');
+        src.forEach(card => {
+            const q = (sel) => (card.querySelector(sel) || {}).value || '';
             footer_persons.push({
                 slot: parseInt(card.dataset.slot, 10),
-                name: (card.querySelector('.fp-name') || {}).value || '',
-                email: (card.querySelector('.fp-email') || {}).value || '',
-                phone1: (card.querySelector('.fp-phone1') || {}).value || '',
-                phone2: (card.querySelector('.fp-phone2') || {}).value || '',
-                facebook_url: (card.querySelector('.fp-fb') || {}).value || '',
+                name:   q('.al-name')   || q('.fp-name'),
+                email:  q('.al-email')  || q('.fp-email'),
+                phone1: q('.al-phone1') || q('.fp-phone1'),
+                phone2: q('.al-phone2') || q('.fp-phone2'),
+                facebook_url: q('.al-fb') || q('.fp-fb'),
                 avatar_path: card.dataset.avatarPath || ''
             });
         });
+
+        // v13: Team grid (6 members from About tab)
+        const team_members = [];
+        document.querySelectorAll('#about-team-cards .settings-panel').forEach(card => {
+            team_members.push({
+                slot: parseInt(card.dataset.slot, 10),
+                name: (card.querySelector('.at-name') || {}).value || '',
+                role: (card.querySelector('.at-role') || {}).value || '',
+                avatar_path: (card.querySelector('.at-avatar') || {}).value || ''
+            });
+        });
+
+        // v13: Our Services 3 cards from About tab
+        const svcs = {};
+        document.querySelectorAll('#about-services-cards .settings-panel').forEach(card => {
+            const i = parseInt(card.dataset.slot, 10);
+            svcs[`about_service_${i}_icon`]  = (card.querySelector('.as-icon')  || {}).value || '';
+            svcs[`about_service_${i}_title`] = (card.querySelector('.as-title') || {}).value || '';
+            svcs[`about_service_${i}_desc`]  = (card.querySelector('.as-desc')  || {}).value || '';
+        });
+
         return {
             banner: (document.getElementById('about-input-banner') || {}).value || '',
             paragraph_left: (document.getElementById('about-input-left') || {}).value || '',
@@ -1261,7 +1299,9 @@ function gatherPreviewData(target) {
             about_office_hcm_address: v('setting-about-hcm-address'),
             about_office_hcm_phone:   v('setting-about-hcm-phone'),
             about_office_hcm_email:   v('setting-about-hcm-email'),
-            footer_persons
+            ...svcs,
+            footer_persons,
+            team_members
         };
     }
     if (target === 'services') {
@@ -1368,9 +1408,10 @@ document.addEventListener('DOMContentLoaded', () => {
         if (el) el.addEventListener('input', pushPreviewDebounced.about);
     });
 
-    // about stat inputs are dynamic — use event delegation on the grid
+    // v13: about stat inputs moved to Dashboard — push to settings iframe (/main),
+    // since #about-stats-info lives inside #home-section. Dynamic grid → delegation.
     const statsGrid = document.getElementById('about-stats-grid');
-    if (statsGrid) statsGrid.addEventListener('input', pushPreviewDebounced.about);
+    if (statsGrid) statsGrid.addEventListener('input', pushPreviewDebounced.settings);
 
     // services/footer cards are dynamic — delegate at container
     const svcWrap = document.getElementById('home-services-cards');
@@ -1455,6 +1496,214 @@ async function saveAboutContent() {
     }
 }
 
+// v13: Our Services 3-card editor (settings keys)
+const ABOUT_SERVICE_ICONS = [
+    ['fa-house-chimney', 'House'],
+    ['fa-scale-balanced', 'Scale'],
+    ['fa-suitcase-rolling', 'Suitcase'],
+    ['fa-handshake', 'Handshake'],
+    ['fa-globe', 'Globe'],
+    ['fa-chart-line', 'Chart'],
+    ['fa-shield-halved', 'Shield'],
+    ['fa-briefcase', 'Briefcase'],
+    ['fa-key', 'Key'],
+    ['fa-building', 'Building']
+];
+async function loadAboutServices() {
+    const wrap = document.getElementById('about-services-cards');
+    if (!wrap) return;
+    try {
+        const res = await fetch('/api/admin/settings');
+        const json = await res.json();
+        if (!json.success) return;
+        const d = json.data;
+        wrap.innerHTML = [1, 2, 3].map(i => {
+            const opts = ABOUT_SERVICE_ICONS.map(([cls, lbl]) =>
+                `<option value="${cls}">${lbl} (${cls})</option>`).join('');
+            return `
+                <div class="settings-panel" data-slot="${i}" style="margin-bottom:16px">
+                    <h2 style="font-size:1.5rem">Service ${i}</h2>
+                    <div class="form-group">
+                        <label>Icon</label>
+                        <div style="display:flex;gap:1rem;align-items:center">
+                            <i class="svc-icon-preview-${i} fa-solid" style="font-size:2.4rem;color:var(--color-gold);width:42px;text-align:center"></i>
+                            <select class="as-icon" style="flex:1">${opts}</select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" class="as-title" maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="as-desc" rows="3" maxlength="1000"></textarea>
+                    </div>
+                </div>`;
+        }).join('');
+        [1, 2, 3].forEach(i => {
+            const card = wrap.querySelector(`[data-slot="${i}"]`);
+            const icon  = d[`about_service_${i}_icon`]  || 'fa-circle';
+            const title = d[`about_service_${i}_title`] || '';
+            const desc  = d[`about_service_${i}_desc`]  || '';
+            card.querySelector('.as-icon').value  = icon;
+            card.querySelector('.as-title').value = title;
+            card.querySelector('.as-desc').value  = desc;
+            card.querySelector(`.svc-icon-preview-${i}`).classList.add(icon);
+            card.querySelectorAll('.as-icon, .as-title, .as-desc').forEach(el => {
+                el.addEventListener('input', () => {
+                    if (el.classList.contains('as-icon')) {
+                        const ic = card.querySelector(`.svc-icon-preview-${i}`);
+                        ic.className = `svc-icon-preview-${i} fa-solid ${el.value}`;
+                        ic.style.fontSize = '2.4rem'; ic.style.color = 'var(--color-gold)'; ic.style.width = '42px'; ic.style.textAlign = 'center';
+                    }
+                    pushPreviewDebounced.about();
+                });
+            });
+        });
+    } catch (e) { console.error('loadAboutServices:', e); }
+}
+
+async function saveAboutServices() {
+    const wrap = document.getElementById('about-services-cards');
+    if (!wrap) return;
+    const payload = {};
+    [1, 2, 3].forEach(i => {
+        const card = wrap.querySelector(`[data-slot="${i}"]`);
+        if (!card) return;
+        payload[`about_service_${i}_icon`]  = card.querySelector('.as-icon').value;
+        payload[`about_service_${i}_title`] = card.querySelector('.as-title').value;
+        payload[`about_service_${i}_desc`]  = card.querySelector('.as-desc').value;
+    });
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã lưu Services' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) refreshPreview('about');
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// v13: Leadership editor — reuses footer_persons API but labels slots Director/Co-Founder
+async function loadAboutLeadership() {
+    const wrap = document.getElementById('about-leadership-cards');
+    if (!wrap) return;
+    try {
+        const res = await fetch('/api/admin/footer-persons');
+        const { data } = await res.json();
+        wrap.innerHTML = '';
+        const ROLE_LABELS = { 1: 'Director', 2: 'Co-Founder' };
+        (data || []).forEach(person => {
+            const slot = person.slot;
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '20px';
+            card.dataset.slot = slot;
+            card.innerHTML = ''
+                + `<h2><i class="fas fa-user-tie"></i> ${ROLE_LABELS[slot] || ('Person ' + slot)}</h2>`
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Name</label>'
+                + '    <input type="text" class="al-name" maxlength="255"></div>'
+                + '  <div class="form-group"><label>Email</label>'
+                + '    <input type="email" class="al-email" maxlength="255"></div>'
+                + '</div>'
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Phone 1</label>'
+                + '    <input type="text" class="al-phone1" maxlength="50"></div>'
+                + '  <div class="form-group"><label>Phone 2</label>'
+                + '    <input type="text" class="al-phone2" maxlength="50"></div>'
+                + '</div>'
+                + '<div class="form-group"><label>Facebook URL (https://)</label>'
+                + '  <input type="url" class="al-fb" maxlength="500" pattern="https://.*"></div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save al-save-btn"><i class="fas fa-save"></i> Save</button>'
+                + '</div>';
+            wrap.appendChild(card);
+            card.querySelector('.al-name').value   = person.name || '';
+            card.querySelector('.al-email').value  = person.email || '';
+            card.querySelector('.al-phone1').value = person.phone1 || '';
+            card.querySelector('.al-phone2').value = person.phone2 || '';
+            card.querySelector('.al-fb').value     = person.facebook_url || '';
+            // Live-preview push on input
+            card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
+            card.querySelector('.al-save-btn').addEventListener('click', async () => {
+                const fb = card.querySelector('.al-fb').value.trim();
+                if (fb && !/^https:\/\//i.test(fb)) { showToast('Facebook URL phải bắt đầu https://', 'error'); return; }
+                const payload = {
+                    name:   card.querySelector('.al-name').value,
+                    email:  card.querySelector('.al-email').value,
+                    phone1: card.querySelector('.al-phone1').value,
+                    phone2: card.querySelector('.al-phone2').value,
+                    facebook_url: fb
+                };
+                try {
+                    const r = await fetch('/api/admin/footer-persons/' + slot, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const j = await r.json();
+                    showToast(j.message || (j.success ? 'Saved' : 'Failed'), j.success ? 'success' : 'error');
+                    if (j.success) refreshPreview('about');
+                } catch (e) { showToast('Error: ' + e.message, 'error'); }
+            });
+        });
+    } catch (e) { console.error('loadAboutLeadership:', e); }
+}
+
+// v13: Team editor — 6 fixed slots (team_members table)
+async function loadAboutTeam() {
+    const wrap = document.getElementById('about-team-cards');
+    if (!wrap) return;
+    try {
+        const res = await fetch('/api/admin/team');
+        const { data } = await res.json();
+        wrap.innerHTML = '';
+        (data || []).forEach(member => {
+            const slot = member.slot;
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '16px';
+            card.dataset.slot = slot;
+            card.innerHTML = ''
+                + `<h2 style="font-size:1.5rem"><i class="fas fa-user"></i> Member ${slot}</h2>`
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Name</label>'
+                + '    <input type="text" class="at-name" maxlength="255"></div>'
+                + '  <div class="form-group"><label>Role</label>'
+                + '    <input type="text" class="at-role" maxlength="255"></div>'
+                + '</div>'
+                + '<div class="form-group"><label>Avatar (path or URL)</label>'
+                + '  <input type="text" class="at-avatar" maxlength="255" placeholder="/uploads/team-1.jpg">'
+                + '</div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save at-save-btn"><i class="fas fa-save"></i> Save</button>'
+                + '</div>';
+            wrap.appendChild(card);
+            card.querySelector('.at-name').value   = member.name || '';
+            card.querySelector('.at-role').value   = member.role || '';
+            card.querySelector('.at-avatar').value = member.avatar_path || '';
+            card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
+            card.querySelector('.at-save-btn').addEventListener('click', async () => {
+                const payload = {
+                    name:   card.querySelector('.at-name').value,
+                    role:   card.querySelector('.at-role').value,
+                    avatar_path: card.querySelector('.at-avatar').value
+                };
+                try {
+                    const r = await fetch('/api/admin/team/' + slot, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const j = await r.json();
+                    showToast(j.message || (j.success ? 'Saved' : 'Failed'), j.success ? 'success' : 'error');
+                    if (j.success) refreshPreview('about');
+                } catch (e) { showToast('Error: ' + e.message, 'error'); }
+            });
+        });
+    } catch (e) { console.error('loadAboutTeam:', e); }
+}
+
 async function loadHomeAbout() {
     try {
         const res = await fetch('/api/admin/about');
@@ -1532,7 +1781,7 @@ document.getElementById('home-about-form').addEventListener('submit', async e =>
         });
         const json = await res.json();
         showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
-        if (json.success) refreshPreview('about');
+        if (json.success) refreshPreview('settings');
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     } finally {
@@ -2081,6 +2330,16 @@ const AUDIT_FIELD_LABELS = {
     'about_office_hcm_address': '/about — HCMC address',
     'about_office_hcm_phone': '/about — HCMC phone',
     'about_office_hcm_email': '/about — HCMC email',
+    // v13: /about Our Services (3 cards)
+    'about_service_1_icon': '/about — Service 1 Icon',
+    'about_service_1_title': '/about — Service 1 Title',
+    'about_service_1_desc': '/about — Service 1 Description',
+    'about_service_2_icon': '/about — Service 2 Icon',
+    'about_service_2_title': '/about — Service 2 Title',
+    'about_service_2_desc': '/about — Service 2 Description',
+    'about_service_3_icon': '/about — Service 3 Icon',
+    'about_service_3_title': '/about — Service 3 Title',
+    'about_service_3_desc': '/about — Service 3 Description',
     // F05d: extended project fields
     'price': 'Giá',
     'beds': 'Số phòng ngủ',

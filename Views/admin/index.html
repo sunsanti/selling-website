@@ -181,6 +181,20 @@
                         </button>
                     </div>
                 </form>
+
+                <!-- v13: About-stats moved here from About tab — shown on /main -->
+                <form id="home-about-form" class="settings-form" style="margin-top:1.6rem">
+                    <textarea id="about-input-banner" style="display:none"></textarea>
+                    <textarea id="about-input-left" style="display:none"></textarea>
+                    <textarea id="about-input-right" style="display:none"></textarea>
+                    <div class="form-section-divider">
+                        <span><i class="fas fa-chart-bar"></i> About Stats (4 blocks — shown on /main)</span>
+                    </div>
+                    <div class="form-row" id="about-stats-grid"></div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Stats</button>
+                    </div>
+                </form>
             </div>
 
             <!-- Live Preview (settings) -->
@@ -361,23 +375,14 @@
         <!-- About Section -->
         <section id="home-about" class="content-section">
             <div class="section-header">
-                <h1>About — /main stats + /about page</h1>
+                <h1>About — /about page editor</h1>
+                <p style="color:#888;font-size:1.2rem">Tất cả nội dung trên trang <strong>/about</strong>. (Stats 4 blocks đã chuyển sang Dashboard.)</p>
             </div>
 
-            <!-- /main: 4 stats (existing) -->
-            <form id="home-about-form" class="settings-form">
-                <textarea id="about-input-banner" style="display:none"></textarea>
-                <textarea id="about-input-left" style="display:none"></textarea>
-                <textarea id="about-input-right" style="display:none"></textarea>
-
-                <div class="project-section-title">
-                    <h3><i class="fas fa-chart-bar"></i> Stats (4 blocks — shown on /main)</h3>
-                </div>
-                <div class="form-row" id="about-stats-grid"></div>
-                <div class="form-actions">
-                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Stats</button>
-                </div>
-            </form>
+            <!-- v13: Director + Co-Founder editor (reuses footer_persons API) -->
+            <div class="form-section-divider"><span><i class="fas fa-user-tie"></i> Leadership — Director &amp; Co-Founder</span></div>
+            <p style="color:#888;font-size:1.15rem;margin:0 0 1rem">Hai nhân sự này hiển thị ở khối Leadership trên <strong>/about</strong> và <em>cũng</em> ở "CONTACT OUR TEAM" trong footer (cùng nguồn dữ liệu).</p>
+            <div id="about-leadership-cards"></div>
 
             <!-- v12: /about page editable content -->
             <form id="about-content-form" class="settings-form" onsubmit="event.preventDefault(); saveAboutContent();" style="margin-top:1.6rem">
@@ -435,6 +440,19 @@
                     <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save /about Content</button>
                 </div>
             </form>
+
+            <!-- v13: Our Services 3-card editor (settings keys) -->
+            <form id="about-services-form" class="settings-form" onsubmit="event.preventDefault(); saveAboutServices();" style="margin-top:1.6rem">
+                <div class="form-section-divider"><span><i class="fas fa-cogs"></i> /about — Our Services (3 cards)</span></div>
+                <div id="about-services-cards"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Services</button>
+                </div>
+            </form>
+
+            <!-- v13: Our Team editor (6 slots, team_members table) -->
+            <div class="form-section-divider" style="margin-top:1.6rem"><span><i class="fas fa-users"></i> /about — Our Team (6 members)</span></div>
+            <div id="about-team-cards"></div>
 
             <!-- Live Preview — /about page -->
             <div class="live-preview-panel">

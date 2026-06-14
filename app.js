@@ -118,6 +118,8 @@ app.get('/api/public/projects/:id', adminController.getProjectById);
 app.get('/api/public/about', homeContentController.getAbout);
 app.get('/api/public/services', homeContentController.getServices);
 app.get('/api/public/footer-persons', homeContentController.getFooterPersons);
+// v13: /about Our Team grid
+app.get('/api/public/team', homeContentController.getTeamMembers);
 // F08: public videos
 app.get('/api/public/videos', videoController.getPublic);
 // F09: public news
@@ -171,6 +173,10 @@ app.put('/api/admin/services/:slot', homeContentController.updateService);
 app.get('/api/admin/footer-persons', homeContentController.getFooterPersons);
 app.get('/api/admin/footer-persons/:slot', homeContentController.getFooterPersonBySlot);
 app.put('/api/admin/footer-persons/:slot', homeContentController.updateFooterPerson);
+
+// v13: /about Our Team
+app.get('/api/admin/team', homeContentController.getTeamMembers);
+app.put('/api/admin/team/:slot', homeContentController.updateTeamMember);
 
 app.get('/api/admin/media', mediaController.getMedia);
 

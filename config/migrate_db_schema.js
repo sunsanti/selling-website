@@ -303,6 +303,30 @@ const TABLES = [
         summaryCols: ['slot', 'name', 'email']
     },
 
+    // v13 — /about page Our Team grid (6 fixed slots, mirrors footer_persons)
+    {
+        name: 'team_members',
+        create: `
+            CREATE TABLE team_members (
+                id INT AUTO_INCREMENT PRIMARY KEY,
+                slot TINYINT NOT NULL UNIQUE,
+                name VARCHAR(255) NOT NULL DEFAULT '',
+                role VARCHAR(255) NOT NULL DEFAULT '',
+                avatar_path VARCHAR(255) NOT NULL DEFAULT '',
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+            )
+        `,
+        seed: [
+            ['INSERT IGNORE INTO team_members (slot, name, role, avatar_path) VALUES (?, ?, ?, ?)', [1, 'Anh Tran',         'Office Manager',      '']],
+            ['INSERT IGNORE INTO team_members (slot, name, role, avatar_path) VALUES (?, ?, ?, ?)', [2, 'Helen Nguyen',     'Marketing Manager',   '']],
+            ['INSERT IGNORE INTO team_members (slot, name, role, avatar_path) VALUES (?, ?, ?, ?)', [3, 'Aley Nguyen',      'Creative Specialist', '']],
+            ['INSERT IGNORE INTO team_members (slot, name, role, avatar_path) VALUES (?, ?, ?, ?)', [4, 'Anny Vu',          'Property Consultant', '']],
+            ['INSERT IGNORE INTO team_members (slot, name, role, avatar_path) VALUES (?, ?, ?, ?)', [5, 'Lucas Doan',       'Property Consultant', '']],
+            ['INSERT IGNORE INTO team_members (slot, name, role, avatar_path) VALUES (?, ?, ?, ?)', [6, 'Apollo Raymundo',  'Property Consultant', '']]
+        ],
+        summaryCols: ['slot', 'name', 'role']
+    },
+
     {
         name: 'audit_log',
         create: `
@@ -507,7 +531,17 @@ async function ensureSettingsKeys() {
         ['about_office_sydney_email',   'hello@sealandproperty.com.au'],
         ['about_office_hcm_address',    'Level 18, 72 Le Thanh Ton, Ben Nghe Ward, District 1, HCMC'],
         ['about_office_hcm_phone',      '+84 905 160 805'],
-        ['about_office_hcm_email',      'vn@sealandproperty.com.au']
+        ['about_office_hcm_email',      'vn@sealandproperty.com.au'],
+        // v13 — /about Our Services (3 cards)
+        ['about_service_1_icon',  'fa-house-chimney'],
+        ['about_service_1_title', 'Real Estate Consultation & Brokerage'],
+        ['about_service_1_desc',  'Buyer agent advisory, off-the-plan apartments, established homes and investment-grade properties — independent advice grounded in market data.'],
+        ['about_service_2_icon',  'fa-scale-balanced'],
+        ['about_service_2_title', 'Legal & Financial Services Support'],
+        ['about_service_2_desc',  'Conveyancing referrals, mortgage broker introductions, FIRB compliance and finance structuring for overseas investors.'],
+        ['about_service_3_icon',  'fa-suitcase-rolling'],
+        ['about_service_3_title', 'Resettlement Assistance'],
+        ['about_service_3_desc',  'Settling-in support for overseas families relocating to Australia — schools, neighbourhoods, banking, healthcare and post-purchase management.']
     ];
     for (const [k, v] of keys) {
         const [r] = await pool.query(

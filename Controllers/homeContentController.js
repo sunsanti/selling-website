@@ -1,6 +1,7 @@
 const aboutModel = require('../Models/aboutSectionModel');
 const serviceModel = require('../Models/serviceModel');
 const footerPersonModel = require('../Models/footerPersonModel');
+const teamMemberModel = require('../Models/teamMemberModel');
 const auditLogModel = require('../Models/auditLogModel');
 
 const URL_HTTPS_RE = /^https:\/\/[^\s<>"']+$/i;
@@ -120,8 +121,38 @@ const updateFooterPerson = async (req, res) => {
     }
 };
 
+// ============= TEAM MEMBERS (v13) =============
+const getTeamMembers = async (req, res) => {
+    try {
+        const data = await teamMemberModel.getAll();
+        res.json({ success: true, data });
+    } catch (err) {
+        console.error('getTeamMembers:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+const updateTeamMember = async (req, res) => {
+    try {
+        const slot = parseInt(req.params.slot, 10);
+        const { name, role, avatar_path } = req.body;
+        const ok = await teamMemberModel.updateBySlot(slot, { name, role, avatar_path });
+        if (!ok) return res.status(400).json({ success: false, message: 'Không có thay đổi nào' });
+        auditLogModel.log({
+            req, action: 'TEAM_MEMBER_UPDATE', target_type: 'team_member', target_id: slot,
+            details: { fields: Object.keys(req.body || {}) }
+        });
+        res.json({ success: true, message: 'Cập nhật thành công' });
+    } catch (err) {
+        console.error('updateTeamMember:', err.message);
+        const isValidation = err.message.startsWith('slot must');
+        res.status(isValidation ? 400 : 500).json({ success: false, message: isValidation ? err.message : 'Lỗi server' });
+    }
+};
+
 module.exports = {
     getAbout, updateAbout,
     getServices, getServiceBySlot, updateService,
-    getFooterPersons, getFooterPersonBySlot, updateFooterPerson
+    getFooterPersons, getFooterPersonBySlot, updateFooterPerson,
+    // v13
+    getTeamMembers, updateTeamMember
 };

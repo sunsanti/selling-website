@@ -6,8 +6,8 @@
     <title>About Us — Sealand Property</title>
     <meta name="description" content="About Sealand Property — trusted Australian real-estate agency for local and overseas investors. Our story, leadership and offices.">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-    <link rel="stylesheet" href="/main/style.css?v=v12">
-    <link rel="stylesheet" href="/about/style.css?v=v12">
+    <link rel="stylesheet" href="/main/style.css?v=v13">
+    <link rel="stylesheet" href="/about/style.css?v=v13">
 </head>
 <body>
     <!-- Header (mirrors /main, ABOUT US active) -->
@@ -85,38 +85,8 @@
                 <span class="about-tag">OUR TEAM</span>
                 <h2 class="about-section-h2">Meet the people behind Sealand.</h2>
             </div>
-            <div class="team-grid">
-                <div class="team-member">
-                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
-                    <h4>Anh Tran</h4>
-                    <p>Office Manager</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
-                    <h4>Helen Nguyen</h4>
-                    <p>Marketing Manager</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
-                    <h4>Aley Nguyen</h4>
-                    <p>Creative Specialist</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
-                    <h4>Anny Vu</h4>
-                    <p>Property Consultant</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
-                    <h4>Lucas Doan</h4>
-                    <p>Property Consultant</p>
-                </div>
-                <div class="team-member">
-                    <div class="team-photo"><i class="fa-solid fa-user"></i></div>
-                    <h4>Apollo Raymundo</h4>
-                    <p>Property Consultant</p>
-                </div>
-            </div>
+            <!-- v13: rendered dynamically from /api/public/team or preview-data -->
+            <div class="team-grid" id="about-team-grid"></div>
         </section>
 
         <!-- 5. Services 3-column -->
@@ -125,23 +95,7 @@
                 <span class="about-tag">OUR SERVICES</span>
                 <h2 class="about-section-h2">What we do for our clients.</h2>
             </div>
-            <div class="about-services-grid">
-                <div class="about-service-card">
-                    <i class="fa-solid fa-house-chimney about-service-icon"></i>
-                    <h3>Real Estate Consultation &amp; Brokerage</h3>
-                    <p>Buyer agent advisory, off-the-plan apartments, established homes and investment-grade properties — independent advice grounded in market data.</p>
-                </div>
-                <div class="about-service-card">
-                    <i class="fa-solid fa-scale-balanced about-service-icon"></i>
-                    <h3>Legal &amp; Financial Services Support</h3>
-                    <p>Conveyancing referrals, mortgage broker introductions, FIRB compliance and finance structuring for overseas investors.</p>
-                </div>
-                <div class="about-service-card">
-                    <i class="fa-solid fa-suitcase-rolling about-service-icon"></i>
-                    <h3>Resettlement Assistance</h3>
-                    <p>Settling-in support for overseas families relocating to Australia — schools, neighbourhoods, banking, healthcare and post-purchase management.</p>
-                </div>
-            </div>
+            <div class="about-services-grid" id="about-services-grid"></div>
         </section>
 
         <!-- 6. Contact / Offices -->
@@ -222,8 +176,8 @@
         </div>
     </section>
 
-    <script src="/main/render.js?v=v12" defer></script>
-    <script src="/main/script.js?v=v12" defer></script>
-    <script src="/about/about.js?v=v12" defer></script>
+    <script src="/main/render.js?v=v13" defer></script>
+    <script src="/main/script.js?v=v13" defer></script>
+    <script src="/about/about.js?v=v13" defer></script>
 </body>
 </html>
