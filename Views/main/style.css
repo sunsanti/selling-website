@@ -608,7 +608,8 @@ section{
     position: relative;
     z-index: 2;
     max-width: 1400px;
-    margin: 0 auto;
+    /* v9e: margin removed per user — wrapper hugs left edge so text content
+       sits inside the cream panel area (gradient anchored bottom-left). */
     padding: calc(80px + 7rem) 6% 8rem;
     display: flex;
     align-items: center;
