@@ -814,18 +814,10 @@ section{
     overflow: visible;
     width: 100%;
 }
-/* hairline divider between fields + center label/select inside cell */
+/* hairline divider between fields (label/select stay left-aligned per user) */
 .home-section .search-field {
     padding: 0.3rem 1rem;
     border-right: 1px solid #ececec;
-    align-items: center;              /* v10b: horizontally center label+select */
-    text-align: center;
-}
-.home-section .search-field label { text-align: center; }
-.home-section .search-field select {
-    text-align: center;
-    text-align-last: center;
-    background-position: right 0 center;
 }
 .home-section .property-search > :last-child { border-right: none; }
 .home-section .btn-search-property {
