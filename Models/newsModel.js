@@ -5,7 +5,7 @@ const SUMMARY_CAP = 200;          // shorten for list endpoint
 const TITLE_MAX = 255;
 const SUMMARY_MAX = 500;
 
-const UPDATABLE_FIELDS = ['title', 'summary', 'content', 'cover_image', 'display_order', 'status', 'external_url'];
+const UPDATABLE_FIELDS = ['title', 'summary', 'content', 'cover_image', 'status', 'external_url'];
 const URL_RE = /^https?:\/\//i;
 
 function truncate(s, n) {
@@ -16,7 +16,7 @@ function truncate(s, n) {
 const getActive = async ({ limit = 12 } = {}) => {
     const lim = Math.min(parseInt(limit, 10) || 12, 50);
     const [rows] = await pool.query(
-        "SELECT id, title, summary, cover_image, external_url, display_order, created_at FROM news WHERE status = 'active' ORDER BY display_order ASC, created_at DESC LIMIT ?",
+        "SELECT id, title, summary, cover_image, external_url, created_at FROM news WHERE status = 'active' ORDER BY created_at DESC LIMIT ?",
         [lim]
     );
     return rows.map(r => ({ ...r, summary: truncate(r.summary, SUMMARY_CAP) }));
@@ -29,7 +29,7 @@ const getActiveById = async (id) => {
 
 const getAll = async () => {
     const [rows] = await pool.query(
-        'SELECT id, title, summary, status, display_order, created_at FROM news ORDER BY display_order ASC, created_at DESC'
+        'SELECT id, title, summary, cover_image, status, is_featured, created_at FROM news ORDER BY created_at DESC'
     );
     return rows;
 };
@@ -39,15 +39,45 @@ const getById = async (id) => {
     return rows[0] || null;
 };
 
+// v3: featured news (up to 4) for /main carousel
+const getFeatured = async (limit = 4) => {
+    const lim = Math.min(Math.max(parseInt(limit, 10) || 4, 1), 4);
+    const [rows] = await pool.query(
+        "SELECT id, title, summary, cover_image, external_url, created_at FROM news WHERE status = 'active' AND is_featured = 1 ORDER BY created_at DESC LIMIT ?",
+        [lim]
+    );
+    return rows.map(r => ({ ...r, summary: truncate(r.summary, SUMMARY_CAP) }));
+};
+
+// v3: enforce max 4 featured news atomically
+const setFeaturedIds = async (ids) => {
+    const sanitized = (Array.isArray(ids) ? ids : []).map(n => parseInt(n, 10)).filter(n => Number.isInteger(n) && n > 0).slice(0, 4);
+    const conn = await pool.getConnection();
+    try {
+        await conn.beginTransaction();
+        await conn.query('UPDATE news SET is_featured = 0');
+        if (sanitized.length > 0) {
+            await conn.query(`UPDATE news SET is_featured = 1 WHERE id IN (${sanitized.map(() => '?').join(',')})`, sanitized);
+        }
+        await conn.commit();
+        return sanitized;
+    } catch (err) {
+        await conn.rollback();
+        throw err;
+    } finally {
+        conn.release();
+    }
+};
+
 const searchByTitle = async (q) => {
     const [rows] = await pool.query(
-        "SELECT id, title, status, display_order, created_at FROM news WHERE title LIKE ? ORDER BY display_order ASC, created_at DESC LIMIT 100",
+        "SELECT id, title, status, is_featured, created_at FROM news WHERE title LIKE ? ORDER BY created_at DESC LIMIT 100",
         ['%' + String(q).slice(0, 200) + '%']
     );
     return rows;
 };
 
-const create = async ({ title, summary, content, cover_image, display_order, external_url }) => {
+const create = async ({ title, summary, content, cover_image, external_url }) => {
     const t = String(title || '').trim();
     if (!t) { const err = new Error('Tiêu đề bắt buộc'); err.status = 400; throw err; }
     if (t.length > TITLE_MAX) { const err = new Error(`Tiêu đề tối đa ${TITLE_MAX} ký tự`); err.status = 400; throw err; }
@@ -56,8 +86,8 @@ const create = async ({ title, summary, content, cover_image, display_order, ext
     const ext = String(external_url || '').trim().slice(0, 500);
     if (ext && !URL_RE.test(ext)) { const err = new Error('External URL phải bắt đầu bằng http(s)://'); err.status = 400; throw err; }
     const [r] = await pool.query(
-        'INSERT INTO news (title, summary, content, cover_image, display_order, external_url) VALUES (?, ?, ?, ?, ?, ?)',
-        [t, s, String(content || ''), String(cover_image || '').slice(0, 255), parseInt(display_order, 10) || 0, ext]
+        'INSERT INTO news (title, summary, content, cover_image, external_url) VALUES (?, ?, ?, ?, ?)',
+        [t, s, String(content || ''), String(cover_image || '').slice(0, 255), ext]
     );
     return r.insertId;
 };
@@ -82,7 +112,6 @@ const update = async (id, fields) => {
     const sets = keys.map(k => `${k} = ?`).join(', ');
     const params = keys.map(k => {
         const v = fields[k];
-        if (k === 'display_order') return parseInt(v, 10) || 0;
         if (k === 'status') return (v === 'inactive' ? 'inactive' : 'active');
         if (k === 'cover_image') return String(v || '').slice(0, 255);
         return String(v == null ? '' : v);
@@ -104,6 +133,7 @@ const hardDelete = async (id) => {
 
 module.exports = {
     getActive, getActiveById, getAll, getById, searchByTitle,
+    getFeatured, setFeaturedIds,
     create, update, softDelete, hardDelete,
     SUMMARY_CAP, TITLE_MAX, SUMMARY_MAX
 };

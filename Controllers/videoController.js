@@ -22,6 +22,36 @@ const getAll = async (req, res) => {
     }
 };
 
+// v3: featured videos (up to 4) for /main carousel
+const getFeatured = async (req, res) => {
+    try {
+        const list = await videoModel.getFeatured(4);
+        res.json({ success: true, data: list });
+    } catch (err) {
+        console.error('getFeatured videos:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// v3: replace featured selection (max 4)
+const setFeatured = async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+        if (ids.length > 4) {
+            return res.status(400).json({ success: false, message: 'Tối đa 4 videos featured' });
+        }
+        const applied = await videoModel.setFeaturedIds(ids);
+        auditLogModel.log({
+            req, action: 'VIDEO_FEATURED_SET', target_type: 'video',
+            details: { ids: applied }
+        });
+        res.json({ success: true, message: 'Đã cập nhật featured videos', ids: applied });
+    } catch (err) {
+        console.error('setFeatured videos:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
 const getById = async (req, res) => {
     try {
         const id = parseInt(req.params.id, 10);
@@ -87,4 +117,4 @@ const hardDelete = async (req, res) => {
     }
 };
 
-module.exports = { getPublic, getAll, getById, create, update, softDelete, hardDelete };
+module.exports = { getPublic, getAll, getById, getFeatured, setFeatured, create, update, softDelete, hardDelete };

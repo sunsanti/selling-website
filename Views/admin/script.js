@@ -242,7 +242,7 @@ async function loadInvestContent() {
         document.getElementById('setting-purpose-video-caption').value = s.purpose_video_caption || '';
 
         window._currentPurposeThumb = s.purpose_video_thumbnail || '';
-        document.getElementById('setting-purpose-video-url').value = s.purpose_video_url || '';
+        window._currentPurposeVideo = s.purpose_video_url || '';
 
         const thumbVal = window._currentPurposeThumb;
         const thumbImg = document.getElementById('current-purpose-thumb-img');
@@ -257,6 +257,23 @@ async function loadInvestContent() {
             thumbImg.style.display = 'none';
             if (thumbPh) thumbPh.style.display = 'flex';
             if (thumbRm) thumbRm.style.display = 'none';
+        }
+
+        // B: Invest video is an uploaded file picked via Media Library
+        const videoVal = window._currentPurposeVideo;
+        const videoEl = document.getElementById('current-purpose-video');
+        const videoPh = document.getElementById('purpose-video-preview-placeholder');
+        const videoRm = document.getElementById('purpose-video-remove-btn');
+        if (videoVal && videoEl) {
+            videoEl.src = videoVal.startsWith('/') || /^https?:\/\//i.test(videoVal) ? videoVal : '/' + videoVal;
+            videoEl.style.display = 'block';
+            if (videoPh) videoPh.style.display = 'none';
+            if (videoRm) videoRm.style.display = 'inline-flex';
+        } else if (videoEl) {
+            videoEl.style.display = 'none';
+            videoEl.src = '';
+            if (videoPh) videoPh.style.display = 'flex';
+            if (videoRm) videoRm.style.display = 'none';
         }
     } catch (error) {
         console.error('Error loading invest content:', error);
@@ -274,7 +291,7 @@ async function saveInvestContent() {
         purpose_cta_text: document.getElementById('setting-purpose-cta-text').value,
         purpose_video_caption: document.getElementById('setting-purpose-video-caption').value,
         purpose_video_thumbnail: window._currentPurposeThumb || '',
-        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
+        purpose_video_url: window._currentPurposeVideo || ''
     };
 
     try {
@@ -356,6 +373,26 @@ function setupSettingsUpload() {
             });
         });
     }
+
+    // B: Purpose-Invest video file picker (uploaded MP4, via Media Library)
+    const purposeVideoBtn = document.getElementById('purpose-video-pick-btn');
+    if (purposeVideoBtn) {
+        purposeVideoBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    window._currentPurposeVideo = url;
+                    const video = document.getElementById('current-purpose-video');
+                    const ph = document.getElementById('purpose-video-preview-placeholder');
+                    const rm = document.getElementById('purpose-video-remove-btn');
+                    if (video) { video.src = url; video.style.display = 'block'; }
+                    if (ph) ph.style.display = 'none';
+                    if (rm) rm.style.display = 'inline-flex';
+                    postPreviewData('invest');
+                }
+            });
+        });
+    }
 }
 
 function removePurposeThumb() {
@@ -364,6 +401,16 @@ function removePurposeThumb() {
     const ph = document.getElementById('purpose-thumb-preview-placeholder');
     const rm = document.getElementById('purpose-thumb-remove-btn');
     if (img) img.style.display = 'none';
+    if (ph) ph.style.display = 'flex';
+    if (rm) rm.style.display = 'none';
+}
+
+function removePurposeVideo() {
+    window._currentPurposeVideo = '';
+    const video = document.getElementById('current-purpose-video');
+    const ph = document.getElementById('purpose-video-preview-placeholder');
+    const rm = document.getElementById('purpose-video-remove-btn');
+    if (video) { video.style.display = 'none'; video.src = ''; }
     if (ph) ph.style.display = 'flex';
     if (rm) rm.style.display = 'none';
 }
@@ -619,6 +666,16 @@ function renderInactiveProjects() {
     });
 }
 
+// A2: price is stored as "From $X,XXX" — admin enters/edits just the plain number
+function parsePriceNumber(priceStr) {
+    return String(priceStr || '').replace(/[^0-9]/g, '');
+}
+function formatPriceFromNumber(numStr) {
+    const digits = String(numStr || '').replace(/[^0-9]/g, '');
+    if (!digits) return '';
+    return 'From $' + parseInt(digits, 10).toLocaleString('en-US');
+}
+
 async function editProject(id) {
     try {
         const res = await fetch(`/api/admin/projects/${id}`);
@@ -636,10 +693,9 @@ async function editProject(id) {
         document.getElementById('project-style').value = p.style || '';
         document.getElementById('project-content').value = p.small_content || '';
         // F05d: 8 extended fields
-        document.getElementById('project-price').value = p.price || '';
+        document.getElementById('project-price').value = parsePriceNumber(p.price);
         document.getElementById('project-state').value = p.state || '';
         document.getElementById('project-property-type').value = p.property_type || '';
-        document.getElementById('project-area-label').value = p.area_label || '';
         document.getElementById('project-address').value = p.address || '';
         document.getElementById('project-beds').value = p.beds || '';
         document.getElementById('project-baths').value = p.baths || '';
@@ -754,19 +810,21 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
     imageUploadQueue = []; // clear queue after upload
 
     // Step 2: Save project
+    const areaSelect = document.getElementById('project-area');
+    const areaLabel = areaSelect.selectedOptions[0] ? areaSelect.selectedOptions[0].text.toUpperCase() : '';
     const payload = {
         name: document.getElementById('project-name').value,
-        area: document.getElementById('project-area').value,
+        area: areaSelect.value,
         square_meters: document.getElementById('project-square').value,
         category: document.getElementById('project-category').value,
         year: document.getElementById('project-year').value,
         style: document.getElementById('project-style').value,
         small_content: document.getElementById('project-content').value,
         // F05d: 8 extended fields
-        price: document.getElementById('project-price').value.trim(),
+        price: formatPriceFromNumber(document.getElementById('project-price').value),
         state: document.getElementById('project-state').value,
         property_type: document.getElementById('project-property-type').value,
-        area_label: document.getElementById('project-area-label').value.trim(),
+        area_label: areaLabel,
         address: document.getElementById('project-address').value.trim(),
         beds: document.getElementById('project-beds').value.trim(),
         baths: document.getElementById('project-baths').value.trim(),
@@ -899,9 +957,16 @@ function loadProjects() {
 }
 
 // ===================== v2: FEATURED PROJECTS PANEL =====================
+// v3: split into 2 rows — "Đã chọn" (selected, max 4) on top and
+// "Tất cả Projects đang Active" (unselected, paginated 5/page) below.
+// Selecting a card moves it up to the selected row; deselecting moves it back down.
 let _featuredSelection = new Set();
+let _featuredAllActive = [];
+let _featuredPage = 1;
+const FEATURED_PAGE_SIZE = 5;
+
 async function loadFeaturedPanel() {
-    const grid = document.getElementById('featured-grid');
+    const grid = document.getElementById('featured-available-grid');
     if (!grid) return;
     try {
         const [allRes, featRes] = await Promise.all([
@@ -910,39 +975,76 @@ async function loadFeaturedPanel() {
         ]);
         const allJson = await allRes.json();
         const featJson = await featRes.json();
-        const all = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(p => p.status === 'active') : [];
+        _featuredAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(p => p.status === 'active') : [];
         const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(p => p.id) : [];
         _featuredSelection = new Set(featuredIds);
-        renderFeaturedGrid(all);
+        _featuredPage = 1;
+        renderFeaturedPanel();
     } catch (err) {
         console.error('loadFeaturedPanel:', err);
     }
 }
 
-function renderFeaturedGrid(projects) {
-    const grid = document.getElementById('featured-grid');
-    if (!grid) return;
-    grid.innerHTML = projects.map(p => {
-        const isSel = _featuredSelection.has(p.id);
-        const cover = (p.image_path || '/uploads/main_image.jpg');
-        return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${p.id}" onclick="toggleFeatured(${p.id})">
-            <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
-            <div class="featured-card-body">
-                <p class="featured-card-name">${(p.name || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
-                <span class="featured-card-area">${(p.area || '').toString()}</span>
-            </div>
-        </div>`;
-    }).join('');
+function featuredCardHtml(p) {
+    const isSel = _featuredSelection.has(p.id);
+    const cover = (p.image_path || '/uploads/main_image.jpg');
+    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${p.id}" onclick="toggleFeatured(${p.id})">
+        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="featured-card-body">
+            <p class="featured-card-name">${(p.name || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+            <span class="featured-card-area">${(p.area || '').toString()}</span>
+        </div>
+    </div>`;
+}
+
+function renderFeaturedPanel() {
+    const selGrid = document.getElementById('featured-selected-grid');
+    const availGrid = document.getElementById('featured-available-grid');
+    if (!selGrid || !availGrid) return;
+
+    const selected = _featuredAllActive.filter(p => _featuredSelection.has(p.id));
+    const available = _featuredAllActive.filter(p => !_featuredSelection.has(p.id));
+
+    selGrid.innerHTML = selected.length
+        ? selected.map(featuredCardHtml).join('')
+        : '<p class="featured-empty">Chưa chọn project nào</p>';
+
+    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_PAGE_SIZE));
+    if (_featuredPage > totalPages) _featuredPage = totalPages;
+    const start = (_featuredPage - 1) * FEATURED_PAGE_SIZE;
+    const pageItems = available.slice(start, start + FEATURED_PAGE_SIZE);
+
+    availGrid.innerHTML = pageItems.length
+        ? pageItems.map(featuredCardHtml).join('')
+        : '<p class="featured-empty">Không còn project nào</p>';
+
+    renderFeaturedPagination(totalPages);
     updateFeaturedCounter();
+}
+
+function renderFeaturedPagination(totalPages) {
+    const pag = document.getElementById('featured-pagination');
+    if (!pag) return;
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${_featuredPage === 1 ? 'disabled' : ''} onclick="changeFeaturedPage(${_featuredPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === _featuredPage ? 'active' : ''}" onclick="changeFeaturedPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${_featuredPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedPage(${_featuredPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    pag.innerHTML = html;
+}
+
+function changeFeaturedPage(page) {
+    _featuredPage = page;
+    renderFeaturedPanel();
 }
 
 function updateFeaturedCounter() {
     const c = document.getElementById('featured-counter');
     if (c) c.textContent = `${_featuredSelection.size} / 4 selected`;
-    // disable cards if 4 selected and they're not currently selected
-    document.querySelectorAll('.featured-card').forEach(card => {
-        const id = parseInt(card.dataset.id, 10);
-        if (_featuredSelection.size >= 4 && !_featuredSelection.has(id)) {
+    // disable available cards once 4 are selected
+    document.querySelectorAll('#featured-available-grid .featured-card').forEach(card => {
+        if (_featuredSelection.size >= 4) {
             card.classList.add('disabled');
         } else {
             card.classList.remove('disabled');
@@ -960,9 +1062,7 @@ function toggleFeatured(id) {
         }
         _featuredSelection.add(id);
     }
-    const card = document.querySelector(`.featured-card[data-id="${id}"]`);
-    if (card) card.classList.toggle('selected', _featuredSelection.has(id));
-    updateFeaturedCounter();
+    renderFeaturedPanel();
 }
 
 async function saveFeaturedProjects() {
@@ -2414,18 +2514,28 @@ function renderMediaGrid() {
     empty.style.display = 'none';
     count.textContent = _mediaState.filteredMedia.length + ' / ' + _mediaState.allMedia.length;
 
+    const VIDEO_EXT_RE = /\.(mp4|webm|mov)$/i;
+
     _mediaState.filteredMedia.forEach(m => {
         const item = document.createElement('div');
         item.className = 'media-item';
         if (_mediaState.selectedUrls.has(m.url)) item.classList.add('selected');
         item.dataset.url = m.url;
 
-        const img = document.createElement('img');
-        img.src = m.url;
-        img.alt = '';
-        img.loading = 'lazy';
-        img.onerror = function () { this.style.display = 'none'; };
-        item.appendChild(img);
+        if (VIDEO_EXT_RE.test(m.name || m.url || '')) {
+            const video = document.createElement('video');
+            video.src = m.url;
+            video.muted = true;
+            video.preload = 'metadata';
+            item.appendChild(video);
+        } else {
+            const img = document.createElement('img');
+            img.src = m.url;
+            img.alt = '';
+            img.loading = 'lazy';
+            img.onerror = function () { this.style.display = 'none'; };
+            item.appendChild(img);
+        }
 
         const check = document.createElement('div');
         check.className = 'media-check';
@@ -2540,11 +2650,15 @@ const AUDIT_ACTION_LABELS = {
     'VIDEO_UPDATE': 'Cập nhật video',
     'VIDEO_SOFTDELETE': 'Ẩn video',
     'VIDEO_DELETE': 'Xóa vĩnh viễn video',
+    // v3: video featured action
+    'VIDEO_FEATURED_SET': 'Cập nhật Featured Videos (trang chủ)',
     // F09: news actions
     'NEWS_CREATE': 'Tạo tin tức mới',
     'NEWS_UPDATE': 'Cập nhật tin tức',
     'NEWS_SOFTDELETE': 'Ẩn tin tức',
-    'NEWS_DELETE': 'Xóa vĩnh viễn tin tức'
+    'NEWS_DELETE': 'Xóa vĩnh viễn tin tức',
+    // v3: news featured action
+    'NEWS_FEATURED_SET': 'Cập nhật Featured News (trang chủ)'
 };
 
 const AUDIT_TARGET_LABELS = {
@@ -2831,6 +2945,7 @@ async function loadVideosAdmin() {
         _videosAll = (json.success && Array.isArray(json.data)) ? json.data : [];
         _videosPage = 1;
         renderVideosAdmin();
+        loadFeaturedVideosPanel();   // v3
     } catch (err) {
         console.error('loadVideosAdmin:', err);
         showToast('Error loading videos: ' + err.message, 'error');
@@ -2841,7 +2956,7 @@ function renderVideosAdmin() {
     const tbody = document.getElementById('videos-table-body');
     if (!tbody) return;
     if (_videosAll.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
         renderPagination('videos-pagination', 0, 1, () => {});
         return;
     }
@@ -2861,7 +2976,6 @@ function renderVideosAdmin() {
                 <td>${_escVid(v.title || '')}</td>
                 <td><a href="${url}" target="_blank" rel="noopener noreferrer">${urlShort}</a></td>
                 <td>${_escVid(v.views_count || '0')}</td>
-                <td>${v.display_order || 0}</td>
                 <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
                 <td>
                     <div class="action-btns">
@@ -2886,7 +3000,6 @@ function openVideoModal() {
     document.getElementById('video-title-input').value = '';
     document.getElementById('video-tiktok-url').value = '';
     document.getElementById('video-views').value = '';
-    document.getElementById('video-order').value = '0';
     document.getElementById('video-thumb-path').value = '';
     document.getElementById('video-thumb-img').style.display = 'none';
     document.getElementById('video-thumb-img').src = '';
@@ -2909,7 +3022,6 @@ async function editVideo(id) {
         document.getElementById('video-title-input').value = v.title || '';
         document.getElementById('video-tiktok-url').value = v.tiktok_url || '';
         document.getElementById('video-views').value = v.views_count || '';
-        document.getElementById('video-order').value = v.display_order || 0;
         document.getElementById('video-thumb-path').value = v.thumbnail_path || '';
         const img = document.getElementById('video-thumb-img');
         const ph = document.getElementById('video-thumb-placeholder');
@@ -2939,7 +3051,6 @@ async function saveVideo() {
     const title = document.getElementById('video-title-input').value.trim();
     const tiktok_url = document.getElementById('video-tiktok-url').value.trim();
     const views_count = document.getElementById('video-views').value.trim();
-    const display_order = parseInt(document.getElementById('video-order').value, 10) || 0;
     const thumbnail_path = document.getElementById('video-thumb-path').value.trim();
 
     if (!title) { showToast('Tiêu đề không được trống', 'error'); return; }
@@ -2947,7 +3058,7 @@ async function saveVideo() {
         showToast('TikTok URL không hợp lệ — phải bắt đầu bằng https://(www.|vt.|m.)tiktok.com/', 'error');
         return;
     }
-    const payload = { title, tiktok_url, thumbnail_path, views_count, display_order };
+    const payload = { title, tiktok_url, thumbnail_path, views_count };
     try {
         const res = await fetch(id ? '/api/admin/videos/' + id : '/api/admin/videos', {
             method: id ? 'PUT' : 'POST',
@@ -3002,6 +3113,127 @@ async function hardDeleteVideo(id) {
     }
 }
 
+// ===================== v3: FEATURED VIDEOS PANEL =====================
+let _featuredVideosSelection = new Set();
+let _featuredVideosAllActive = [];
+let _featuredVideosPage = 1;
+const FEATURED_VIDEOS_PAGE_SIZE = 5;
+
+async function loadFeaturedVideosPanel() {
+    const grid = document.getElementById('featured-videos-available-grid');
+    if (!grid) return;
+    try {
+        const [allRes, featRes] = await Promise.all([
+            fetch('/api/admin/videos'),
+            fetch('/api/admin/videos/featured')
+        ]);
+        const allJson = await allRes.json();
+        const featJson = await featRes.json();
+        _featuredVideosAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(v => v.status === 'active') : [];
+        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(v => v.id) : [];
+        _featuredVideosSelection = new Set(featuredIds);
+        _featuredVideosPage = 1;
+        renderFeaturedVideosPanel();
+    } catch (err) {
+        console.error('loadFeaturedVideosPanel:', err);
+    }
+}
+
+function featuredVideoCardHtml(v) {
+    const isSel = _featuredVideosSelection.has(v.id);
+    const cover = (v.thumbnail_path || '/uploads/main_image.jpg');
+    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${v.id}" onclick="toggleFeaturedVideo(${v.id})">
+        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="featured-card-body">
+            <p class="featured-card-name">${(v.title || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+            <span class="featured-card-area">${(v.views_count || '0').toString()} views</span>
+        </div>
+    </div>`;
+}
+
+function renderFeaturedVideosPanel() {
+    const selGrid = document.getElementById('featured-videos-selected-grid');
+    const availGrid = document.getElementById('featured-videos-available-grid');
+    if (!selGrid || !availGrid) return;
+
+    const selected = _featuredVideosAllActive.filter(v => _featuredVideosSelection.has(v.id));
+    const available = _featuredVideosAllActive.filter(v => !_featuredVideosSelection.has(v.id));
+
+    selGrid.innerHTML = selected.length
+        ? selected.map(featuredVideoCardHtml).join('')
+        : '<p class="featured-empty">Chưa chọn video nào</p>';
+
+    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_VIDEOS_PAGE_SIZE));
+    if (_featuredVideosPage > totalPages) _featuredVideosPage = totalPages;
+    const start = (_featuredVideosPage - 1) * FEATURED_VIDEOS_PAGE_SIZE;
+    const pageItems = available.slice(start, start + FEATURED_VIDEOS_PAGE_SIZE);
+
+    availGrid.innerHTML = pageItems.length
+        ? pageItems.map(featuredVideoCardHtml).join('')
+        : '<p class="featured-empty">Không còn video nào</p>';
+
+    renderFeaturedVideosPagination(totalPages);
+    updateFeaturedVideosCounter();
+}
+
+function renderFeaturedVideosPagination(totalPages) {
+    const pag = document.getElementById('featured-videos-pagination');
+    if (!pag) return;
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${_featuredVideosPage === 1 ? 'disabled' : ''} onclick="changeFeaturedVideosPage(${_featuredVideosPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === _featuredVideosPage ? 'active' : ''}" onclick="changeFeaturedVideosPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${_featuredVideosPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedVideosPage(${_featuredVideosPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    pag.innerHTML = html;
+}
+
+function changeFeaturedVideosPage(page) {
+    _featuredVideosPage = page;
+    renderFeaturedVideosPanel();
+}
+
+function updateFeaturedVideosCounter() {
+    const c = document.getElementById('featured-videos-counter');
+    if (c) c.textContent = `${_featuredVideosSelection.size} / 4 selected`;
+    document.querySelectorAll('#featured-videos-available-grid .featured-card').forEach(card => {
+        if (_featuredVideosSelection.size >= 4) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
+        }
+    });
+}
+
+function toggleFeaturedVideo(id) {
+    if (_featuredVideosSelection.has(id)) {
+        _featuredVideosSelection.delete(id);
+    } else {
+        if (_featuredVideosSelection.size >= 4) {
+            showToast('Tối đa 4 videos featured', 'error');
+            return;
+        }
+        _featuredVideosSelection.add(id);
+    }
+    renderFeaturedVideosPanel();
+}
+
+async function saveFeaturedVideos() {
+    try {
+        const ids = Array.from(_featuredVideosSelection);
+        const res = await fetch('/api/admin/videos/featured', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(`Đã lưu ${ids.length} featured videos`, 'success');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
 // ===================== F09 — NEWS ADMIN =====================
 function _escNews(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -3019,6 +3251,7 @@ async function loadNewsAdmin(query) {
         _newsAll = (json.success && Array.isArray(json.data)) ? json.data : [];
         _newsPage = 1;
         renderNewsAdmin();
+        loadFeaturedNewsPanel();   // v3
     } catch (err) {
         console.error('loadNewsAdmin:', err);
         showToast('Error loading news: ' + err.message, 'error');
@@ -3029,7 +3262,7 @@ function renderNewsAdmin() {
     const tbody = document.getElementById('news-table-body');
     if (!tbody) return;
     if (_newsAll.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:2rem">Chưa có tin tức</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;padding:2rem">Chưa có tin tức</td></tr>';
         renderPagination('news-pagination', 0, 1, () => {});
         return;
     }
@@ -3042,7 +3275,6 @@ function renderNewsAdmin() {
                 <td>${n.id}</td>
                 <td>${_escNews(n.title || '')}</td>
                 <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
-                <td>${n.display_order || 0}</td>
                 <td>${created}</td>
                 <td>
                     <div class="action-btns">
@@ -3073,7 +3305,6 @@ function openNewsModal() {
     document.getElementById('news-form-summary').value = '';
     document.getElementById('news-form-content').value = '';
     document.getElementById('news-form-cover').value = '';
-    document.getElementById('news-form-order').value = '0';
     document.getElementById('news-form-status').value = 'active';
     const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = '';
     const img = document.getElementById('news-cover-img');
@@ -3098,7 +3329,6 @@ async function editNewsItem(id) {
         document.getElementById('news-form-summary').value = n.summary || '';
         document.getElementById('news-form-content').value = n.content || '';
         document.getElementById('news-form-cover').value = n.cover_image || '';
-        document.getElementById('news-form-order').value = n.display_order || 0;
         document.getElementById('news-form-status').value = n.status || 'active';
         const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = n.external_url || '';
         const img = document.getElementById('news-cover-img');
@@ -3129,7 +3359,6 @@ async function saveNewsItem() {
     const summary = document.getElementById('news-form-summary').value;
     const content = document.getElementById('news-form-content').value;
     const cover_image = document.getElementById('news-form-cover').value.trim();
-    const display_order = parseInt(document.getElementById('news-form-order').value, 10) || 0;
     const status = document.getElementById('news-form-status').value;
     const extInp = document.getElementById('news-form-external-url');
     const external_url = extInp ? extInp.value.trim() : '';
@@ -3142,7 +3371,7 @@ async function saveNewsItem() {
         return;
     }
 
-    const payload = { title, summary, content, cover_image, display_order, external_url };
+    const payload = { title, summary, content, cover_image, external_url };
     if (id) payload.status = status;
     try {
         const res = await fetch(id ? '/api/admin/news/' + id : '/api/admin/news', {
@@ -3193,6 +3422,126 @@ async function hardDeleteNews(id) {
         if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
         showToast('Đã xóa', 'success');
         loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+// ===================== v3: FEATURED NEWS PANEL =====================
+let _featuredNewsSelection = new Set();
+let _featuredNewsAllActive = [];
+let _featuredNewsPage = 1;
+const FEATURED_NEWS_PAGE_SIZE = 5;
+
+async function loadFeaturedNewsPanel() {
+    const grid = document.getElementById('featured-news-available-grid');
+    if (!grid) return;
+    try {
+        const [allRes, featRes] = await Promise.all([
+            fetch('/api/admin/news'),
+            fetch('/api/admin/news/featured')
+        ]);
+        const allJson = await allRes.json();
+        const featJson = await featRes.json();
+        _featuredNewsAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(n => n.status === 'active') : [];
+        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(n => n.id) : [];
+        _featuredNewsSelection = new Set(featuredIds);
+        _featuredNewsPage = 1;
+        renderFeaturedNewsPanel();
+    } catch (err) {
+        console.error('loadFeaturedNewsPanel:', err);
+    }
+}
+
+function featuredNewsCardHtml(n) {
+    const isSel = _featuredNewsSelection.has(n.id);
+    const cover = (n.cover_image || '/uploads/main_image.jpg');
+    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${n.id}" onclick="toggleFeaturedNews(${n.id})">
+        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="featured-card-body">
+            <p class="featured-card-name">${(n.title || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+        </div>
+    </div>`;
+}
+
+function renderFeaturedNewsPanel() {
+    const selGrid = document.getElementById('featured-news-selected-grid');
+    const availGrid = document.getElementById('featured-news-available-grid');
+    if (!selGrid || !availGrid) return;
+
+    const selected = _featuredNewsAllActive.filter(n => _featuredNewsSelection.has(n.id));
+    const available = _featuredNewsAllActive.filter(n => !_featuredNewsSelection.has(n.id));
+
+    selGrid.innerHTML = selected.length
+        ? selected.map(featuredNewsCardHtml).join('')
+        : '<p class="featured-empty">Chưa chọn tin nào</p>';
+
+    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_NEWS_PAGE_SIZE));
+    if (_featuredNewsPage > totalPages) _featuredNewsPage = totalPages;
+    const start = (_featuredNewsPage - 1) * FEATURED_NEWS_PAGE_SIZE;
+    const pageItems = available.slice(start, start + FEATURED_NEWS_PAGE_SIZE);
+
+    availGrid.innerHTML = pageItems.length
+        ? pageItems.map(featuredNewsCardHtml).join('')
+        : '<p class="featured-empty">Không còn tin nào</p>';
+
+    renderFeaturedNewsPagination(totalPages);
+    updateFeaturedNewsCounter();
+}
+
+function renderFeaturedNewsPagination(totalPages) {
+    const pag = document.getElementById('featured-news-pagination');
+    if (!pag) return;
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${_featuredNewsPage === 1 ? 'disabled' : ''} onclick="changeFeaturedNewsPage(${_featuredNewsPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === _featuredNewsPage ? 'active' : ''}" onclick="changeFeaturedNewsPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${_featuredNewsPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedNewsPage(${_featuredNewsPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    pag.innerHTML = html;
+}
+
+function changeFeaturedNewsPage(page) {
+    _featuredNewsPage = page;
+    renderFeaturedNewsPanel();
+}
+
+function updateFeaturedNewsCounter() {
+    const c = document.getElementById('featured-news-counter');
+    if (c) c.textContent = `${_featuredNewsSelection.size} / 4 selected`;
+    document.querySelectorAll('#featured-news-available-grid .featured-card').forEach(card => {
+        if (_featuredNewsSelection.size >= 4) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
+        }
+    });
+}
+
+function toggleFeaturedNews(id) {
+    if (_featuredNewsSelection.has(id)) {
+        _featuredNewsSelection.delete(id);
+    } else {
+        if (_featuredNewsSelection.size >= 4) {
+            showToast('Tối đa 4 news featured', 'error');
+            return;
+        }
+        _featuredNewsSelection.add(id);
+    }
+    renderFeaturedNewsPanel();
+}
+
+async function saveFeaturedNews() {
+    try {
+        const ids = Array.from(_featuredNewsSelection);
+        const res = await fetch('/api/admin/news/featured', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(`Đã lưu ${ids.length} featured news`, 'success');
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     }

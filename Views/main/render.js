@@ -550,7 +550,7 @@ function _escapeAttr(s) {
 
 async function loadVideos() {
     try {
-        const res = await fetch('/api/public/videos');
+        const res = await fetch('/api/public/videos/featured');
         const data = await res.json();
         _allVideos = (data && data.success && Array.isArray(data.data)) ? data.data : [];
     } catch (e) {
@@ -611,7 +611,7 @@ const NEWS_PER_VIEW = 3;
 
 async function loadNews() {
     try {
-        const res = await fetch('/api/public/news?limit=12');
+        const res = await fetch('/api/public/news/featured');
         const data = await res.json();
         _allNews = (data && data.success && Array.isArray(data.data)) ? data.data : [];
     } catch (e) {

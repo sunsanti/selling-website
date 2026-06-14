@@ -122,8 +122,12 @@ app.get('/api/public/footer-persons', homeContentController.getFooterPersons);
 app.get('/api/public/team', homeContentController.getTeamMembers);
 // F08: public videos
 app.get('/api/public/videos', videoController.getPublic);
+// v3: featured videos for /main carousel
+app.get('/api/public/videos/featured', videoController.getFeatured);
 // F09: public news
 app.get('/api/public/news', newsController.getPublic);
+// v3: featured news for /main carousel
+app.get('/api/public/news/featured', newsController.getFeatured);
 app.get('/api/public/news/:id', newsController.getPublicById);
 
 app.use('/api/admin', requireAuth);
@@ -185,6 +189,8 @@ app.get('/api/admin/audit-log/actions', requireAdmin, auditLogController.getActi
 
 // F08: Videos admin endpoints (auth via requireAuth above; DELETE needs admin role)
 app.get('/api/admin/videos', videoController.getAll);
+app.get('/api/admin/videos/featured', videoController.getFeatured);
+app.put('/api/admin/videos/featured', videoController.setFeatured);
 app.get('/api/admin/videos/:id', videoController.getById);
 app.post('/api/admin/videos', videoController.create);
 app.put('/api/admin/videos/:id', videoController.update);
@@ -193,6 +199,8 @@ app.delete('/api/admin/videos/:id', requireAdmin, videoController.hardDelete);
 
 // F09: News admin endpoints
 app.get('/api/admin/news', newsController.getAll);
+app.get('/api/admin/news/featured', newsController.getFeatured);
+app.put('/api/admin/news/featured', newsController.setFeatured);
 app.get('/api/admin/news/:id', newsController.getById);
 app.post('/api/admin/news', newsController.create);
 app.put('/api/admin/news/:id', newsController.update);

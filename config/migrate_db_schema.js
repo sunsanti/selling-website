@@ -472,6 +472,26 @@ async function ensureProjectFeatured() {
         console.log('   ✅ Added projects.is_featured + index');
     }
 }
+
+// v3: idempotent ALTER for videos.is_featured + news.is_featured (replaces display_order on homepage)
+async function ensureVideosFeatured() {
+    if (!(await hasTable('videos'))) return;
+    if (await hasColumn('videos', 'is_featured')) {
+        console.log('   ⏭️  videos.is_featured already exists');
+    } else {
+        await pool.query("ALTER TABLE videos ADD COLUMN is_featured TINYINT(1) NOT NULL DEFAULT 0, ADD INDEX idx_videos_featured (is_featured)");
+        console.log('   ✅ Added videos.is_featured + index');
+    }
+}
+async function ensureNewsFeatured() {
+    if (!(await hasTable('news'))) return;
+    if (await hasColumn('news', 'is_featured')) {
+        console.log('   ⏭️  news.is_featured already exists');
+    } else {
+        await pool.query("ALTER TABLE news ADD COLUMN is_featured TINYINT(1) NOT NULL DEFAULT 0, ADD INDEX idx_news_featured (is_featured)");
+        console.log('   ✅ Added news.is_featured + index');
+    }
+}
 // v2: idempotent ALTER for services.icon (font-awesome class) — replace image picker
 async function ensureServiceIcon() {
     if (!(await hasTable('services'))) return;
@@ -641,6 +661,11 @@ async function dropAllTables() {
         await ensureNewsExternalUrl();
         await ensureProjectFeatured();
         await ensureServiceIcon();
+
+        // v3: ALTER for videos.is_featured + news.is_featured (Featured-on-Homepage panels)
+        console.log('\n🔧 v3: adding videos.is_featured + news.is_featured...');
+        await ensureVideosFeatured();
+        await ensureNewsFeatured();
 
         // F10.fix: normalize all legacy /images/ + bare-filename media paths to /uploads/
         console.log('\n🔧 Normalizing media paths to /uploads/...');

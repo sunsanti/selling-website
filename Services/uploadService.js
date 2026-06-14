@@ -5,10 +5,13 @@ const ALLOWED_MIME = new Set([
     'image/jpeg',
     'image/png',
     'image/webp',
-    'image/gif'
+    'image/gif',
+    'video/mp4',
+    'video/webm',
+    'video/quicktime'
 ]);
 
-const ALLOWED_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+const ALLOWED_EXT = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif', '.mp4', '.webm', '.mov']);
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -26,12 +29,12 @@ const fileFilter = (req, file, cb) => {
     if (ALLOWED_MIME.has(file.mimetype) && ALLOWED_EXT.has(ext)) {
         return cb(null, true);
     }
-    cb(new Error('Chỉ chấp nhận ảnh: jpg, jpeg, png, webp, gif'));
+    cb(new Error('Chỉ chấp nhận ảnh (jpg, jpeg, png, webp, gif) hoặc video (mp4, webm, mov)'));
 };
 
 const upload = multer({
     storage,
-    limits: { fileSize: 50 * 1024 * 1024 },
+    limits: { fileSize: 100 * 1024 * 1024 },
     fileFilter
 });
 

@@ -207,7 +207,13 @@
                     </button>
                 </div>
                 <p id="featured-counter" class="featured-counter">0 / 4 selected</p>
-                <div id="featured-grid" class="featured-grid"></div>
+
+                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
+                <div id="featured-selected-grid" class="featured-grid featured-grid-selected"></div>
+
+                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả Projects đang Active</div>
+                <div id="featured-available-grid" class="featured-grid"></div>
+                <div id="featured-pagination" class="pagination"></div>
             </div>
 
             <div class="search-bar">
@@ -515,8 +521,23 @@
                         <input type="text" id="setting-purpose-video-caption" maxlength="300">
                     </div>
                     <div class="form-group">
-                        <label>Video URL (MP4 path in /uploads or full https://)</label>
-                        <input type="text" id="setting-purpose-video-url" placeholder="/uploads/sydney-intro.mp4">
+                        <label>Video File (MP4 upload)</label>
+                        <div class="settings-image-area">
+                            <div class="settings-image-preview" id="purpose-video-preview-area">
+                                <video id="current-purpose-video" src="" style="display:none" controls muted></video>
+                                <span id="purpose-video-preview-placeholder" class="settings-preview-placeholder">
+                                    <i class="fas fa-video"></i> No video uploaded
+                                </span>
+                            </div>
+                            <div class="settings-image-actions">
+                                <button type="button" class="btn-add" id="purpose-video-pick-btn">
+                                    <i class="fas fa-video"></i> Chọn video
+                                </button>
+                                <button type="button" class="btn-cancel" id="purpose-video-remove-btn" style="display:none" onclick="removePurposeVideo()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
@@ -615,6 +636,25 @@
                     <i class="fas fa-plus"></i> Add Video
                 </button>
             </div>
+
+            <!-- v3: Featured selection (up to 4 shown on /main carousel) -->
+            <div class="featured-panel">
+                <div class="featured-panel-header">
+                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 videos sẽ hiển thị ở trang chủ)</small></h3>
+                    <button type="button" class="btn-save" onclick="saveFeaturedVideos()">
+                        <i class="fas fa-check"></i> Lưu chọn
+                    </button>
+                </div>
+                <p id="featured-videos-counter" class="featured-counter">0 / 4 selected</p>
+
+                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
+                <div id="featured-videos-selected-grid" class="featured-grid featured-grid-selected"></div>
+
+                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả Videos đang Active</div>
+                <div id="featured-videos-available-grid" class="featured-grid"></div>
+                <div id="featured-videos-pagination" class="pagination"></div>
+            </div>
+
             <div class="table-container">
                 <table class="data-table">
                     <thead>
@@ -624,7 +664,6 @@
                             <th>Title</th>
                             <th>TikTok URL</th>
                             <th>Views</th>
-                            <th>Order</th>
                             <th>Status</th>
                             <th>Actions</th>
                         </tr>
@@ -643,6 +682,25 @@
                     <i class="fas fa-plus"></i> Add News
                 </button>
             </div>
+
+            <!-- v3: Featured selection (up to 4 shown on /main carousel) -->
+            <div class="featured-panel">
+                <div class="featured-panel-header">
+                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 news sẽ hiển thị ở trang chủ)</small></h3>
+                    <button type="button" class="btn-save" onclick="saveFeaturedNews()">
+                        <i class="fas fa-check"></i> Lưu chọn
+                    </button>
+                </div>
+                <p id="featured-news-counter" class="featured-counter">0 / 4 selected</p>
+
+                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
+                <div id="featured-news-selected-grid" class="featured-grid featured-grid-selected"></div>
+
+                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả News đang Active</div>
+                <div id="featured-news-available-grid" class="featured-grid"></div>
+                <div id="featured-news-pagination" class="pagination"></div>
+            </div>
+
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="news-search" placeholder="Tìm theo tiêu đề...">
@@ -655,7 +713,6 @@
                             <th>ID</th>
                             <th>Title</th>
                             <th>Status</th>
-                            <th>Order</th>
                             <th>Created</th>
                             <th>Actions</th>
                         </tr>
@@ -703,15 +760,9 @@
                 </div>
                 <input type="hidden" id="video-thumb-path">
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Views Count</label>
-                    <input type="text" id="video-views" placeholder="e.g. 12.4K" maxlength="20">
-                </div>
-                <div class="form-group">
-                    <label>Display Order</label>
-                    <input type="number" id="video-order" value="0" min="0">
-                </div>
+            <div class="form-group">
+                <label>Views Count</label>
+                <input type="text" id="video-views" placeholder="e.g. 12.4K" maxlength="20">
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="closeVideoModalAdmin()">Cancel</button>
@@ -763,18 +814,12 @@
                 <label>Content <small style="color:#888">(plain text — line breaks preserved; shown on /news/:id when no external URL)</small></label>
                 <textarea id="news-form-content" rows="12" placeholder="Full article body"></textarea>
             </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>Display Order</label>
-                    <input type="number" id="news-form-order" value="0" min="0">
-                </div>
-                <div class="form-group">
-                    <label>Status</label>
-                    <select id="news-form-status">
-                        <option value="active">Hiển thị</option>
-                        <option value="inactive">Đã ẩn</option>
-                    </select>
-                </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="news-form-status">
+                    <option value="active">Hiển thị</option>
+                    <option value="inactive">Đã ẩn</option>
+                </select>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="closeNewsModalAdmin()">Cancel</button>
@@ -846,8 +891,8 @@
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>Price</label>
-                    <input type="text" id="project-price" placeholder="e.g. From $699,000">
+                    <label>Price <small style="color:#888">(number only — displays as "From $X,XXX")</small></label>
+                    <input type="number" id="project-price" placeholder="e.g. 699000" min="0">
                 </div>
                 <div class="form-group">
                     <label>State</label>
@@ -875,12 +920,6 @@
                         <option value="land">Land</option>
                     </select>
                 </div>
-                <div class="form-group">
-                    <label>Area Badge (uppercase, e.g. LIVERPOOL)</label>
-                    <input type="text" id="project-area-label" placeholder="e.g. LIVERPOOL">
-                </div>
-            </div>
-            <div class="form-row">
                 <div class="form-group">
                     <label>Address</label>
                     <input type="text" id="project-address" placeholder="e.g. 12 Riverside Dr, Liverpool">
@@ -973,14 +1012,14 @@
 <div id="media-modal" class="modal">
     <div class="modal-content media-modal-content">
         <div class="modal-header">
-            <h2><i class="fas fa-images"></i> Thư viện ảnh</h2>
+            <h2><i class="fas fa-images"></i> Thư viện Media</h2>
             <button class="modal-close" onclick="closeMediaLibrary()">&times;</button>
         </div>
         <div class="media-toolbar">
             <button type="button" class="btn-add" onclick="document.getElementById('media-upload-input').click()">
                 <i class="fas fa-upload"></i> Upload
             </button>
-            <input type="file" id="media-upload-input" accept="image/*" style="display:none">
+            <input type="file" id="media-upload-input" accept="image/*,video/mp4,video/webm,video/quicktime" style="display:none">
             <input type="text" id="media-search-input" class="media-search" placeholder="Tìm theo tên file...">
             <span class="media-count" id="media-count"></span>
         </div>
@@ -988,7 +1027,7 @@
             <div id="media-grid" class="media-grid"></div>
             <div id="media-empty" class="media-empty" style="display:none">
                 <i class="fas fa-image"></i>
-                <p>Chưa có ảnh — bấm Upload để thêm</p>
+                <p>Chưa có file — bấm Upload để thêm</p>
             </div>
         </div>
         <div class="form-actions media-actions">
