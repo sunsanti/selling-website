@@ -489,7 +489,15 @@ async function ensureSettingsKeys() {
     if (!(await hasTable('settings'))) return;
     const keys = [
         ['purpose_video_url', ''],
-        ['purpose_video_thumbnail', '']
+        ['purpose_video_thumbnail', ''],
+        // v11 — Footer dynamic content (editable in admin Dashboard tab)
+        ['footer_desc', 'Helping investors and homeowners across Australia build long-term wealth through trusted real-estate guidance.'],
+        ['footer_address', 'Level 12, 1 Market Street, Sydney NSW 2000, Australia'],
+        ['footer_facebook_url', ''],
+        ['footer_linkedin_url', ''],
+        ['footer_youtube_url', ''],
+        ['footer_tiktok_url', ''],
+        ['footer_copyright', '© 2026 Sealand Property. All rights reserved.']
     ];
     for (const [k, v] of keys) {
         const [r] = await pool.query(

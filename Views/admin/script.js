@@ -167,6 +167,15 @@ async function loadDashboard() {
             // F06: Purpose-Invest video
             window._currentPurposeThumb = settingsData.data.purpose_video_thumbnail || '';
             document.getElementById('setting-purpose-video-url').value = settingsData.data.purpose_video_url || '';
+            // v11: Footer dynamic content
+            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+            setVal('setting-footer-desc',       settingsData.data.footer_desc);
+            setVal('setting-footer-address',    settingsData.data.footer_address);
+            setVal('setting-footer-facebook',   settingsData.data.footer_facebook_url);
+            setVal('setting-footer-linkedin',   settingsData.data.footer_linkedin_url);
+            setVal('setting-footer-youtube',    settingsData.data.footer_youtube_url);
+            setVal('setting-footer-tiktok',     settingsData.data.footer_tiktok_url);
+            setVal('setting-footer-copyright',  settingsData.data.footer_copyright);
             const thumbVal = window._currentPurposeThumb;
             const thumbImg = document.getElementById('current-purpose-thumb-img');
             const thumbPh = document.getElementById('purpose-thumb-preview-placeholder');
@@ -322,7 +331,15 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         main_image: mainImageValue,
         // F06: Purpose-Invest video keys
         purpose_video_thumbnail: window._currentPurposeThumb || '',
-        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
+        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim(),
+        // v11: Footer
+        footer_desc:         document.getElementById('setting-footer-desc').value,
+        footer_address:      document.getElementById('setting-footer-address').value,
+        footer_copyright:    document.getElementById('setting-footer-copyright').value,
+        footer_facebook_url: document.getElementById('setting-footer-facebook').value.trim(),
+        footer_linkedin_url: document.getElementById('setting-footer-linkedin').value.trim(),
+        footer_youtube_url:  document.getElementById('setting-footer-youtube').value.trim(),
+        footer_tiktok_url:   document.getElementById('setting-footer-tiktok').value.trim()
     };
 
     try {
@@ -1204,10 +1221,20 @@ function postPreviewData(target) {
 
 function gatherPreviewData(target) {
     if (target === 'settings') {
+        const v = id => (document.getElementById(id) || {}).value || '';
         return {
             logo: window._pendingLogoDataUrl || currentLogoPath || '',
-            phone: (document.getElementById('setting-phone') || {}).value || '',
-            main_image: window._pendingMainImageDataUrl || currentMainImagePath || ''
+            phone: v('setting-phone'),
+            main_image: window._pendingMainImageDataUrl || currentMainImagePath || '',
+            // v11: footer fields driven through the settings scope so the
+            // /main preview iframe (which loads the full footer) reacts live.
+            footer_desc:         v('setting-footer-desc'),
+            footer_address:      v('setting-footer-address'),
+            footer_copyright:    v('setting-footer-copyright'),
+            footer_facebook_url: v('setting-footer-facebook'),
+            footer_linkedin_url: v('setting-footer-linkedin'),
+            footer_youtube_url:  v('setting-footer-youtube'),
+            footer_tiktok_url:   v('setting-footer-tiktok')
         };
     }
     if (target === 'about') {
@@ -1239,6 +1266,7 @@ function gatherPreviewData(target) {
         return { services };
     }
     if (target === 'footer') {
+        const v = id => (document.getElementById(id) || {}).value || '';
         const footer_persons = [];
         document.querySelectorAll('#home-footer-cards .settings-panel').forEach(card => {
             footer_persons.push({
@@ -1251,7 +1279,18 @@ function gatherPreviewData(target) {
                 avatar_path: card.dataset.avatarPath || ''
             });
         });
-        return { footer_persons };
+        return {
+            footer_persons,
+            // v11: include site-wide footer content so the footer preview
+            // iframe also reflects desc/address/socials/copyright edits.
+            footer_desc:         v('setting-footer-desc'),
+            footer_address:      v('setting-footer-address'),
+            footer_copyright:    v('setting-footer-copyright'),
+            footer_facebook_url: v('setting-footer-facebook'),
+            footer_linkedin_url: v('setting-footer-linkedin'),
+            footer_youtube_url:  v('setting-footer-youtube'),
+            footer_tiktok_url:   v('setting-footer-tiktok')
+        };
     }
     return {};
 }
@@ -1291,6 +1330,19 @@ window.addEventListener('message', (event) => {
 document.addEventListener('DOMContentLoaded', () => {
     const phone = document.getElementById('setting-phone');
     if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
+
+    // v11: Live-preview hooks for footer dynamic content (drives both the
+    // /main settings preview iframe and the footer preview iframe).
+    ['setting-footer-desc','setting-footer-address','setting-footer-copyright',
+     'setting-footer-facebook','setting-footer-linkedin','setting-footer-youtube',
+     'setting-footer-tiktok'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+            pushPreviewDebounced.settings();
+            pushPreviewDebounced.footer();
+        });
+    });
 
     ['about-input-banner', 'about-input-left', 'about-input-right'].forEach(id => {
         const el = document.getElementById(id);
@@ -1900,6 +1952,14 @@ const AUDIT_FIELD_LABELS = {
     // F06: Purpose-Invest video
     'purpose_video_thumbnail': 'Ảnh thumbnail video Purpose',
     'purpose_video_url': 'URL video Purpose',
+    // v11: Footer dynamic content
+    'footer_desc': 'Footer — Mô tả',
+    'footer_address': 'Footer — Địa chỉ',
+    'footer_copyright': 'Footer — Copyright',
+    'footer_facebook_url': 'Footer — Facebook URL',
+    'footer_linkedin_url': 'Footer — LinkedIn URL',
+    'footer_youtube_url': 'Footer — YouTube URL',
+    'footer_tiktok_url': 'Footer — TikTok URL',
     // F05d: extended project fields
     'price': 'Giá',
     'beds': 'Số phòng ngủ',

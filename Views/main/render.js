@@ -55,6 +55,48 @@ function renderSettings(s) {
     if (s.purpose_video_url !== undefined) {
         document.body.dataset.purposeVideoUrl = s.purpose_video_url || '';
     }
+    // v11: Footer dynamic content (shared across /main + sub-pages)
+    if (s.footer_desc !== undefined) {
+        const el = document.getElementById('footer-desc');
+        if (el && s.footer_desc) el.textContent = s.footer_desc;
+    }
+    if (s.footer_address !== undefined) {
+        const el = document.getElementById('footer-desc-2');
+        if (el && s.footer_address) {
+            // Rebuild safely: icon + text node (XSS-safe via textContent)
+            el.innerHTML = '';
+            const i = document.createElement('i');
+            i.className = 'fa-solid fa-location-dot';
+            el.appendChild(i);
+            el.appendChild(document.createTextNode(' ' + s.footer_address));
+        }
+    }
+    if (s.footer_copyright !== undefined) {
+        const el = document.getElementById('copyright-text');
+        if (el && s.footer_copyright) el.textContent = s.footer_copyright;
+    }
+    // Social links
+    const sockets = [
+        ['Facebook', s.footer_facebook_url],
+        ['LinkedIn', s.footer_linkedin_url],
+        ['YouTube',  s.footer_youtube_url],
+        ['TikTok',   s.footer_tiktok_url]
+    ];
+    sockets.forEach(([label, url]) => {
+        if (url === undefined) return;
+        const a = document.querySelector(`#footer-social-links a[aria-label="${label}"]`);
+        if (!a) return;
+        if (url && /^https?:\/\//i.test(url)) {
+            a.href = url;
+            a.target = '_blank';
+            a.rel = 'noopener noreferrer';
+            a.style.display = '';
+        } else {
+            a.href = '#';
+            a.removeAttribute('target');
+            a.removeAttribute('rel');
+        }
+    });
 }
 
 // F06: Video modal handlers (exposed on window because onclick attrs reference them)
@@ -922,7 +964,11 @@ window.addEventListener('message', (event) => {
         if (target === 'settings') renderSettings(data);
         else if (target === 'about') renderAbout(data);
         else if (target === 'services') renderServices(data.services || []);
-        else if (target === 'footer') renderFooterPersons(data.footer_persons || []);
+        else if (target === 'footer') {
+            renderFooterPersons(data.footer_persons || []);
+            // v11: also apply site-wide footer text + socials (driven by settings payload shape)
+            renderSettings(data);
+        }
         // Resize after content change
         setTimeout(postPreviewHeight, 50);
     }

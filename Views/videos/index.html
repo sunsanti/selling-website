@@ -68,9 +68,60 @@
         </section>
     </main>
 
-    <footer class="videos-page-footer">
-        <p>© 2026 Sealand Property. <a href="/main">Back to home</a></p>
-    </footer>
+        <!-- Shared full footer (mirrors /main) -->
+    <section id="footer" class="footer">
+        <div id="footer-top">
+            <div class="footer-top-inner">
+                <h3 class="footer-form-title">Get in touch with us today</h3>
+                <form id="customer-contact-form" onsubmit="submitCustomerContact(event)" novalidate>
+                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" required autocomplete="name" maxlength="255">
+                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" autocomplete="tel" maxlength="20">
+                    <input type="email" id="customer-email" name="email" placeholder="Email Address" autocomplete="email" maxlength="255">
+                    <button type="submit" id="btn-submit-form" class="btn-footer-submit">SUBMIT</button>
+                </form>
+                <div id="footer-form-status" class="footer-form-status" role="status" aria-live="polite"></div>
+            </div>
+        </div>
+        <div id="footer-bottom">
+            <div class="footer-bottom-inner">
+                <div id="footer-col-brand">
+                    <span id="footer-logo" class="footer-logo">SEALAND PROPERTY</span>
+                    <p id="footer-desc">
+                        Helping investors and homeowners across Australia build long-term
+                        wealth through trusted real-estate guidance.
+                    </p>
+                    <p id="footer-desc-2">
+                        <i class="fa-solid fa-location-dot"></i>
+                        Level 12, 1 Market Street, Sydney NSW 2000, Australia
+                    </p>
+                    <div id="footer-social-links">
+                        <a href="#" aria-label="Facebook"><i class="fa-brands fa-facebook"></i></a>
+                        <a href="#" aria-label="LinkedIn"><i class="fa-brands fa-linkedin"></i></a>
+                        <a href="#" aria-label="YouTube"><i class="fa-brands fa-youtube"></i></a>
+                        <a href="#" aria-label="TikTok"><i class="fa-brands fa-tiktok"></i></a>
+                    </div>
+                </div>
+                <div id="footer-col-links">
+                    <h3 class="footer-col-title">QUICK LINKS</h3>
+                    <ul id="footer-nav-list">
+                        <li><a href="/main">Home</a></li>
+                        <li><a href="/projects">Projects</a></li>
+                        <li><a href="/main#services">Services</a></li>
+                        <li><a href="/videos">Video</a></li>
+                        <li><a href="/news">News</a></li>
+                        <li><a href="/about">About Us</a></li>
+                    </ul>
+                </div>
+                <div id="footer-col-contact">
+                    <h3 class="footer-col-title">CONTACT OUR TEAM</h3>
+                    <div class="footer-container" id="footer-container"></div>
+                </div>
+            </div>
+        </div>
+        <div id="footer-copyright">
+            <p id="copyright-text">© 2026 Sealand Property. All rights reserved.</p>
+        </div>
+    </section>
 
     <script src="/main/render.js?v=f08" defer></script>
     <script src="/main/script.js?v=f08" defer></script>

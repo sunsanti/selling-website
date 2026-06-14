@@ -30,7 +30,12 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
     try {
-        const { logo, phone, main_image, purpose_video_url, purpose_video_thumbnail } = req.body;
+        const {
+            logo, phone, main_image, purpose_video_url, purpose_video_thumbnail,
+            // v11: footer dynamic content
+            footer_desc, footer_address, footer_copyright,
+            footer_facebook_url, footer_linkedin_url, footer_youtube_url, footer_tiktok_url
+        } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
         if (main_image !== undefined) {
@@ -50,6 +55,33 @@ const updateSettings = async (req, res) => {
             } else {
                 return res.status(400).json({ success: false, message: 'Video URL phải bắt đầu bằng /uploads/ hoặc https://' });
             }
+        }
+
+        // v11: Footer dynamic content
+        const setFooterText = async (key, val, max = 1000) => {
+            if (val === undefined) return;
+            await settingModel.updateSetting(key, String(val).slice(0, max));
+        };
+        const setFooterUrl = async (key, val) => {
+            if (val === undefined) return;
+            const url = String(val).trim();
+            if (url === '' || /^https?:\/\//i.test(url)) {
+                await settingModel.updateSetting(key, url.slice(0, 500));
+            } else {
+                throw Object.assign(new Error(`${key} phải bắt đầu bằng http(s)://`), { status: 400 });
+            }
+        };
+        try {
+            await setFooterText('footer_desc', footer_desc, 2000);
+            await setFooterText('footer_address', footer_address, 500);
+            await setFooterText('footer_copyright', footer_copyright, 500);
+            await setFooterUrl('footer_facebook_url', footer_facebook_url);
+            await setFooterUrl('footer_linkedin_url', footer_linkedin_url);
+            await setFooterUrl('footer_youtube_url', footer_youtube_url);
+            await setFooterUrl('footer_tiktok_url', footer_tiktok_url);
+        } catch (e) {
+            if (e.status === 400) return res.status(400).json({ success: false, message: e.message });
+            throw e;
         }
         auditLogModel.log({
             req,
