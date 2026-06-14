@@ -264,6 +264,45 @@ body {
     grid-column: 1 / -1;
 }
 
+/* v17: a lone field/textarea left in the auto-fit grid only fills ONE
+   column, leaving the rest of its row empty — looks tiny and uneven
+   next to full-width rows. .full-row stretches it across the grid. */
+.settings-form .form-group.full-row {
+    grid-column: 1 / -1;
+}
+
+/* v17: 3-equal-column row (e.g. thumbnail + caption + url), spans the
+   full grid width so it doesn't leave a dangling empty column. */
+.settings-form .form-row-3 {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+@media (max-width: 900px) {
+    .settings-form .form-row-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* v17: lightweight sub-section label — replaces extra .form-section-divider
+   bars inside an already-consolidated wrapper. Just a small heading with a
+   thin separator, not another full gradient bar. */
+.settings-form .form-subsection-label {
+    grid-column: 1 / -1;
+    margin: 4px 0 -4px;
+    padding-top: 16px;
+    border-top: 1px dashed #e3e3e3;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    color: #1B2635;
+}
+.settings-form .form-subsection-label i {
+    color: #D1AE6B;
+    margin-right: 6px;
+}
+
 /* v16: /about — dynamic Offices cards (add/remove, editable name) */
 .office-cards-grid {
     display: grid;

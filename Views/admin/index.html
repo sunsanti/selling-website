@@ -370,7 +370,7 @@
 
             <!-- v12: /about page editable content -->
             <form id="about-content-form" class="settings-form settings-panel" onsubmit="event.preventDefault(); saveAboutContent();" style="margin-top:1.6rem">
-                <div class="form-section-divider"><span>/about Page — Hero</span></div>
+                <div class="form-section-divider"><span><i class="fas fa-house"></i> /about Page — Hero &amp; Mission</span></div>
                 <div class="form-row">
                     <div class="form-group">
                         <label>Hero Tag (small uppercase above title)</label>
@@ -381,14 +381,12 @@
                         <input type="text" id="setting-about-hero-title" maxlength="200" placeholder="ABOUT US">
                     </div>
                 </div>
-
-                <div class="form-section-divider"><span>/about Page — Mission Statement</span></div>
-                <div class="form-group">
+                <div class="form-group full-row">
                     <label>Mission paragraph</label>
-                    <textarea id="setting-about-mission" rows="4" maxlength="2000" placeholder="Our core mission is to become a trusted agency..."></textarea>
+                    <textarea id="setting-about-mission" rows="6" maxlength="2000" placeholder="Our core mission is to become a trusted agency..."></textarea>
                 </div>
 
-                <div class="form-section-divider"><span><i class="fas fa-building"></i> /about Page — Offices</span></div>
+                <div class="form-subsection-label"><i class="fas fa-building"></i> Offices</div>
                 <div id="about-offices-cards" class="office-cards-grid"></div>
                 <div class="form-actions" style="grid-column:1/-1; justify-content:flex-start; margin-top:0">
                     <button type="button" class="btn-add" onclick="addAboutOffice()"><i class="fas fa-plus"></i> Add Office</button>
@@ -454,7 +452,7 @@
 
             <form id="invest-content-form" class="settings-form settings-panel" onsubmit="event.preventDefault(); saveInvestContent();">
                 <div class="form-section-divider">
-                    <span><i class="fas fa-chart-line"></i> /main — "Why Invest in Australia" Section</span>
+                    <span><i class="fas fa-chart-line"></i> /main — "Why Invest in Australia"</span>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -466,9 +464,9 @@
                         <input type="text" id="setting-purpose-cta-text" maxlength="100" placeholder="LEARN MORE ABOUT AUSTRALIA">
                     </div>
                 </div>
-                <div class="form-group">
+                <div class="form-group full-row">
                     <label>Heading (use a new line for the 2nd line)</label>
-                    <textarea id="setting-purpose-heading" rows="2" maxlength="300" placeholder="A Strong Market.&#10;A Brighter Future."></textarea>
+                    <textarea id="setting-purpose-heading" rows="3" maxlength="300" placeholder="A Strong Market.&#10;A Brighter Future."></textarea>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -491,35 +489,35 @@
                     </div>
                 </div>
 
-                <div class="form-section-divider">
-                    <span><i class="fas fa-video"></i> /main — "Why Invest" Video</span>
-                </div>
-                <div class="form-group">
-                    <label>Video Thumbnail Image</label>
-                    <div class="settings-image-area">
-                        <div class="settings-image-preview" id="purpose-thumb-preview-area">
-                            <img id="current-purpose-thumb-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
-                            <span id="purpose-thumb-preview-placeholder" class="settings-preview-placeholder">
-                                <i class="fas fa-image"></i> No thumbnail uploaded
-                            </span>
-                        </div>
-                        <div class="settings-image-actions">
-                            <button type="button" class="btn-add" id="purpose-thumb-pick-btn">
-                                <i class="fas fa-images"></i> Chọn thumbnail
-                            </button>
-                            <button type="button" class="btn-cancel" id="purpose-thumb-remove-btn" style="display:none" onclick="removePurposeThumb()">
-                                <i class="fas fa-times"></i> Remove
-                            </button>
+                <div class="form-subsection-label"><i class="fas fa-video"></i> Video</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Video Thumbnail Image</label>
+                        <div class="settings-image-area">
+                            <div class="settings-image-preview" id="purpose-thumb-preview-area">
+                                <img id="current-purpose-thumb-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                                <span id="purpose-thumb-preview-placeholder" class="settings-preview-placeholder">
+                                    <i class="fas fa-image"></i> No thumbnail uploaded
+                                </span>
+                            </div>
+                            <div class="settings-image-actions">
+                                <button type="button" class="btn-add" id="purpose-thumb-pick-btn">
+                                    <i class="fas fa-images"></i> Chọn thumbnail
+                                </button>
+                                <button type="button" class="btn-cancel" id="purpose-thumb-remove-btn" style="display:none" onclick="removePurposeThumb()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Video Caption</label>
-                    <input type="text" id="setting-purpose-video-caption" maxlength="300">
-                </div>
-                <div class="form-group">
-                    <label>Video URL (MP4 path in /uploads or full https://)</label>
-                    <input type="text" id="setting-purpose-video-url" placeholder="/uploads/sydney-intro.mp4">
+                    <div class="form-group">
+                        <label>Video Caption</label>
+                        <input type="text" id="setting-purpose-video-caption" maxlength="300">
+                    </div>
+                    <div class="form-group">
+                        <label>Video URL (MP4 path in /uploads or full https://)</label>
+                        <input type="text" id="setting-purpose-video-url" placeholder="/uploads/sydney-intro.mp4">
+                    </div>
                 </div>
 
                 <div class="form-actions">
@@ -551,13 +549,19 @@
                 <div class="form-section-divider">
                     <span>Footer — Site-wide Content</span>
                 </div>
-                <div class="form-group">
+                <div class="form-group full-row">
                     <label>Description (paragraph)</label>
-                    <textarea id="setting-footer-desc" rows="3" maxlength="2000" placeholder="Helping investors and homeowners across Australia..."></textarea>
+                    <textarea id="setting-footer-desc" rows="4" maxlength="2000" placeholder="Helping investors and homeowners across Australia..."></textarea>
                 </div>
-                <div class="form-group">
-                    <label>Address</label>
-                    <input type="text" id="setting-footer-address" maxlength="500" placeholder="Level 12, 1 Market Street, Sydney NSW 2000, Australia">
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" id="setting-footer-address" maxlength="500" placeholder="Level 12, 1 Market Street, Sydney NSW 2000, Australia">
+                    </div>
+                    <div class="form-group">
+                        <label>Copyright text</label>
+                        <input type="text" id="setting-footer-copyright" maxlength="500" placeholder="© 2026 Sealand Property. All rights reserved.">
+                    </div>
                 </div>
                 <div class="form-row">
                     <div class="form-group">
@@ -578,10 +582,6 @@
                         <label>TikTok URL</label>
                         <input type="url" id="setting-footer-tiktok" maxlength="500" placeholder="https://tiktok.com/...">
                     </div>
-                </div>
-                <div class="form-group">
-                    <label>Copyright text</label>
-                    <input type="text" id="setting-footer-copyright" maxlength="500" placeholder="© 2026 Sealand Property. All rights reserved.">
                 </div>
                 <div class="form-actions">
                     <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Footer Content</button>
@@ -736,7 +736,7 @@
             </div>
             <div class="form-group">
                 <label>Summary <small style="color:#888">(max 500, shown on card)</small></label>
-                <textarea id="news-form-summary" rows="3" maxlength="500" placeholder="One-paragraph teaser"></textarea>
+                <textarea id="news-form-summary" rows="4" maxlength="500" placeholder="One-paragraph teaser"></textarea>
             </div>
             <div class="form-group">
                 <label>Cover Image</label>
@@ -923,7 +923,7 @@
                         <i class="fas fa-globe"></i> JA
                     </button>
                 </label>
-                <textarea id="project-content" rows="3" placeholder="Brief description..."></textarea>
+                <textarea id="project-content" rows="4" placeholder="Brief description..."></textarea>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="closeProjectModal()">Cancel</button>

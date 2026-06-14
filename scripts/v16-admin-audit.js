@@ -118,9 +118,9 @@ async function checkPagination(page, label, tbodySelector, paginationId, opts = 
     const aboutWrapperOk = aboutForm &&
         aboutForm.classes.includes('settings-form') &&
         aboutForm.classes.includes('settings-panel') &&
-        aboutForm.dividerCount === 3 &&
+        aboutForm.dividerCount === 1 &&
         aboutForm.officeCardCount >= 1;
-    console.log(`  single .settings-form.settings-panel wrapper, 3 dividers (Hero/Mission/Offices), >=1 office card: ${aboutWrapperOk ? '✓' : '✗'}`);
+    console.log(`  single .settings-form.settings-panel wrapper, 1 divider (Hero & Mission, Offices uses lightweight label), >=1 office card: ${aboutWrapperOk ? '✓' : '✗'}`);
 
     // Add an office, verify card count + live preview reflects it, then remove
     const TEST_OFFICE_NAME = 'AUDIT OFFICE ' + Date.now();
@@ -166,8 +166,8 @@ async function checkPagination(page, label, tbodySelector, paginationId, opts = 
     const investOk = investForm &&
         investForm.classes.includes('settings-form') &&
         investForm.classes.includes('settings-panel') &&
-        investForm.dividerCount === 2;
-    console.log(`  single .settings-form.settings-panel wrapper, 2 dividers (Section + Video): ${investOk ? '✓' : '✗'}`);
+        investForm.dividerCount === 1;
+    console.log(`  single .settings-form.settings-panel wrapper, 1 divider (Why Invest in Australia, Video uses lightweight label): ${investOk ? '✓' : '✗'}`);
     await page.locator('#invest-content-form').screenshot({ path: 'docs/superpowers/plans/.state/2026-05-31-sealand-premium-redesign/screenshots/v16-invest-tab.png' });
 
     // === 3. Footer tab — Site-wide Content in one wrapper ===

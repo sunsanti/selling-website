@@ -1780,7 +1780,7 @@ async function loadAboutServices() {
                     </div>
                     <div class="form-group">
                         <label>Description</label>
-                        <textarea class="as-desc" rows="3" maxlength="1000"></textarea>
+                        <textarea class="as-desc" rows="4" maxlength="1000"></textarea>
                     </div>
                 </div>`;
         }).join('') + '</div></div>';
@@ -2117,7 +2117,7 @@ async function loadHomeServices() {
                 + '<div class="form-group"><label>Title</label>'
                 + '  <input type="text" class="svc-title" maxlength="255"></div>'
                 + '<div class="form-group"><label>Description</label>'
-                + '  <textarea class="svc-desc" rows="4" maxlength="2000"></textarea></div>'
+                + '  <textarea class="svc-desc" rows="5" maxlength="2000"></textarea></div>'
                 + '<div class="form-group"><label>Icon <small style="color:#888;font-weight:400">(Font Awesome 6 — chọn 1 trong danh sách)</small></label>'
                 + '  <div style="display:flex;gap:1rem;align-items:center">'
                 + '    <i class="svc-icon-preview fa-solid" style="font-size:2.6rem;color:var(--color-gold);width:48px;text-align:center"></i>'
