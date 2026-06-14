@@ -55,6 +55,23 @@ function renderSettings(s) {
     if (s.purpose_video_url !== undefined) {
         document.body.dataset.purposeVideoUrl = s.purpose_video_url || '';
     }
+    // v14: "Why Invest in Australia" (Purpose-Invest) section content
+    if (s.purpose_tagline !== undefined) setText('purpose-tagline-text', s.purpose_tagline);
+    if (s.purpose_heading !== undefined) {
+        const heading = document.getElementById('purpose-heading-text');
+        if (heading) {
+            heading.innerHTML = '';
+            String(s.purpose_heading || '').split('\n').forEach((line, i) => {
+                if (i > 0) heading.appendChild(document.createElement('br'));
+                heading.appendChild(document.createTextNode(line));
+            });
+        }
+    }
+    [1, 2, 3, 4].forEach(i => {
+        if (s['purpose_list_' + i] !== undefined) setText('purpose-list-' + i + '-text', s['purpose_list_' + i]);
+    });
+    if (s.purpose_cta_text !== undefined) setText('purpose-cta-text', s.purpose_cta_text);
+    if (s.purpose_video_caption !== undefined) setText('purpose-video-caption', s.purpose_video_caption);
     // v11: Footer dynamic content (shared across /main + sub-pages)
     if (s.footer_desc !== undefined) {
         const el = document.getElementById('footer-desc');
@@ -907,7 +924,7 @@ const PREVIEW_SCOPE = PREVIEW_PARAMS.get('scope') || '';
 
 function applyPreviewMode(scope) {
     const keepSelectorsByScope = {
-        settings: ['#home-section'],   // header + home (logo, phone in header; main_image in home)
+        settings: ['#home-section', '#purpose-invest'],   // header + home (logo, phone in header; main_image in home) + Why Invest section
         about: ['#about-us'],
         services: ['#services'],
         footer: ['#footer']

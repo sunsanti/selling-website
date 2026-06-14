@@ -541,7 +541,16 @@ async function ensureSettingsKeys() {
         ['about_service_2_desc',  'Conveyancing referrals, mortgage broker introductions, FIRB compliance and finance structuring for overseas investors.'],
         ['about_service_3_icon',  'fa-suitcase-rolling'],
         ['about_service_3_title', 'Resettlement Assistance'],
-        ['about_service_3_desc',  'Settling-in support for overseas families relocating to Australia — schools, neighbourhoods, banking, healthcare and post-purchase management.']
+        ['about_service_3_desc',  'Settling-in support for overseas families relocating to Australia — schools, neighbourhoods, banking, healthcare and post-purchase management.'],
+        // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
+        ['purpose_tagline', 'WHY INVEST IN AUSTRALIA'],
+        ['purpose_heading', 'A Strong Market.\nA Brighter Future.'],
+        ['purpose_list_1', 'Stable economy and secure legal system'],
+        ['purpose_list_2', 'High rental demand and low vacancy rates'],
+        ['purpose_list_3', 'Capital growth in key locations'],
+        ['purpose_list_4', 'Foreign ownership opportunities'],
+        ['purpose_cta_text', 'LEARN MORE ABOUT AUSTRALIA'],
+        ['purpose_video_caption', "Discover why Australia is one of the world's most trusted property markets."]
     ];
     for (const [k, v] of keys) {
         const [r] = await pool.query(

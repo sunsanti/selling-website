@@ -42,7 +42,11 @@ const updateSettings = async (req, res) => {
             // v13 — /about Our Services (3 cards × icon/title/desc)
             about_service_1_icon, about_service_1_title, about_service_1_desc,
             about_service_2_icon, about_service_2_title, about_service_2_desc,
-            about_service_3_icon, about_service_3_title, about_service_3_desc
+            about_service_3_icon, about_service_3_title, about_service_3_desc,
+            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
+            purpose_tagline, purpose_heading,
+            purpose_list_1, purpose_list_2, purpose_list_3, purpose_list_4,
+            purpose_cta_text, purpose_video_caption
         } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
@@ -108,6 +112,15 @@ const updateSettings = async (req, res) => {
                 await setFooterText(`about_service_${i}_title`, svc[i].title, 200);
                 await setFooterText(`about_service_${i}_desc`,  svc[i].desc,  1000);
             }
+            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
+            await setFooterText('purpose_tagline', purpose_tagline, 100);
+            await setFooterText('purpose_heading', purpose_heading, 300);
+            await setFooterText('purpose_list_1', purpose_list_1, 200);
+            await setFooterText('purpose_list_2', purpose_list_2, 200);
+            await setFooterText('purpose_list_3', purpose_list_3, 200);
+            await setFooterText('purpose_list_4', purpose_list_4, 200);
+            await setFooterText('purpose_cta_text', purpose_cta_text, 100);
+            await setFooterText('purpose_video_caption', purpose_video_caption, 300);
         } catch (e) {
             if (e.status === 400) return res.status(400).json({ success: false, message: e.message });
             throw e;

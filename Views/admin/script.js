@@ -11,6 +11,11 @@ let translateLoadingEl = null;
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
+    // v14: Dashboard is the default active section on load, but the
+    // About-Stats grid previously only loaded via switchSection('dashboard')
+    // on click — leaving it empty until the user clicked the tab.
+    loadHomeAbout();
+    ensurePreviewLoaded('settings');
     setupNavigation();
     setupForms();
     setupSettingsUpload();
@@ -166,6 +171,15 @@ async function loadDashboard() {
                 document.getElementById('main-image-remove-btn').style.display = 'none';
             }
             currentMainImageFile = null;
+
+            // v14: "Why Invest in Australia" section content
+            document.getElementById('setting-purpose-tagline').value = settingsData.data.purpose_tagline || '';
+            document.getElementById('setting-purpose-heading').value = settingsData.data.purpose_heading || '';
+            [1, 2, 3, 4].forEach(i => {
+                document.getElementById('setting-purpose-list-' + i).value = settingsData.data['purpose_list_' + i] || '';
+            });
+            document.getElementById('setting-purpose-cta-text').value = settingsData.data.purpose_cta_text || '';
+            document.getElementById('setting-purpose-video-caption').value = settingsData.data.purpose_video_caption || '';
 
             // F06: Purpose-Invest video
             window._currentPurposeThumb = settingsData.data.purpose_video_thumbnail || '';
@@ -324,6 +338,15 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         logo: logoValue,
         phone: document.getElementById('setting-phone').value,
         main_image: mainImageValue,
+        // v14: "Why Invest in Australia" section content
+        purpose_tagline: document.getElementById('setting-purpose-tagline').value,
+        purpose_heading: document.getElementById('setting-purpose-heading').value,
+        purpose_list_1: document.getElementById('setting-purpose-list-1').value,
+        purpose_list_2: document.getElementById('setting-purpose-list-2').value,
+        purpose_list_3: document.getElementById('setting-purpose-list-3').value,
+        purpose_list_4: document.getElementById('setting-purpose-list-4').value,
+        purpose_cta_text: document.getElementById('setting-purpose-cta-text').value,
+        purpose_video_caption: document.getElementById('setting-purpose-video-caption').value,
         // F06: Purpose-Invest video keys
         purpose_video_thumbnail: window._currentPurposeThumb || '',
         purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
@@ -1234,6 +1257,16 @@ function gatherPreviewData(target) {
             footer_linkedin_url: v('setting-footer-linkedin'),
             footer_youtube_url:  v('setting-footer-youtube'),
             footer_tiktok_url:   v('setting-footer-tiktok'),
+            // v14: "Why Invest in Australia" section content
+            purpose_tagline:       v('setting-purpose-tagline'),
+            purpose_heading:       v('setting-purpose-heading'),
+            purpose_list_1:        v('setting-purpose-list-1'),
+            purpose_list_2:        v('setting-purpose-list-2'),
+            purpose_list_3:        v('setting-purpose-list-3'),
+            purpose_list_4:        v('setting-purpose-list-4'),
+            purpose_cta_text:      v('setting-purpose-cta-text'),
+            purpose_video_caption: v('setting-purpose-video-caption'),
+            purpose_video_thumbnail: window._currentPurposeThumb || '',
             stats
         };
     }
@@ -1271,7 +1304,7 @@ function gatherPreviewData(target) {
                 slot: parseInt(card.dataset.slot, 10),
                 name: (card.querySelector('.at-name') || {}).value || '',
                 role: (card.querySelector('.at-role') || {}).value || '',
-                avatar_path: (card.querySelector('.at-avatar') || {}).value || ''
+                avatar_path: card.dataset.avatarPath || ''
             });
         });
 
@@ -1381,6 +1414,14 @@ window.addEventListener('message', (event) => {
 document.addEventListener('DOMContentLoaded', () => {
     const phone = document.getElementById('setting-phone');
     if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
+
+    // v14: "Why Invest in Australia" section content — push to settings iframe (/main)
+    ['setting-purpose-tagline','setting-purpose-heading','setting-purpose-list-1',
+     'setting-purpose-list-2','setting-purpose-list-3','setting-purpose-list-4',
+     'setting-purpose-cta-text','setting-purpose-video-caption','setting-purpose-video-url'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', pushPreviewDebounced.settings);
+    });
 
     // v12: Footer dynamic content (now in Footer tab) — push to settings + footer iframes
     ['setting-footer-desc','setting-footer-address','setting-footer-copyright',
@@ -1585,6 +1626,50 @@ async function saveAboutServices() {
     } catch (e) { showToast('Error: ' + e.message, 'error'); }
 }
 
+// v14: shared avatar picker (media library) — used by Leadership + Team editors
+// so every person/photo field in the admin works the same way: preview +
+// "Chọn ảnh" (opens media library) + Remove, never a raw path/url input.
+function avatarPickerHTML(label) {
+    return '<div class="form-group"><label>' + label + '</label>'
+        + '  <div class="settings-image-area">'
+        + '    <div class="settings-image-preview settings-avatar-preview">'
+        + '      <img class="avatar-preview-img" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
+        + '      <span class="avatar-placeholder settings-preview-placeholder"><i class="fas fa-user"></i> No photo</span>'
+        + '    </div>'
+        + '    <div class="settings-image-actions">'
+        + '      <button type="button" class="btn-add avatar-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
+        + '      <button type="button" class="btn-cancel avatar-remove-btn" style="display:none"><i class="fas fa-times"></i> Remove</button>'
+        + '    </div>'
+        + '  </div>'
+        + '</div>';
+}
+
+function wireAvatarPicker(card, initialPath, onChange) {
+    const img = card.querySelector('.avatar-preview-img');
+    const ph = card.querySelector('.avatar-placeholder');
+    const rm = card.querySelector('.avatar-remove-btn');
+    const pick = card.querySelector('.avatar-pick-btn');
+    const setPath = (path) => {
+        card.dataset.avatarPath = path || '';
+        if (path) {
+            img.src = (path.startsWith('/') || path.startsWith('http') || path.startsWith('data:')) ? path : '/' + path;
+            img.style.display = 'block';
+            ph.style.display = 'none';
+            rm.style.display = 'inline-flex';
+        } else {
+            img.style.display = 'none';
+            img.src = '';
+            ph.style.display = 'flex';
+            rm.style.display = 'none';
+        }
+    };
+    setPath(initialPath);
+    pick.addEventListener('click', () => {
+        openMediaLibrary({ mode: 'single', onSelect: ([url]) => { setPath(url); onChange(); } });
+    });
+    rm.addEventListener('click', () => { setPath(''); onChange(); });
+}
+
 // v13: Leadership editor — reuses footer_persons API but labels slots Director/Co-Founder
 async function loadAboutLeadership() {
     const wrap = document.getElementById('about-leadership-cards');
@@ -1602,6 +1687,7 @@ async function loadAboutLeadership() {
             card.dataset.slot = slot;
             card.innerHTML = ''
                 + `<h2><i class="fas fa-user-tie"></i> ${ROLE_LABELS[slot] || ('Person ' + slot)}</h2>`
+                + avatarPickerHTML('Photo')
                 + '<div class="form-row">'
                 + '  <div class="form-group"><label>Name</label>'
                 + '    <input type="text" class="al-name" maxlength="255"></div>'
@@ -1625,6 +1711,7 @@ async function loadAboutLeadership() {
             card.querySelector('.al-phone1').value = person.phone1 || '';
             card.querySelector('.al-phone2').value = person.phone2 || '';
             card.querySelector('.al-fb').value     = person.facebook_url || '';
+            wireAvatarPicker(card, person.avatar_path || '', () => pushPreviewDebounced.about());
             // Live-preview push on input
             card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
             card.querySelector('.al-save-btn').addEventListener('click', async () => {
@@ -1635,7 +1722,8 @@ async function loadAboutLeadership() {
                     email:  card.querySelector('.al-email').value,
                     phone1: card.querySelector('.al-phone1').value,
                     phone2: card.querySelector('.al-phone2').value,
-                    facebook_url: fb
+                    facebook_url: fb,
+                    avatar_path: card.dataset.avatarPath || ''
                 };
                 try {
                     const r = await fetch('/api/admin/footer-persons/' + slot, {
@@ -1667,14 +1755,12 @@ async function loadAboutTeam() {
             card.dataset.slot = slot;
             card.innerHTML = ''
                 + `<h2 style="font-size:1.5rem"><i class="fas fa-user"></i> Member ${slot}</h2>`
+                + avatarPickerHTML('Photo')
                 + '<div class="form-row">'
                 + '  <div class="form-group"><label>Name</label>'
                 + '    <input type="text" class="at-name" maxlength="255"></div>'
                 + '  <div class="form-group"><label>Role</label>'
                 + '    <input type="text" class="at-role" maxlength="255"></div>'
-                + '</div>'
-                + '<div class="form-group"><label>Avatar (path or URL)</label>'
-                + '  <input type="text" class="at-avatar" maxlength="255" placeholder="/uploads/team-1.jpg">'
                 + '</div>'
                 + '<div class="form-actions">'
                 + '  <button type="button" class="btn-save at-save-btn"><i class="fas fa-save"></i> Save</button>'
@@ -1682,13 +1768,13 @@ async function loadAboutTeam() {
             wrap.appendChild(card);
             card.querySelector('.at-name').value   = member.name || '';
             card.querySelector('.at-role').value   = member.role || '';
-            card.querySelector('.at-avatar').value = member.avatar_path || '';
+            wireAvatarPicker(card, member.avatar_path || '', () => pushPreviewDebounced.about());
             card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
             card.querySelector('.at-save-btn').addEventListener('click', async () => {
                 const payload = {
                     name:   card.querySelector('.at-name').value,
                     role:   card.querySelector('.at-role').value,
-                    avatar_path: card.querySelector('.at-avatar').value
+                    avatar_path: card.dataset.avatarPath || ''
                 };
                 try {
                     const r = await fetch('/api/admin/team/' + slot, {
@@ -2312,6 +2398,15 @@ const AUDIT_FIELD_LABELS = {
     // F06: Purpose-Invest video
     'purpose_video_thumbnail': 'Ảnh thumbnail video Purpose',
     'purpose_video_url': 'URL video Purpose',
+    // v14: "Why Invest in Australia" section content
+    'purpose_tagline': 'Invest — Tagline',
+    'purpose_heading': 'Invest — Tiêu đề',
+    'purpose_list_1': 'Invest — Mục 1',
+    'purpose_list_2': 'Invest — Mục 2',
+    'purpose_list_3': 'Invest — Mục 3',
+    'purpose_list_4': 'Invest — Mục 4',
+    'purpose_cta_text': 'Invest — Nút CTA',
+    'purpose_video_caption': 'Invest — Chú thích video',
     // v11: Footer dynamic content
     'footer_desc': 'Footer — Mô tả',
     'footer_address': 'Footer — Địa chỉ',

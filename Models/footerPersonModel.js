@@ -27,9 +27,9 @@ const updateFooterPerson = async (slot, { name, avatar_path, email, phone1, phon
     if (phone1 !== undefined) { fields.push('phone1 = ?'); values.push(phone1 || ''); }
     if (phone2 !== undefined) { fields.push('phone2 = ?'); values.push(phone2 || ''); }
     if (facebook_url !== undefined) { fields.push('facebook_url = ?'); values.push(facebook_url || ''); }
-    if (avatar_path !== undefined && avatar_path !== null && avatar_path !== '') {
+    if (avatar_path !== undefined) {
         fields.push('avatar_path = ?');
-        values.push(avatar_path);
+        values.push(String(avatar_path || '').slice(0, 255));
     }
     if (fields.length === 0) return false;
     values.push(slot);
