@@ -497,7 +497,17 @@ async function ensureSettingsKeys() {
         ['footer_linkedin_url', ''],
         ['footer_youtube_url', ''],
         ['footer_tiktok_url', ''],
-        ['footer_copyright', '© 2026 Sealand Property. All rights reserved.']
+        ['footer_copyright', '© 2026 Sealand Property. All rights reserved.'],
+        // v12 — /about page editable content
+        ['about_hero_tag', 'SEALAND PROPERTY'],
+        ['about_hero_title', 'ABOUT US'],
+        ['about_mission', 'Our core mission is to become a trusted agency for buyers, sellers and investors looking to achieve property ownership in Australia — connecting people, knowledge and opportunity across Sydney, Melbourne, Brisbane and the Gold Coast.'],
+        ['about_office_sydney_address', 'Level 20, 135 King Street, Sydney NSW 2000'],
+        ['about_office_sydney_phone',   '+61 432 285 678'],
+        ['about_office_sydney_email',   'hello@sealandproperty.com.au'],
+        ['about_office_hcm_address',    'Level 18, 72 Le Thanh Ton, Ben Nghe Ward, District 1, HCMC'],
+        ['about_office_hcm_phone',      '+84 905 160 805'],
+        ['about_office_hcm_email',      'vn@sealandproperty.com.au']
     ];
     for (const [k, v] of keys) {
         const [r] = await pool.query(

@@ -34,7 +34,11 @@ const updateSettings = async (req, res) => {
             logo, phone, main_image, purpose_video_url, purpose_video_thumbnail,
             // v11: footer dynamic content
             footer_desc, footer_address, footer_copyright,
-            footer_facebook_url, footer_linkedin_url, footer_youtube_url, footer_tiktok_url
+            footer_facebook_url, footer_linkedin_url, footer_youtube_url, footer_tiktok_url,
+            // v12 — /about page content
+            about_hero_tag, about_hero_title, about_mission,
+            about_office_sydney_address, about_office_sydney_phone, about_office_sydney_email,
+            about_office_hcm_address, about_office_hcm_phone, about_office_hcm_email
         } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
@@ -79,6 +83,16 @@ const updateSettings = async (req, res) => {
             await setFooterUrl('footer_linkedin_url', footer_linkedin_url);
             await setFooterUrl('footer_youtube_url', footer_youtube_url);
             await setFooterUrl('footer_tiktok_url', footer_tiktok_url);
+            // v12 /about content
+            await setFooterText('about_hero_tag', about_hero_tag, 100);
+            await setFooterText('about_hero_title', about_hero_title, 200);
+            await setFooterText('about_mission', about_mission, 2000);
+            await setFooterText('about_office_sydney_address', about_office_sydney_address, 300);
+            await setFooterText('about_office_sydney_phone',   about_office_sydney_phone,   50);
+            await setFooterText('about_office_sydney_email',   about_office_sydney_email,   255);
+            await setFooterText('about_office_hcm_address',    about_office_hcm_address,    300);
+            await setFooterText('about_office_hcm_phone',      about_office_hcm_phone,      50);
+            await setFooterText('about_office_hcm_email',      about_office_hcm_email,      255);
         } catch (e) {
             if (e.status === 400) return res.status(400).json({ success: false, message: e.message });
             throw e;

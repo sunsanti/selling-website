@@ -99,9 +99,9 @@ function switchSection(section) {
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
         case 'audit-log': loadAuditLog(); break;
-        case 'home-about': loadHomeAbout(); ensurePreviewLoaded('about'); break;
+        case 'home-about': loadHomeAbout(); loadAboutContent(); ensurePreviewLoaded('about'); break;
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
-        case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
+        case 'home-footer': loadHomeFooter(); loadFooterContent(); ensurePreviewLoaded('footer'); break;
         case 'videos': loadVideosAdmin(); break;
         case 'news': loadNewsAdmin(); break;
     }
@@ -167,15 +167,7 @@ async function loadDashboard() {
             // F06: Purpose-Invest video
             window._currentPurposeThumb = settingsData.data.purpose_video_thumbnail || '';
             document.getElementById('setting-purpose-video-url').value = settingsData.data.purpose_video_url || '';
-            // v11: Footer dynamic content
-            const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
-            setVal('setting-footer-desc',       settingsData.data.footer_desc);
-            setVal('setting-footer-address',    settingsData.data.footer_address);
-            setVal('setting-footer-facebook',   settingsData.data.footer_facebook_url);
-            setVal('setting-footer-linkedin',   settingsData.data.footer_linkedin_url);
-            setVal('setting-footer-youtube',    settingsData.data.footer_youtube_url);
-            setVal('setting-footer-tiktok',     settingsData.data.footer_tiktok_url);
-            setVal('setting-footer-copyright',  settingsData.data.footer_copyright);
+            // v12: Footer dynamic content fields are now in the Footer tab — not loaded here
             const thumbVal = window._currentPurposeThumb;
             const thumbImg = document.getElementById('current-purpose-thumb-img');
             const thumbPh = document.getElementById('purpose-thumb-preview-placeholder');
@@ -331,15 +323,7 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
         main_image: mainImageValue,
         // F06: Purpose-Invest video keys
         purpose_video_thumbnail: window._currentPurposeThumb || '',
-        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim(),
-        // v11: Footer
-        footer_desc:         document.getElementById('setting-footer-desc').value,
-        footer_address:      document.getElementById('setting-footer-address').value,
-        footer_copyright:    document.getElementById('setting-footer-copyright').value,
-        footer_facebook_url: document.getElementById('setting-footer-facebook').value.trim(),
-        footer_linkedin_url: document.getElementById('setting-footer-linkedin').value.trim(),
-        footer_youtube_url:  document.getElementById('setting-footer-youtube').value.trim(),
-        footer_tiktok_url:   document.getElementById('setting-footer-tiktok').value.trim()
+        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
     };
 
     try {
@@ -1200,7 +1184,9 @@ function refreshPreview(target) {
     const iframe = document.getElementById('preview-iframe-' + target);
     if (!iframe) return;
     PREVIEW_READY.delete(target);
-    iframe.src = '/main?preview=1&scope=' + target + '&t=' + Date.now();
+    // v12: the 'about' iframe targets the dedicated /about page; others use /main
+    const base = (target === 'about') ? '/about' : '/main';
+    iframe.src = base + '?preview=1&scope=' + target + '&t=' + Date.now();
 }
 
 function ensurePreviewLoaded(target) {
@@ -1238,6 +1224,7 @@ function gatherPreviewData(target) {
         };
     }
     if (target === 'about') {
+        const v = id => (document.getElementById(id) || {}).value || '';
         const stats = [];
         document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
             const slot = parseInt(inp.dataset.slot, 10);
@@ -1246,11 +1233,35 @@ function gatherPreviewData(target) {
             if (!entry) { entry = { slot }; stats.push(entry); }
             entry[field] = inp.value;
         });
+        // also include the 2 footer_persons so /about?preview can re-render leadership
+        const footer_persons = [];
+        document.querySelectorAll('#home-footer-cards .settings-panel').forEach(card => {
+            footer_persons.push({
+                slot: parseInt(card.dataset.slot, 10),
+                name: (card.querySelector('.fp-name') || {}).value || '',
+                email: (card.querySelector('.fp-email') || {}).value || '',
+                phone1: (card.querySelector('.fp-phone1') || {}).value || '',
+                phone2: (card.querySelector('.fp-phone2') || {}).value || '',
+                facebook_url: (card.querySelector('.fp-fb') || {}).value || '',
+                avatar_path: card.dataset.avatarPath || ''
+            });
+        });
         return {
             banner: (document.getElementById('about-input-banner') || {}).value || '',
             paragraph_left: (document.getElementById('about-input-left') || {}).value || '',
             paragraph_right: (document.getElementById('about-input-right') || {}).value || '',
-            stats
+            stats,
+            // v12: /about page content
+            about_hero_tag:           v('setting-about-hero-tag'),
+            about_hero_title:         v('setting-about-hero-title'),
+            about_mission:            v('setting-about-mission'),
+            about_office_sydney_address: v('setting-about-sydney-address'),
+            about_office_sydney_phone:   v('setting-about-sydney-phone'),
+            about_office_sydney_email:   v('setting-about-sydney-email'),
+            about_office_hcm_address: v('setting-about-hcm-address'),
+            about_office_hcm_phone:   v('setting-about-hcm-phone'),
+            about_office_hcm_email:   v('setting-about-hcm-email'),
+            footer_persons
         };
     }
     if (target === 'services') {
@@ -1331,8 +1342,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const phone = document.getElementById('setting-phone');
     if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
 
-    // v11: Live-preview hooks for footer dynamic content (drives both the
-    // /main settings preview iframe and the footer preview iframe).
+    // v12: Footer dynamic content (now in Footer tab) — push to settings + footer iframes
     ['setting-footer-desc','setting-footer-address','setting-footer-copyright',
      'setting-footer-facebook','setting-footer-linkedin','setting-footer-youtube',
      'setting-footer-tiktok'].forEach(id => {
@@ -1342,6 +1352,15 @@ document.addEventListener('DOMContentLoaded', () => {
             pushPreviewDebounced.settings();
             pushPreviewDebounced.footer();
         });
+    });
+
+    // v12: /about page content — push to about iframe (which loads /about?preview=1)
+    ['setting-about-hero-tag','setting-about-hero-title','setting-about-mission',
+     'setting-about-sydney-address','setting-about-sydney-phone','setting-about-sydney-email',
+     'setting-about-hcm-address','setting-about-hcm-phone','setting-about-hcm-email'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => pushPreviewDebounced.about());
     });
 
     ['about-input-banner', 'about-input-left', 'about-input-right'].forEach(id => {
@@ -1388,6 +1407,54 @@ async function uploadHomeImage(file) {
 }
 
 // ===================== HOME — ABOUT =====================
+// v12: /about page content (hero + mission + 2 offices). Settings-keyed.
+async function loadAboutContent() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+        setVal('setting-about-hero-tag',      json.data.about_hero_tag);
+        setVal('setting-about-hero-title',    json.data.about_hero_title);
+        setVal('setting-about-mission',       json.data.about_mission);
+        setVal('setting-about-sydney-address', json.data.about_office_sydney_address);
+        setVal('setting-about-sydney-phone',   json.data.about_office_sydney_phone);
+        setVal('setting-about-sydney-email',   json.data.about_office_sydney_email);
+        setVal('setting-about-hcm-address',    json.data.about_office_hcm_address);
+        setVal('setting-about-hcm-phone',      json.data.about_office_hcm_phone);
+        setVal('setting-about-hcm-email',      json.data.about_office_hcm_email);
+    } catch (e) {
+        console.error('loadAboutContent:', e);
+    }
+}
+
+async function saveAboutContent() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const payload = {
+        about_hero_tag:              v('setting-about-hero-tag'),
+        about_hero_title:            v('setting-about-hero-title'),
+        about_mission:               v('setting-about-mission'),
+        about_office_sydney_address: v('setting-about-sydney-address'),
+        about_office_sydney_phone:   v('setting-about-sydney-phone'),
+        about_office_sydney_email:   v('setting-about-sydney-email'),
+        about_office_hcm_address:    v('setting-about-hcm-address'),
+        about_office_hcm_phone:      v('setting-about-hcm-phone'),
+        about_office_hcm_email:      v('setting-about-hcm-email')
+    };
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã lưu /about content' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) refreshPreview('about');
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
 async function loadHomeAbout() {
     try {
         const res = await fetch('/api/admin/about');
@@ -1570,6 +1637,50 @@ async function loadHomeServices() {
 }
 
 // ===================== HOME — FOOTER PERSONS =====================
+// v12: Footer site-wide content (moved from Dashboard). Loaded alongside footer-persons.
+async function loadFooterContent() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+        setVal('setting-footer-desc',       json.data.footer_desc);
+        setVal('setting-footer-address',    json.data.footer_address);
+        setVal('setting-footer-facebook',   json.data.footer_facebook_url);
+        setVal('setting-footer-linkedin',   json.data.footer_linkedin_url);
+        setVal('setting-footer-youtube',    json.data.footer_youtube_url);
+        setVal('setting-footer-tiktok',     json.data.footer_tiktok_url);
+        setVal('setting-footer-copyright',  json.data.footer_copyright);
+    } catch (e) {
+        console.error('loadFooterContent:', e);
+    }
+}
+
+async function saveFooterContent() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const payload = {
+        footer_desc:         v('setting-footer-desc'),
+        footer_address:      v('setting-footer-address'),
+        footer_copyright:    v('setting-footer-copyright'),
+        footer_facebook_url: v('setting-footer-facebook').trim(),
+        footer_linkedin_url: v('setting-footer-linkedin').trim(),
+        footer_youtube_url:  v('setting-footer-youtube').trim(),
+        footer_tiktok_url:   v('setting-footer-tiktok').trim()
+    };
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã lưu Footer' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) { refreshPreview('footer'); refreshPreview('settings'); }
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
 async function loadHomeFooter() {
     try {
         const res = await fetch('/api/admin/footer-persons');
@@ -1960,6 +2071,16 @@ const AUDIT_FIELD_LABELS = {
     'footer_linkedin_url': 'Footer — LinkedIn URL',
     'footer_youtube_url': 'Footer — YouTube URL',
     'footer_tiktok_url': 'Footer — TikTok URL',
+    // v12: /about page content
+    'about_hero_tag': '/about — Hero Tag',
+    'about_hero_title': '/about — Hero Title',
+    'about_mission': '/about — Mission paragraph',
+    'about_office_sydney_address': '/about — Sydney address',
+    'about_office_sydney_phone': '/about — Sydney phone',
+    'about_office_sydney_email': '/about — Sydney email',
+    'about_office_hcm_address': '/about — HCMC address',
+    'about_office_hcm_phone': '/about — HCMC phone',
+    'about_office_hcm_email': '/about — HCMC email',
     // F05d: extended project fields
     'price': 'Giá',
     'beds': 'Số phòng ngủ',
