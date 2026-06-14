@@ -73,7 +73,7 @@ html::-webkit-scrollbar-thumb{
   background: var(--gray);
 }
 section{
-    padding: 3rem 3%;
+    /* v10: padding removed per user — each section now controls its own spacing */
 }
 .heading{
     display: inline-block;
@@ -843,7 +843,7 @@ section{
 /* BOX 2 — about stats inside the combined hero section */
 .about-stats-box {
     background: var(--color-cream, #EBE9E8);
-    padding: 2rem 5% 5.5rem;
+    padding: 2rem 5% 5.5rem;          /* unchanged per user */
 }
 .about-stats-box .info { max-width: 1300px; margin: 0 auto; }
 
@@ -1017,7 +1017,7 @@ section{
 .feature-project {
     width: 100%;
     background: var(--color-cream);
-    padding: 6rem 5%;
+    padding: 2rem 5%;                 /* v10: reduced 6rem→2rem so sections sit close */
 }
 .feature-project .heading,
 .feature-project .select {
@@ -1027,7 +1027,7 @@ section{
     display: flex;
     justify-content: space-between;
     align-items: flex-end;
-    max-width: 1320px;
+    max-width: 1300px;                /* v10: unified */
     margin: 0 auto 4rem;
     gap: 2rem;
     flex-wrap: wrap;
@@ -1074,7 +1074,7 @@ section{
     display: grid;
     grid-template-columns: repeat(4, 1fr);
     gap: 2rem;
-    max-width: 1320px;
+    max-width: 1300px;                /* v10: unified */
     margin: 0 auto;
 }
 .project-card {
@@ -1341,7 +1341,7 @@ section{
     background: #030C2E;
     width: 100%;
     min-height: 500px;
-    padding: 40px 60px;
+    padding: 40px 60px;               /* v10 restored */
     display: flex;
     justify-content: center;
     align-items: center;
@@ -2090,7 +2090,7 @@ body.logged-in .header .navbar.open .mobile-logout-btn {
 }
 /* F05b mobile: Featured 4-grid → 1 column */
 .feature-project {
-    padding: 4rem 4%;
+    padding: 1.5rem 4%;               /* v10: reduced 4rem→1.5rem */
 }
 .feature-project .project-grid {
     grid-template-columns: 1fr;
@@ -2751,7 +2751,7 @@ img{
    ============================================================ */
 .purpose-invest {
     background: var(--color-cream, #EBE9E8);
-    padding: 6rem 5%;
+    padding: 2rem 5%;                 /* v10: reduced 6rem→2rem */
 }
 .purpose-grid {
     max-width: 1300px;
@@ -2897,7 +2897,7 @@ img{
 
 @media (max-width: 1024px) {
     .purpose-grid { grid-template-columns: 1fr; gap: 3rem; }
-    .purpose-invest { padding: 4rem 5%; }
+    .purpose-invest { padding: 1.5rem 5%; }       /* v10: reduced 4rem→1.5rem */
 }
 @media (max-width: 768px) {
     .purpose-heading { font-size: 2.6rem; }
@@ -2911,7 +2911,7 @@ img{
    ============================================================ */
 .services {
     background: var(--color-cream, #EBE9E8);
-    padding: 6rem 5%;
+    padding: 2rem 5%;                 /* v10: reduced 6rem→2rem */
 }
 .section-header-centered {
     text-align: center;
@@ -2923,7 +2923,7 @@ img{
 
 /* Services v2: left-aligned header + big heading like feature-projects */
 .services-section-header {
-    max-width: 1400px;
+    max-width: 1300px;                /* v10: unified with other sections */
     margin: 0 auto 3.5rem;
 }
 .services-heading-lg {
@@ -2937,7 +2937,7 @@ img{
     display: grid;
     grid-template-columns: repeat(5, 1fr);
     gap: 1.6rem;
-    max-width: 1400px;
+    max-width: 1300px;                /* v10: unified */
     margin: 0 auto;
 }
 .service-card {
@@ -2987,7 +2987,7 @@ img{
 }
 @media (max-width: 768px) {
     .services-grid { grid-template-columns: 1fr; }
-    .services { padding: 4rem 5%; }
+    .services { padding: 1.5rem 5%; }             /* v10: reduced 4rem→1.5rem */
 }
 
 /* ============================================================
@@ -2995,10 +2995,10 @@ img{
    ============================================================ */
 .video-section {
     background: var(--color-cream, #EBE9E8);
-    padding: 6rem 5%;
+    padding: 2rem 5%;                 /* v10: reduced 6rem→2rem */
 }
 #video-carousel-container {
-    max-width: 1400px;
+    max-width: 1300px;                /* v10: unified */
     margin: 0 auto;
 }
 .video-track {
@@ -3104,7 +3104,7 @@ img{
    ============================================================ */
 .news-section {
     background: var(--color-cream, #EBE9E8);
-    padding: 6rem 5%;
+    padding: 2rem 5%;                 /* v10: reduced 6rem→2rem */
 }
 .news-section .section-header { max-width: 1300px; margin: 0 auto 3rem; }
 #news-navigation { display: flex; gap: 0.8rem; }
@@ -3219,7 +3219,7 @@ img{
 }
 @media (max-width: 768px) {
     .news-track { grid-template-columns: 1fr; }
-    .news-section { padding: 4rem 5%; }
+    .news-section { padding: 1.5rem 5%; }         /* v10: reduced 4rem→1.5rem */
 }
 
 /* ============================================================
