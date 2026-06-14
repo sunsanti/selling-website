@@ -20,26 +20,34 @@
         const el = document.getElementById(id);
         if (el && val != null && val !== '') el.textContent = val;
     }
-    function setLink(id, val, prefix) {
-        const el = document.getElementById(id);
-        if (el && val != null && val !== '') {
-            el.textContent = val;
-            el.href = prefix + String(val).replace(/\s+/g, '');
-        }
-    }
 
     function applyAboutSettings(s) {
         if (!s) return;
-        setText('about-hero-tag',                s.about_hero_tag);
-        setText('about-hero-title',              s.about_hero_title);
-        setText('about-mission-text',            s.about_mission);
-        setText('about-office-sydney-address',   s.about_office_sydney_address);
-        setLink('about-office-sydney-phone',     s.about_office_sydney_phone, 'tel:');
-        setLink('about-office-sydney-email',     s.about_office_sydney_email, 'mailto:');
-        setText('about-office-hcm-address',      s.about_office_hcm_address);
-        setLink('about-office-hcm-phone',        s.about_office_hcm_phone, 'tel:');
-        setLink('about-office-hcm-email',        s.about_office_hcm_email, 'mailto:');
+        setText('about-hero-tag',     s.about_hero_tag);
+        setText('about-hero-title',   s.about_hero_title);
+        setText('about-mission-text', s.about_mission);
+        renderOffices(s.about_offices);
         renderServices(s);
+    }
+
+    // v16: /about — dynamic Offices grid (editable name/flag/address/phone/email,
+    // any number of offices). `offices` is either a JSON string (from /api/public/settings)
+    // or an already-parsed array (from the admin live-preview postMessage payload).
+    function renderOffices(offices) {
+        const grid = document.getElementById('about-offices-grid');
+        if (!grid) return;
+        let list = offices;
+        if (typeof list === 'string') {
+            try { list = JSON.parse(list); } catch (e) { list = []; }
+        }
+        if (!Array.isArray(list)) list = [];
+        grid.innerHTML = list.map(o => `
+            <div class="office-card">
+                <h3 class="office-city">${esc(o.name || '')}${o.flag ? ` <span class="office-flag" aria-hidden="true">${esc(o.flag)}</span>` : ''}</h3>
+                ${o.address ? `<p class="office-row"><i class="fa-solid fa-location-dot"></i> <span>${esc(o.address)}</span></p>` : ''}
+                ${o.phone   ? `<p class="office-row"><i class="fa-solid fa-phone"></i> <a href="tel:${esc(String(o.phone).replace(/\s+/g, ''))}">${esc(o.phone)}</a></p>` : ''}
+                ${o.email   ? `<p class="office-row"><i class="fa-solid fa-envelope"></i> <a href="mailto:${esc(o.email)}">${esc(o.email)}</a></p>` : ''}
+            </div>`).join('');
     }
 
     function renderServices(s) {

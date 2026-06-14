@@ -259,8 +259,39 @@ body {
    surrounding form-groups and the layout looks scrambled. */
 .settings-form .form-section-divider,
 .settings-form .form-row,
-.settings-form #about-services-cards {
+.settings-form #about-services-cards,
+.settings-form #about-offices-cards {
     grid-column: 1 / -1;
+}
+
+/* v16: /about — dynamic Offices cards (add/remove, editable name) */
+.office-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.office-card-admin {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.office-card-admin h2 {
+    justify-content: space-between;
+}
+
+.office-card-admin .ao-remove {
+    background: none;
+    border: none;
+    color: #c0392b;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+}
+
+.office-card-admin .ao-remove:hover {
+    color: #e74c3c;
 }
 
 /* ================ BUTTONS ================ */
@@ -456,6 +487,49 @@ body {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* v16: shared pagination controls — appended below every .table-container table */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+}
+
+.pagination .page-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination .page-btn:hover:not(:disabled):not(.active) {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.pagination .page-btn.active {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-color: transparent;
+    color: #fff;
+}
+
+.pagination .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .data-table {

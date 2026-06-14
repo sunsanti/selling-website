@@ -8,6 +8,52 @@ let currentProjectImages = []; // { id: dbId|null, image_path: string, isNew: bo
 let imageUploadQueue = [];    // files to upload on form submit
 let translateLoadingEl = null;
 
+// v16: per-table pagination state — each table keeps its full dataset
+// client-side and slices PAGE_SIZE rows per page.
+let _activeProjectsAll = [];
+let _activeProjectsPage = 1;
+let _inactiveProjectsAll = [];
+let _inactiveProjectsPage = 1;
+let _contactsAll = [];
+let _contactsPage = 1;
+let _accountsAll = [];
+let _accountsPage = 1;
+let _auditLogAll = [];
+let _auditLogPage = 1;
+let _videosAll = [];
+let _videosPage = 1;
+let _newsAll = [];
+let _newsPage = 1;
+
+// ===================== PAGINATION =====================
+const PAGE_SIZE = 10;
+
+function paginate(data, page) {
+    const start = (page - 1) * PAGE_SIZE;
+    return (data || []).slice(start, start + PAGE_SIZE);
+}
+
+function renderPagination(containerId, totalItems, currentPage, onPageChange) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const totalPages = Math.max(1, Math.ceil((totalItems || 0) / PAGE_SIZE));
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+    let html = `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''} title="Previous"><i class="fas fa-chevron-left"></i></button>`;
+    for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="page-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+    }
+    html += `<button class="page-btn" data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''} title="Next"><i class="fas fa-chevron-right"></i></button>`;
+    el.innerHTML = html;
+    el.querySelectorAll('.page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            const page = parseInt(btn.dataset.page, 10);
+            if (!page || page === currentPage) return;
+            onPageChange(page);
+        });
+    });
+}
+
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
@@ -488,7 +534,11 @@ function loadActiveProjects() {
     fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=active`)
         .then(res => res.json())
         .then(data => {
-            if (data.success) renderActiveProjects(data.data);
+            if (data.success) {
+                _activeProjectsAll = data.data || [];
+                _activeProjectsPage = 1;
+                renderActiveProjects();
+            }
         });
 }
 
@@ -497,19 +547,26 @@ function loadInactiveProjects() {
     fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=inactive`)
         .then(res => res.json())
         .then(data => {
-            if (data.success) renderInactiveProjects(data.data);
+            if (data.success) {
+                _inactiveProjectsAll = data.data || [];
+                _inactiveProjectsPage = 1;
+                renderInactiveProjects();
+            }
         });
 }
 
-function renderActiveProjects(projects) {
+function renderActiveProjects() {
     const tbody = document.getElementById('active-projects-tbody');
-    if (!projects || projects.length === 0) {
+    if (_activeProjectsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#95a5a6;">No active projects</td></tr>';
+        renderPagination('active-projects-pagination', 0, 1, () => {});
         return;
     }
+    const projects = paginate(_activeProjectsAll, _activeProjectsPage);
+    const offset = (_activeProjectsPage - 1) * PAGE_SIZE;
     tbody.innerHTML = projects.map((p, i) => `
         <tr>
-            <td>${i + 1}</td>
+            <td>${offset + i + 1}</td>
             <td><img src="${p.image_path || 'placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/80x60?text=No+Img'"></td>
             <td>${escapeHtml(p.name)}</td>
             <td><span class="status-badge status-${p.area}">${capitalize(p.area)}</span></td>
@@ -524,17 +581,24 @@ function renderActiveProjects(projects) {
             </td>
         </tr>
     `).join('');
+    renderPagination('active-projects-pagination', _activeProjectsAll.length, _activeProjectsPage, (page) => {
+        _activeProjectsPage = page;
+        renderActiveProjects();
+    });
 }
 
-function renderInactiveProjects(projects) {
+function renderInactiveProjects() {
     const tbody = document.getElementById('inactive-projects-tbody');
-    if (!projects || projects.length === 0) {
+    if (_inactiveProjectsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#95a5a6;">No inactive projects</td></tr>';
+        renderPagination('inactive-projects-pagination', 0, 1, () => {});
         return;
     }
+    const projects = paginate(_inactiveProjectsAll, _inactiveProjectsPage);
+    const offset = (_inactiveProjectsPage - 1) * PAGE_SIZE;
     tbody.innerHTML = projects.map((p, i) => `
         <tr>
-            <td>${i + 1}</td>
+            <td>${offset + i + 1}</td>
             <td><img src="${p.image_path || 'placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/80x60?text=No+Img'"></td>
             <td>${escapeHtml(p.name)}</td>
             <td><span class="status-badge status-${p.area}">${capitalize(p.area)}</span></td>
@@ -549,6 +613,10 @@ function renderInactiveProjects(projects) {
             </td>
         </tr>
     `).join('');
+    renderPagination('inactive-projects-pagination', _inactiveProjectsAll.length, _inactiveProjectsPage, (page) => {
+        _inactiveProjectsPage = page;
+        renderInactiveProjects();
+    });
 }
 
 async function editProject(id) {
@@ -919,20 +987,24 @@ async function loadContacts() {
         const res = await fetch('/api/admin/contacts');
         const data = await res.json();
         if (data.success) {
-            renderContactsTable(data.data);
+            _contactsAll = data.data || [];
+            _contactsPage = 1;
+            renderContactsTable();
         }
     } catch (error) {
         console.error('Error loading contacts:', error);
     }
 }
 
-function renderContactsTable(contacts) {
+function renderContactsTable() {
     const tbody = document.getElementById('contacts-tbody');
-    if (!contacts || contacts.length === 0) {
+    if (_contactsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#95a5a6;">No contacts found</td></tr>';
+        renderPagination('contacts-pagination', 0, 1, () => {});
         return;
     }
 
+    const contacts = paginate(_contactsAll, _contactsPage);
     tbody.innerHTML = contacts.map(c => `
         <tr>
             <td>${c.id}</td>
@@ -947,6 +1019,10 @@ function renderContactsTable(contacts) {
             </td>
         </tr>
     `).join('');
+    renderPagination('contacts-pagination', _contactsAll.length, _contactsPage, (page) => {
+        _contactsPage = page;
+        renderContactsTable();
+    });
 }
 
 async function searchContacts() {
@@ -959,7 +1035,9 @@ async function searchContacts() {
         const res = await fetch(`/api/admin/contacts/search?keyword=${encodeURIComponent(keyword)}`);
         const data = await res.json();
         if (data.success) {
-            renderContactsTable(data.data);
+            _contactsAll = data.data || [];
+            _contactsPage = 1;
+            renderContactsTable();
         }
     } catch (error) {
         showToast('Error searching contacts', 'error');
@@ -992,20 +1070,24 @@ async function loadAccounts() {
         const res = await fetch('/api/admin/accounts');
         const data = await res.json();
         if (data.success) {
-            renderAccountsTable(data.data);
+            _accountsAll = data.data || [];
+            _accountsPage = 1;
+            renderAccountsTable();
         }
     } catch (error) {
         console.error('Error loading accounts:', error);
     }
 }
 
-function renderAccountsTable(accounts) {
+function renderAccountsTable() {
     const tbody = document.getElementById('accounts-tbody');
-    if (!accounts || accounts.length === 0) {
+    if (_accountsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#95a5a6;">No accounts found</td></tr>';
+        renderPagination('accounts-pagination', 0, 1, () => {});
         return;
     }
 
+    const accounts = paginate(_accountsAll, _accountsPage);
     tbody.innerHTML = accounts.map(a => `
         <tr>
             <td>${a.id}</td>
@@ -1021,6 +1103,10 @@ function renderAccountsTable(accounts) {
             </td>
         </tr>
     `).join('');
+    renderPagination('accounts-pagination', _accountsAll.length, _accountsPage, (page) => {
+        _accountsPage = page;
+        renderAccountsTable();
+    });
 }
 
 async function editAccount(id) {
@@ -1363,12 +1449,7 @@ function gatherPreviewData(target) {
             about_hero_tag:           v('setting-about-hero-tag'),
             about_hero_title:         v('setting-about-hero-title'),
             about_mission:            v('setting-about-mission'),
-            about_office_sydney_address: v('setting-about-sydney-address'),
-            about_office_sydney_phone:   v('setting-about-sydney-phone'),
-            about_office_sydney_email:   v('setting-about-sydney-email'),
-            about_office_hcm_address: v('setting-about-hcm-address'),
-            about_office_hcm_phone:   v('setting-about-hcm-phone'),
-            about_office_hcm_email:   v('setting-about-hcm-email'),
+            about_offices:            gatherAboutOffices(),
             ...svcs,
             footer_persons,
             team_members
@@ -1474,13 +1555,30 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // v12: /about page content — push to about iframe (which loads /about?preview=1)
-    ['setting-about-hero-tag','setting-about-hero-title','setting-about-mission',
-     'setting-about-sydney-address','setting-about-sydney-phone','setting-about-sydney-email',
-     'setting-about-hcm-address','setting-about-hcm-phone','setting-about-hcm-email'].forEach(id => {
+    ['setting-about-hero-tag','setting-about-hero-title','setting-about-mission'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         el.addEventListener('input', () => pushPreviewDebounced.about());
     });
+
+    // v16: /about — dynamic Offices cards (add/remove, editable name). Delegate
+    // input + remove-click at the container since cards are rendered dynamically.
+    const officesWrap = document.getElementById('about-offices-cards');
+    if (officesWrap) {
+        officesWrap.addEventListener('input', () => pushPreviewDebounced.about());
+        officesWrap.addEventListener('click', (e) => {
+            const btn = e.target.closest('.ao-remove');
+            if (!btn) return;
+            const cards = officesWrap.querySelectorAll('.office-card-admin');
+            if (cards.length <= 1) {
+                showToast('Cần có ít nhất 1 office', 'error');
+                return;
+            }
+            btn.closest('.office-card-admin').remove();
+            relabelAboutOffices();
+            pushPreviewDebounced.about();
+        });
+    }
 
     ['about-input-banner', 'about-input-left', 'about-input-right'].forEach(id => {
         const el = document.getElementById(id);
@@ -1538,29 +1636,93 @@ async function loadAboutContent() {
         setVal('setting-about-hero-tag',      json.data.about_hero_tag);
         setVal('setting-about-hero-title',    json.data.about_hero_title);
         setVal('setting-about-mission',       json.data.about_mission);
-        setVal('setting-about-sydney-address', json.data.about_office_sydney_address);
-        setVal('setting-about-sydney-phone',   json.data.about_office_sydney_phone);
-        setVal('setting-about-sydney-email',   json.data.about_office_sydney_email);
-        setVal('setting-about-hcm-address',    json.data.about_office_hcm_address);
-        setVal('setting-about-hcm-phone',      json.data.about_office_hcm_phone);
-        setVal('setting-about-hcm-email',      json.data.about_office_hcm_email);
+        let offices = [];
+        try { offices = JSON.parse(json.data.about_offices || '[]'); } catch (e) { offices = []; }
+        renderAboutOffices(Array.isArray(offices) ? offices : []);
     } catch (e) {
         console.error('loadAboutContent:', e);
     }
 }
 
+// v16: /about — dynamic Offices cards (add/remove, editable name + flag/address/phone/email)
+function renderAboutOffices(offices) {
+    const wrap = document.getElementById('about-offices-cards');
+    if (!wrap) return;
+    if (!offices.length) offices = [{ name: '', flag: '', address: '', phone: '', email: '' }];
+    wrap.innerHTML = offices.map((o, i) => `
+        <div class="office-card-admin settings-panel" data-index="${i}">
+            <h2><span class="ao-label">Office ${i + 1}</span> <button type="button" class="ao-remove" title="Remove office"><i class="fas fa-times"></i></button></h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="ao-name" maxlength="100" placeholder="e.g. Sydney">
+                </div>
+                <div class="form-group">
+                    <label>Flag (emoji, optional)</label>
+                    <input type="text" class="ao-flag" maxlength="10" placeholder="🇦🇺">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" class="ao-address" maxlength="300">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" class="ao-phone" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="ao-email" maxlength="255">
+                </div>
+            </div>
+        </div>`).join('');
+    offices.forEach((o, i) => {
+        const card = wrap.querySelector(`[data-index="${i}"]`);
+        card.querySelector('.ao-name').value    = o.name    || '';
+        card.querySelector('.ao-flag').value    = o.flag    || '';
+        card.querySelector('.ao-address').value = o.address || '';
+        card.querySelector('.ao-phone').value   = o.phone   || '';
+        card.querySelector('.ao-email').value   = o.email   || '';
+    });
+}
+
+function relabelAboutOffices() {
+    const wrap = document.getElementById('about-offices-cards');
+    if (!wrap) return;
+    wrap.querySelectorAll('.office-card-admin').forEach((card, i) => {
+        card.dataset.index = i;
+        const label = card.querySelector('.ao-label');
+        if (label) label.textContent = `Office ${i + 1}`;
+    });
+}
+
+function gatherAboutOffices() {
+    const wrap = document.getElementById('about-offices-cards');
+    if (!wrap) return [];
+    return Array.from(wrap.querySelectorAll('.office-card-admin')).map(card => ({
+        name:    (card.querySelector('.ao-name')    || {}).value || '',
+        flag:    (card.querySelector('.ao-flag')    || {}).value || '',
+        address: (card.querySelector('.ao-address') || {}).value || '',
+        phone:   (card.querySelector('.ao-phone')   || {}).value || '',
+        email:   (card.querySelector('.ao-email')   || {}).value || ''
+    }));
+}
+
+function addAboutOffice() {
+    const offices = gatherAboutOffices();
+    offices.push({ name: '', flag: '', address: '', phone: '', email: '' });
+    renderAboutOffices(offices);
+    pushPreviewDebounced.about();
+}
+
 async function saveAboutContent() {
     const v = id => (document.getElementById(id) || {}).value || '';
     const payload = {
-        about_hero_tag:              v('setting-about-hero-tag'),
-        about_hero_title:            v('setting-about-hero-title'),
-        about_mission:               v('setting-about-mission'),
-        about_office_sydney_address: v('setting-about-sydney-address'),
-        about_office_sydney_phone:   v('setting-about-sydney-phone'),
-        about_office_sydney_email:   v('setting-about-sydney-email'),
-        about_office_hcm_address:    v('setting-about-hcm-address'),
-        about_office_hcm_phone:      v('setting-about-hcm-phone'),
-        about_office_hcm_email:      v('setting-about-hcm-email')
+        about_hero_tag:   v('setting-about-hero-tag'),
+        about_hero_title: v('setting-about-hero-title'),
+        about_mission:    v('setting-about-mission'),
+        about_offices:    gatherAboutOffices()
     };
     try {
         const res = await fetch('/api/admin/settings', {
@@ -2460,12 +2622,8 @@ const AUDIT_FIELD_LABELS = {
     'about_hero_tag': '/about — Hero Tag',
     'about_hero_title': '/about — Hero Title',
     'about_mission': '/about — Mission paragraph',
-    'about_office_sydney_address': '/about — Sydney address',
-    'about_office_sydney_phone': '/about — Sydney phone',
-    'about_office_sydney_email': '/about — Sydney email',
-    'about_office_hcm_address': '/about — HCMC address',
-    'about_office_hcm_phone': '/about — HCMC phone',
-    'about_office_hcm_email': '/about — HCMC email',
+    // v16: /about Offices (dynamic list, replaces fixed Sydney/HCM fields)
+    'about_offices': '/about — Offices',
     // v13: /about Our Services (3 cards)
     'about_service_1_icon': '/about — Service 1 Icon',
     'about_service_1_title': '/about — Service 1 Title',
@@ -2580,61 +2738,73 @@ async function loadAuditLog() {
             return;
         }
         const j = await res.json();
-        const tbody = document.getElementById('audit-log-tbody');
-        tbody.innerHTML = '';
-
-        if (!j.success || !j.data || j.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#95a5a6">Không có dữ liệu</td></tr>';
-            return;
-        }
-
-        j.data.forEach(row => {
-            const tr = document.createElement('tr');
-
-            const tdTime = document.createElement('td');
-            tdTime.textContent = new Date(row.created_at).toLocaleString('vi-VN');
-            tdTime.style.fontSize = '11px';
-            tdTime.style.whiteSpace = 'nowrap';
-            tr.appendChild(tdTime);
-
-            const tdUser = document.createElement('td');
-            tdUser.textContent = row.username || '(anonymous)';
-            tr.appendChild(tdUser);
-
-            const tdAction = document.createElement('td');
-            const badge = document.createElement('span');
-            badge.className = 'audit-badge';
-            badge.dataset.action = row.action;
-            badge.textContent = AUDIT_ACTION_LABELS[row.action] || row.action;
-            tdAction.appendChild(badge);
-            tr.appendChild(tdAction);
-
-            const tdTarget = document.createElement('td');
-            tdTarget.textContent = formatAuditTarget(row.target_type, row.target_id);
-            tr.appendChild(tdTarget);
-
-            const tdDetails = document.createElement('td');
-            tdDetails.style.fontSize = '12px';
-            tdDetails.style.maxWidth = '320px';
-            tdDetails.style.overflow = 'hidden';
-            tdDetails.style.textOverflow = 'ellipsis';
-            tdDetails.style.whiteSpace = 'nowrap';
-            const readable = formatAuditDetails(row.action, row.details);
-            tdDetails.textContent = readable;
-            tdDetails.title = readable;   // tooltip on hover for truncated values
-            tr.appendChild(tdDetails);
-
-            const tdIp = document.createElement('td');
-            tdIp.textContent = row.ip_address || '-';
-            tdIp.style.fontSize = '11px';
-            tr.appendChild(tdIp);
-
-            tbody.appendChild(tr);
-        });
+        _auditLogAll = (j.success && Array.isArray(j.data)) ? j.data : [];
+        _auditLogPage = 1;
+        renderAuditLog();
     } catch (err) {
         console.error('loadAuditLog:', err);
         showToast('Lỗi tải audit log: ' + err.message, 'error');
     }
+}
+
+function renderAuditLog() {
+    const tbody = document.getElementById('audit-log-tbody');
+    tbody.innerHTML = '';
+
+    if (_auditLogAll.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#95a5a6">Không có dữ liệu</td></tr>';
+        renderPagination('audit-log-pagination', 0, 1, () => {});
+        return;
+    }
+
+    paginate(_auditLogAll, _auditLogPage).forEach(row => {
+        const tr = document.createElement('tr');
+
+        const tdTime = document.createElement('td');
+        tdTime.textContent = new Date(row.created_at).toLocaleString('vi-VN');
+        tdTime.style.fontSize = '11px';
+        tdTime.style.whiteSpace = 'nowrap';
+        tr.appendChild(tdTime);
+
+        const tdUser = document.createElement('td');
+        tdUser.textContent = row.username || '(anonymous)';
+        tr.appendChild(tdUser);
+
+        const tdAction = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = 'audit-badge';
+        badge.dataset.action = row.action;
+        badge.textContent = AUDIT_ACTION_LABELS[row.action] || row.action;
+        tdAction.appendChild(badge);
+        tr.appendChild(tdAction);
+
+        const tdTarget = document.createElement('td');
+        tdTarget.textContent = formatAuditTarget(row.target_type, row.target_id);
+        tr.appendChild(tdTarget);
+
+        const tdDetails = document.createElement('td');
+        tdDetails.style.fontSize = '12px';
+        tdDetails.style.maxWidth = '320px';
+        tdDetails.style.overflow = 'hidden';
+        tdDetails.style.textOverflow = 'ellipsis';
+        tdDetails.style.whiteSpace = 'nowrap';
+        const readable = formatAuditDetails(row.action, row.details);
+        tdDetails.textContent = readable;
+        tdDetails.title = readable;   // tooltip on hover for truncated values
+        tr.appendChild(tdDetails);
+
+        const tdIp = document.createElement('td');
+        tdIp.textContent = row.ip_address || '-';
+        tdIp.style.fontSize = '11px';
+        tr.appendChild(tdIp);
+
+        tbody.appendChild(tr);
+    });
+
+    renderPagination('audit-log-pagination', _auditLogAll.length, _auditLogPage, (page) => {
+        _auditLogPage = page;
+        renderAuditLog();
+    });
 }
 
 function resetAuditSearch() {
@@ -2658,43 +2828,56 @@ async function loadVideosAdmin() {
     try {
         const res = await fetch('/api/admin/videos');
         const json = await res.json();
-        const tbody = document.getElementById('videos-table-body');
-        if (!tbody) return;
-        if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
-            return;
-        }
-        tbody.innerHTML = json.data.map(v => {
-            const thumb = _escVid(v.thumbnail_path || '');
-            const thumbHtml = thumb
-                ? `<img src="${thumb}" alt="" style="width:48px;height:64px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`
-                : '<span style="color:#888">—</span>';
-            const statusClass = v.status === 'active' ? 'status-active' : 'status-inactive';
-            const statusLabel = v.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
-            const url = _escVid(v.tiktok_url || '');
-            const urlShort = url.length > 50 ? url.slice(0, 50) + '…' : url;
-            return `
-                <tr data-id="${v.id}">
-                    <td>${v.id}</td>
-                    <td>${thumbHtml}</td>
-                    <td>${_escVid(v.title || '')}</td>
-                    <td><a href="${url}" target="_blank" rel="noopener noreferrer">${urlShort}</a></td>
-                    <td>${_escVid(v.views_count || '0')}</td>
-                    <td>${v.display_order || 0}</td>
-                    <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
-                    <td>
-                        <button class="btn-edit" onclick="editVideo(${v.id})"><i class="fas fa-edit"></i></button>
-                        ${v.status === 'active'
-                            ? `<button class="btn-cancel" onclick="softDeleteVideo(${v.id})" title="Ẩn"><i class="fas fa-eye-slash"></i></button>`
-                            : `<button class="btn-add" onclick="restoreVideoStatus(${v.id})" title="Hiện lại"><i class="fas fa-eye"></i></button>`}
-                        <button class="btn-cancel" onclick="hardDeleteVideo(${v.id})" title="Xóa vĩnh viễn"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-        }).join('');
+        _videosAll = (json.success && Array.isArray(json.data)) ? json.data : [];
+        _videosPage = 1;
+        renderVideosAdmin();
     } catch (err) {
         console.error('loadVideosAdmin:', err);
         showToast('Error loading videos: ' + err.message, 'error');
     }
+}
+
+function renderVideosAdmin() {
+    const tbody = document.getElementById('videos-table-body');
+    if (!tbody) return;
+    if (_videosAll.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
+        renderPagination('videos-pagination', 0, 1, () => {});
+        return;
+    }
+    tbody.innerHTML = paginate(_videosAll, _videosPage).map(v => {
+        const thumb = _escVid(v.thumbnail_path || '');
+        const thumbHtml = thumb
+            ? `<img src="${thumb}" alt="" style="width:48px;height:64px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`
+            : '<span style="color:#888">—</span>';
+        const statusClass = v.status === 'active' ? 'status-active' : 'status-inactive';
+        const statusLabel = v.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
+        const url = _escVid(v.tiktok_url || '');
+        const urlShort = url.length > 50 ? url.slice(0, 50) + '…' : url;
+        return `
+            <tr data-id="${v.id}">
+                <td>${v.id}</td>
+                <td>${thumbHtml}</td>
+                <td>${_escVid(v.title || '')}</td>
+                <td><a href="${url}" target="_blank" rel="noopener noreferrer">${urlShort}</a></td>
+                <td>${_escVid(v.views_count || '0')}</td>
+                <td>${v.display_order || 0}</td>
+                <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="action-btn edit" onclick="editVideo(${v.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        ${v.status === 'active'
+                            ? `<button class="action-btn delete" onclick="confirmAction('Ẩn video này khỏi public site?', () => softDeleteVideo(${v.id}))" title="Hide"><i class="fas fa-eye-slash"></i></button>`
+                            : `<button class="action-btn restore" onclick="restoreVideoStatus(${v.id})" title="Show"><i class="fas fa-eye"></i></button>`}
+                        <button class="action-btn delete" onclick="confirmAction('Xóa VĨNH VIỄN video này? Không thể hoàn tác.', () => hardDeleteVideo(${v.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+    renderPagination('videos-pagination', _videosAll.length, _videosPage, (page) => {
+        _videosPage = page;
+        renderVideosAdmin();
+    });
 }
 
 function openVideoModal() {
@@ -2782,7 +2965,6 @@ async function saveVideo() {
 }
 
 async function softDeleteVideo(id) {
-    if (!confirm('Ẩn video này khỏi public site?')) return;
     try {
         const res = await fetch('/api/admin/videos/' + id + '/soft-delete', { method: 'PUT' });
         const json = await res.json();
@@ -2809,7 +2991,6 @@ async function restoreVideoStatus(id) {
 }
 
 async function hardDeleteVideo(id) {
-    if (!confirm('Xóa VĨNH VIỄN video này? Không thể hoàn tác.')) return;
     try {
         const res = await fetch('/api/admin/videos/' + id, { method: 'DELETE' });
         const json = await res.json();
@@ -2835,36 +3016,49 @@ async function loadNewsAdmin(query) {
             : '/api/admin/news';
         const res = await fetch(url);
         const json = await res.json();
-        const tbody = document.getElementById('news-table-body');
-        if (!tbody) return;
-        if (!json.success || !Array.isArray(json.data) || json.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:2rem">Chưa có tin tức</td></tr>';
-            return;
-        }
-        tbody.innerHTML = json.data.map(n => {
-            const statusClass = n.status === 'active' ? 'status-active' : 'status-inactive';
-            const statusLabel = n.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
-            const created = n.created_at ? new Date(n.created_at).toLocaleDateString('en-AU') : '';
-            return `
-                <tr data-id="${n.id}">
-                    <td>${n.id}</td>
-                    <td>${_escNews(n.title || '')}</td>
-                    <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
-                    <td>${n.display_order || 0}</td>
-                    <td>${created}</td>
-                    <td>
-                        <button class="btn-edit" onclick="editNewsItem(${n.id})" title="Sửa"><i class="fas fa-edit"></i></button>
-                        ${n.status === 'active'
-                            ? `<button class="btn-cancel" onclick="softDeleteNews(${n.id})" title="Ẩn"><i class="fas fa-eye-slash"></i></button>`
-                            : `<button class="btn-add" onclick="restoreNewsStatus(${n.id})" title="Hiện lại"><i class="fas fa-eye"></i></button>`}
-                        <button class="btn-cancel" onclick="hardDeleteNews(${n.id})" title="Xóa vĩnh viễn"><i class="fas fa-trash"></i></button>
-                    </td>
-                </tr>`;
-        }).join('');
+        _newsAll = (json.success && Array.isArray(json.data)) ? json.data : [];
+        _newsPage = 1;
+        renderNewsAdmin();
     } catch (err) {
         console.error('loadNewsAdmin:', err);
         showToast('Error loading news: ' + err.message, 'error');
     }
+}
+
+function renderNewsAdmin() {
+    const tbody = document.getElementById('news-table-body');
+    if (!tbody) return;
+    if (_newsAll.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:2rem">Chưa có tin tức</td></tr>';
+        renderPagination('news-pagination', 0, 1, () => {});
+        return;
+    }
+    tbody.innerHTML = paginate(_newsAll, _newsPage).map(n => {
+        const statusClass = n.status === 'active' ? 'status-active' : 'status-inactive';
+        const statusLabel = n.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
+        const created = n.created_at ? new Date(n.created_at).toLocaleDateString('en-AU') : '';
+        return `
+            <tr data-id="${n.id}">
+                <td>${n.id}</td>
+                <td>${_escNews(n.title || '')}</td>
+                <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                <td>${n.display_order || 0}</td>
+                <td>${created}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="action-btn edit" onclick="editNewsItem(${n.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        ${n.status === 'active'
+                            ? `<button class="action-btn delete" onclick="confirmAction('Ẩn tin này khỏi public site?', () => softDeleteNews(${n.id}))" title="Hide"><i class="fas fa-eye-slash"></i></button>`
+                            : `<button class="action-btn restore" onclick="restoreNewsStatus(${n.id})" title="Show"><i class="fas fa-eye"></i></button>`}
+                        <button class="action-btn delete" onclick="confirmAction('Xóa VĨNH VIỄN tin này? Không thể hoàn tác.', () => hardDeleteNews(${n.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+    renderPagination('news-pagination', _newsAll.length, _newsPage, (page) => {
+        _newsPage = page;
+        renderNewsAdmin();
+    });
 }
 
 function searchNews() {
@@ -2967,7 +3161,6 @@ async function saveNewsItem() {
 }
 
 async function softDeleteNews(id) {
-    if (!confirm('Ẩn tin tức này khỏi public site?')) return;
     try {
         const res = await fetch('/api/admin/news/' + id + '/soft-delete', { method: 'PUT' });
         const json = await res.json();
@@ -2994,7 +3187,6 @@ async function restoreNewsStatus(id) {
 }
 
 async function hardDeleteNews(id) {
-    if (!confirm('Xóa VĨNH VIỄN tin tức này? Không thể hoàn tác.')) return;
     try {
         const res = await fetch('/api/admin/news/' + id, { method: 'DELETE' });
         const json = await res.json();

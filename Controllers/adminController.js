@@ -37,8 +37,8 @@ const updateSettings = async (req, res) => {
             footer_facebook_url, footer_linkedin_url, footer_youtube_url, footer_tiktok_url,
             // v12 — /about page content
             about_hero_tag, about_hero_title, about_mission,
-            about_office_sydney_address, about_office_sydney_phone, about_office_sydney_email,
-            about_office_hcm_address, about_office_hcm_phone, about_office_hcm_email,
+            // v16 — /about Offices (dynamic list, JSON array of {name, flag, address, phone, email})
+            about_offices,
             // v13 — /about Our Services (3 cards × icon/title/desc)
             about_service_1_icon, about_service_1_title, about_service_1_desc,
             about_service_2_icon, about_service_2_title, about_service_2_desc,
@@ -95,12 +95,22 @@ const updateSettings = async (req, res) => {
             await setFooterText('about_hero_tag', about_hero_tag, 100);
             await setFooterText('about_hero_title', about_hero_title, 200);
             await setFooterText('about_mission', about_mission, 2000);
-            await setFooterText('about_office_sydney_address', about_office_sydney_address, 300);
-            await setFooterText('about_office_sydney_phone',   about_office_sydney_phone,   50);
-            await setFooterText('about_office_sydney_email',   about_office_sydney_email,   255);
-            await setFooterText('about_office_hcm_address',    about_office_hcm_address,    300);
-            await setFooterText('about_office_hcm_phone',      about_office_hcm_phone,      50);
-            await setFooterText('about_office_hcm_email',      about_office_hcm_email,      255);
+            // v16 — /about Offices (dynamic list, replaces fixed Sydney/HCM fields)
+            if (about_offices !== undefined) {
+                let list = about_offices;
+                if (typeof list === 'string') {
+                    try { list = JSON.parse(list); } catch (_) { list = []; }
+                }
+                if (!Array.isArray(list)) list = [];
+                const clean = list.slice(0, 12).map(o => ({
+                    name:    String((o && o.name)    || '').slice(0, 100),
+                    flag:    String((o && o.flag)    || '').slice(0, 10),
+                    address: String((o && o.address) || '').slice(0, 300),
+                    phone:   String((o && o.phone)   || '').slice(0, 50),
+                    email:   String((o && o.email)   || '').slice(0, 255)
+                }));
+                await settingModel.updateSetting('about_offices', JSON.stringify(clean));
+            }
             // v13 — /about Our Services (3 cards × 3 fields)
             const svc = {
                 1: { icon: about_service_1_icon, title: about_service_1_title, desc: about_service_1_desc },
