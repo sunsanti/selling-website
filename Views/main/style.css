@@ -596,7 +596,7 @@ section{
     z-index: 1;
     pointer-events: none;
     background: linear-gradient(
-        159deg,
+        59deg,
         var(--color-cream, #EBE9E8) 0%,
         var(--color-cream, #EBE9E8) 33%,
         rgba(235,233,232,0.61) 41%,
