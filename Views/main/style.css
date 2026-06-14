@@ -598,7 +598,7 @@ section{
     background: linear-gradient(
         59deg,
         var(--color-cream, #EBE9E8) 0%,
-        var(--color-cream, #EBE9E8) 33%,
+        var(--color-cream, #EBE9E8) 27%,
         rgba(235,233,232,0.61) 41%,
         rgba(235,233,232,0.25) 47%,
         rgba(235,233,232,0) 50%
@@ -608,8 +608,8 @@ section{
     position: relative;
     z-index: 2;
     max-width: 1400px;
-    /* v9e: margin removed per user — wrapper hugs left edge so text content
-       sits inside the cream panel area (gradient anchored bottom-left). */
+    /* v9f: margin removed left/right (hug left edge) + 150px top offset */
+    margin-top: 150px;
     padding: calc(80px + 7rem) 6% 8rem;
     display: flex;
     align-items: center;
