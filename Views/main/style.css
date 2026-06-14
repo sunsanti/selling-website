@@ -595,14 +595,26 @@ section{
     inset: 0;
     z-index: 1;
     pointer-events: none;
-    background: linear-gradient(
-        59deg,
-        var(--color-cream, #EBE9E8) 0%,
-        var(--color-cream, #EBE9E8) 27%,
-        rgba(235,233,232,0.61) 41%,
-        rgba(235,233,232,0.25) 47%,
-        rgba(235,233,232,0) 50%
-    );
+    /* v9g: TWO stacked gradients. First (bottom fade) adds cream haze
+       to the lower portion of the image — covers the area BELOW the
+       buttons that was previously showing the apartment buildings. */
+    background:
+        linear-gradient(
+            180deg,
+            transparent 0%,
+            transparent 55%,
+            rgba(235,233,232,0.30) 72%,
+            rgba(235,233,232,0.70) 88%,
+            var(--color-cream, #EBE9E8) 100%
+        ),
+        linear-gradient(
+            59deg,
+            var(--color-cream, #EBE9E8) 0%,
+            var(--color-cream, #EBE9E8) 27%,
+            rgba(235,233,232,0.61) 41%,
+            rgba(235,233,232,0.25) 47%,
+            rgba(235,233,232,0) 50%
+        );
 }
 .home-content-wrapper {
     position: relative;
