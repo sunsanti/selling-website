@@ -62,15 +62,20 @@ window.onclick = function(event) {
 }
 
 function fillInfoPopup(){
-    document.getElementById("fill-popup").style.display = "flex";
+    const el = document.getElementById("fill-popup");
+    if (el) el.style.display = "flex";
 }
 
 function closeFillPopup(){
-    document.getElementById("fill-popup").style.display = "none";
+    const el = document.getElementById("fill-popup");
+    if (el) el.style.display = "none";
 }
 
-// Auto-open contact popup on first visit per session (delay 1.5s)
+// Auto-open contact popup on first visit per session (delay 1.5s).
+// Skipped entirely inside admin live-preview iframes (?preview=1) — the
+// popup should never appear over the Dashboard's preview panel.
 window.addEventListener('DOMContentLoaded', () => {
+    if (new URLSearchParams(window.location.search).get('preview') === '1') return;
     if (sessionStorage.getItem('fillPopupShown')) return;
     setTimeout(() => {
         fillInfoPopup();

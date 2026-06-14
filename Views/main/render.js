@@ -924,10 +924,11 @@ const PREVIEW_SCOPE = PREVIEW_PARAMS.get('scope') || '';
 
 function applyPreviewMode(scope) {
     const keepSelectorsByScope = {
-        settings: ['#home-section', '#purpose-invest'],   // header + home (logo, phone in header; main_image in home) + Why Invest section
+        settings: ['#home-section'],   // header + home (logo, phone in header; main_image in home)
         about: ['#about-us'],
         services: ['#services'],
-        footer: ['#footer']
+        footer: ['#footer'],
+        invest: ['#purpose-invest']   // v15: "Why Invest in Australia" section, own tab
     };
     const keep = new Set(keepSelectorsByScope[scope] || []);
     document.querySelectorAll('body > section').forEach(s => {
@@ -991,6 +992,7 @@ window.addEventListener('message', (event) => {
             // v11: also apply site-wide footer text + socials (driven by settings payload shape)
             renderSettings(data);
         }
+        else if (target === 'invest') renderSettings(data);
         // Resize after content change
         setTimeout(postPreviewHeight, 50);
     }

@@ -110,6 +110,7 @@ function switchSection(section) {
             break;
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
         case 'home-footer': loadHomeFooter(); loadFooterContent(); ensurePreviewLoaded('footer'); break;
+        case 'invest': loadInvestContent(); ensurePreviewLoaded('invest'); break;
         case 'videos': loadVideosAdmin(); break;
         case 'news': loadNewsAdmin(); break;
     }
@@ -171,37 +172,80 @@ async function loadDashboard() {
                 document.getElementById('main-image-remove-btn').style.display = 'none';
             }
             currentMainImageFile = null;
-
-            // v14: "Why Invest in Australia" section content
-            document.getElementById('setting-purpose-tagline').value = settingsData.data.purpose_tagline || '';
-            document.getElementById('setting-purpose-heading').value = settingsData.data.purpose_heading || '';
-            [1, 2, 3, 4].forEach(i => {
-                document.getElementById('setting-purpose-list-' + i).value = settingsData.data['purpose_list_' + i] || '';
-            });
-            document.getElementById('setting-purpose-cta-text').value = settingsData.data.purpose_cta_text || '';
-            document.getElementById('setting-purpose-video-caption').value = settingsData.data.purpose_video_caption || '';
-
-            // F06: Purpose-Invest video
-            window._currentPurposeThumb = settingsData.data.purpose_video_thumbnail || '';
-            document.getElementById('setting-purpose-video-url').value = settingsData.data.purpose_video_url || '';
-            // v12: Footer dynamic content fields are now in the Footer tab — not loaded here
-            const thumbVal = window._currentPurposeThumb;
-            const thumbImg = document.getElementById('current-purpose-thumb-img');
-            const thumbPh = document.getElementById('purpose-thumb-preview-placeholder');
-            const thumbRm = document.getElementById('purpose-thumb-remove-btn');
-            if (thumbVal && thumbImg) {
-                thumbImg.src = thumbVal.startsWith('/') ? thumbVal : '/' + thumbVal;
-                thumbImg.style.display = 'block';
-                if (thumbPh) thumbPh.style.display = 'none';
-                if (thumbRm) thumbRm.style.display = 'inline-flex';
-            } else if (thumbImg) {
-                thumbImg.style.display = 'none';
-                if (thumbPh) thumbPh.style.display = 'flex';
-                if (thumbRm) thumbRm.style.display = 'none';
-            }
         }
     } catch (error) {
         console.error('Error loading dashboard:', error);
+    }
+}
+
+// ===================== INVEST SECTION =====================
+// v15: "Why Invest in Australia" content + video now live in their own tab
+async function loadInvestContent() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        const result = await res.json();
+        if (!result.success || !result.data) return;
+        const s = result.data;
+
+        document.getElementById('setting-purpose-tagline').value = s.purpose_tagline || '';
+        document.getElementById('setting-purpose-heading').value = s.purpose_heading || '';
+        [1, 2, 3, 4].forEach(i => {
+            document.getElementById('setting-purpose-list-' + i).value = s['purpose_list_' + i] || '';
+        });
+        document.getElementById('setting-purpose-cta-text').value = s.purpose_cta_text || '';
+        document.getElementById('setting-purpose-video-caption').value = s.purpose_video_caption || '';
+
+        window._currentPurposeThumb = s.purpose_video_thumbnail || '';
+        document.getElementById('setting-purpose-video-url').value = s.purpose_video_url || '';
+
+        const thumbVal = window._currentPurposeThumb;
+        const thumbImg = document.getElementById('current-purpose-thumb-img');
+        const thumbPh = document.getElementById('purpose-thumb-preview-placeholder');
+        const thumbRm = document.getElementById('purpose-thumb-remove-btn');
+        if (thumbVal && thumbImg) {
+            thumbImg.src = thumbVal.startsWith('/') ? thumbVal : '/' + thumbVal;
+            thumbImg.style.display = 'block';
+            if (thumbPh) thumbPh.style.display = 'none';
+            if (thumbRm) thumbRm.style.display = 'inline-flex';
+        } else if (thumbImg) {
+            thumbImg.style.display = 'none';
+            if (thumbPh) thumbPh.style.display = 'flex';
+            if (thumbRm) thumbRm.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading invest content:', error);
+    }
+}
+
+async function saveInvestContent() {
+    const data = {
+        purpose_tagline: document.getElementById('setting-purpose-tagline').value,
+        purpose_heading: document.getElementById('setting-purpose-heading').value,
+        purpose_list_1: document.getElementById('setting-purpose-list-1').value,
+        purpose_list_2: document.getElementById('setting-purpose-list-2').value,
+        purpose_list_3: document.getElementById('setting-purpose-list-3').value,
+        purpose_list_4: document.getElementById('setting-purpose-list-4').value,
+        purpose_cta_text: document.getElementById('setting-purpose-cta-text').value,
+        purpose_video_caption: document.getElementById('setting-purpose-video-caption').value,
+        purpose_video_thumbnail: window._currentPurposeThumb || '',
+        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
+    };
+
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) {
+            showToast('Invest content saved successfully!', 'success');
+            refreshPreview('invest');
+        } else {
+            showToast(result.message || 'Error saving invest content', 'error');
+        }
+    } catch (error) {
+        showToast('Error saving invest content', 'error');
     }
 }
 
@@ -261,7 +305,7 @@ function setupSettingsUpload() {
                     if (img) { img.src = url; img.style.display = 'block'; }
                     if (ph) ph.style.display = 'none';
                     if (rm) rm.style.display = 'inline-flex';
-                    postPreviewData('settings');
+                    postPreviewData('invest');
                 }
             });
         });
@@ -337,19 +381,7 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
     const data = {
         logo: logoValue,
         phone: document.getElementById('setting-phone').value,
-        main_image: mainImageValue,
-        // v14: "Why Invest in Australia" section content
-        purpose_tagline: document.getElementById('setting-purpose-tagline').value,
-        purpose_heading: document.getElementById('setting-purpose-heading').value,
-        purpose_list_1: document.getElementById('setting-purpose-list-1').value,
-        purpose_list_2: document.getElementById('setting-purpose-list-2').value,
-        purpose_list_3: document.getElementById('setting-purpose-list-3').value,
-        purpose_list_4: document.getElementById('setting-purpose-list-4').value,
-        purpose_cta_text: document.getElementById('setting-purpose-cta-text').value,
-        purpose_video_caption: document.getElementById('setting-purpose-video-caption').value,
-        // F06: Purpose-Invest video keys
-        purpose_video_thumbnail: window._currentPurposeThumb || '',
-        purpose_video_url: document.getElementById('setting-purpose-video-url').value.trim()
+        main_image: mainImageValue
     };
 
     try {
@@ -1257,7 +1289,12 @@ function gatherPreviewData(target) {
             footer_linkedin_url: v('setting-footer-linkedin'),
             footer_youtube_url:  v('setting-footer-youtube'),
             footer_tiktok_url:   v('setting-footer-tiktok'),
-            // v14: "Why Invest in Australia" section content
+            stats
+        };
+    }
+    if (target === 'invest') {
+        const v = id => (document.getElementById(id) || {}).value || '';
+        return {
             purpose_tagline:       v('setting-purpose-tagline'),
             purpose_heading:       v('setting-purpose-heading'),
             purpose_list_1:        v('setting-purpose-list-1'),
@@ -1267,7 +1304,7 @@ function gatherPreviewData(target) {
             purpose_cta_text:      v('setting-purpose-cta-text'),
             purpose_video_caption: v('setting-purpose-video-caption'),
             purpose_video_thumbnail: window._currentPurposeThumb || '',
-            stats
+            purpose_video_url:     v('setting-purpose-video-url')
         };
     }
     if (target === 'about') {
@@ -1310,7 +1347,7 @@ function gatherPreviewData(target) {
 
         // v13: Our Services 3 cards from About tab
         const svcs = {};
-        document.querySelectorAll('#about-services-cards .settings-panel').forEach(card => {
+        document.querySelectorAll('#about-services-cards .service-card-col').forEach(card => {
             const i = parseInt(card.dataset.slot, 10);
             svcs[`about_service_${i}_icon`]  = (card.querySelector('.as-icon')  || {}).value || '';
             svcs[`about_service_${i}_title`] = (card.querySelector('.as-title') || {}).value || '';
@@ -1388,7 +1425,8 @@ const pushPreviewDebounced = {
     settings: debounce(() => postPreviewData('settings'), 200),
     about: debounce(() => postPreviewData('about'), 200),
     services: debounce(() => postPreviewData('services'), 200),
-    footer: debounce(() => postPreviewData('footer'), 200)
+    footer: debounce(() => postPreviewData('footer'), 200),
+    invest: debounce(() => postPreviewData('invest'), 200)
 };
 
 // Listen for iframe messages (ready + auto-resize)
@@ -1399,8 +1437,8 @@ window.addEventListener('message', (event) => {
         PREVIEW_READY.add(msg.scope);
         postPreviewData(msg.scope);   // push initial state
     } else if (msg.type === 'preview-height') {
-        // Auto-resize all 4 iframes by matching the source frame
-        ['settings', 'about', 'services', 'footer'].forEach(t => {
+        // Auto-resize all 5 iframes by matching the source frame
+        ['settings', 'about', 'services', 'footer', 'invest'].forEach(t => {
             const ifr = document.getElementById('preview-iframe-' + t);
             if (ifr && ifr.contentWindow === event.source && msg.height) {
                 ifr.style.height = Math.min(msg.height, 1200) + 'px';
@@ -1415,12 +1453,12 @@ document.addEventListener('DOMContentLoaded', () => {
     const phone = document.getElementById('setting-phone');
     if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
 
-    // v14: "Why Invest in Australia" section content — push to settings iframe (/main)
+    // v15: "Why Invest in Australia" section content — push to invest iframe (/main)
     ['setting-purpose-tagline','setting-purpose-heading','setting-purpose-list-1',
      'setting-purpose-list-2','setting-purpose-list-3','setting-purpose-list-4',
      'setting-purpose-cta-text','setting-purpose-video-caption','setting-purpose-video-url'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) el.addEventListener('input', pushPreviewDebounced.settings);
+        if (el) el.addEventListener('input', pushPreviewDebounced.invest);
     });
 
     // v12: Footer dynamic content (now in Footer tab) — push to settings + footer iframes
@@ -1469,7 +1507,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'dashboard': 'settings',
         'home-about': 'about',
         'home-services': 'services',
-        'home-footer': 'footer'
+        'home-footer': 'footer',
+        'invest': 'invest'
     };
     const active = document.querySelector('.content-section.active');
     if (active) {
@@ -1558,12 +1597,14 @@ async function loadAboutServices() {
         const json = await res.json();
         if (!json.success) return;
         const d = json.data;
-        wrap.innerHTML = [1, 2, 3].map(i => {
+        // v15: all 3 services share ONE panel, side-by-side, so the About
+        // tab doesn't stack 3 full-width cards (was "too long").
+        wrap.innerHTML = '<div class="settings-panel"><div class="service-cards-grid">' + [1, 2, 3].map(i => {
             const opts = ABOUT_SERVICE_ICONS.map(([cls, lbl]) =>
                 `<option value="${cls}">${lbl} (${cls})</option>`).join('');
             return `
-                <div class="settings-panel" data-slot="${i}" style="margin-bottom:16px">
-                    <h2 style="font-size:1.5rem">Service ${i}</h2>
+                <div class="service-card-col" data-slot="${i}">
+                    <h2>Service ${i}</h2>
                     <div class="form-group">
                         <label>Icon</label>
                         <div style="display:flex;gap:1rem;align-items:center">
@@ -1580,7 +1621,7 @@ async function loadAboutServices() {
                         <textarea class="as-desc" rows="3" maxlength="1000"></textarea>
                     </div>
                 </div>`;
-        }).join('');
+        }).join('') + '</div></div>';
         [1, 2, 3].forEach(i => {
             const card = wrap.querySelector(`[data-slot="${i}"]`);
             const icon  = d[`about_service_${i}_icon`]  || 'fa-circle';
