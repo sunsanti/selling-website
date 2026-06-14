@@ -804,7 +804,7 @@ section{
     display: grid;
     grid-template-columns: repeat(4, 1fr) auto;
     gap: 1.2rem;
-    align-items: end;
+    align-items: center;              /* v10b: vertically center fields with button */
     background: transparent;
     box-shadow: none;
     padding: 0;
@@ -814,10 +814,18 @@ section{
     overflow: visible;
     width: 100%;
 }
-/* hairline divider between fields (replaces the wrap's outer divider) */
+/* hairline divider between fields + center label/select inside cell */
 .home-section .search-field {
     padding: 0.3rem 1rem;
     border-right: 1px solid #ececec;
+    align-items: center;              /* v10b: horizontally center label+select */
+    text-align: center;
+}
+.home-section .search-field label { text-align: center; }
+.home-section .search-field select {
+    text-align: center;
+    text-align-last: center;
+    background-position: right 0 center;
 }
 .home-section .property-search > :last-child { border-right: none; }
 .home-section .btn-search-property {
