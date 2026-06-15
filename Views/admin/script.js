@@ -2063,55 +2063,82 @@ async function loadAboutLeadership() {
     } catch (e) { console.error('loadAboutLeadership:', e); }
 }
 
-// v13: Team editor — 6 fixed slots (team_members table)
+// v13 / v22: Team editor — dynamic list (add/remove members), team_members table
 async function loadAboutTeam() {
     const wrap = document.getElementById('about-team-cards');
     if (!wrap) return;
     try {
         const res = await fetch('/api/admin/team');
         const { data } = await res.json();
-        wrap.innerHTML = '';
-        (data || []).forEach(member => {
-            const slot = member.slot;
-            const card = document.createElement('div');
-            card.className = 'settings-panel';
-            card.style.marginBottom = '16px';
-            card.dataset.slot = slot;
-            card.innerHTML = ''
-                + `<h2 style="font-size:1.5rem"><i class="fas fa-user"></i> Member ${slot}</h2>`
-                + avatarPickerHTML('Photo')
-                + '<div class="form-row">'
-                + '  <div class="form-group"><label>Name</label>'
-                + '    <input type="text" class="at-name" maxlength="255"></div>'
-                + '  <div class="form-group"><label>Role</label>'
-                + '    <input type="text" class="at-role" maxlength="255"></div>'
-                + '</div>'
-                + '<div class="form-actions">'
-                + '  <button type="button" class="btn-save at-save-btn"><i class="fas fa-save"></i> Save</button>'
-                + '</div>';
-            wrap.appendChild(card);
-            card.querySelector('.at-name').value   = member.name || '';
-            card.querySelector('.at-role').value   = member.role || '';
-            wireAvatarPicker(card, member.avatar_path || '', () => pushPreviewDebounced.about());
-            card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
-            card.querySelector('.at-save-btn').addEventListener('click', async () => {
-                const payload = {
-                    name:   card.querySelector('.at-name').value,
-                    role:   card.querySelector('.at-role').value,
-                    avatar_path: card.dataset.avatarPath || ''
-                };
+        renderAboutTeamCards(data || []);
+    } catch (e) { console.error('loadAboutTeam:', e); }
+}
+
+function renderAboutTeamCards(members) {
+    const wrap = document.getElementById('about-team-cards');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    members.forEach((member, i) => {
+        const id = member.id;
+        const card = document.createElement('div');
+        card.className = 'settings-panel office-card-admin';
+        card.dataset.id = id;
+        card.innerHTML = ''
+            + `<h2 style="font-size:1.5rem"><span><i class="fas fa-user"></i> Member ${i + 1}</span> <button type="button" class="ao-remove" title="Remove member"><i class="fas fa-times"></i></button></h2>`
+            + avatarPickerHTML('Photo')
+            + '<div class="form-row">'
+            + '  <div class="form-group"><label>Name</label>'
+            + '    <input type="text" class="at-name" maxlength="255"></div>'
+            + '  <div class="form-group"><label>Role</label>'
+            + '    <input type="text" class="at-role" maxlength="255"></div>'
+            + '</div>'
+            + '<div class="form-actions">'
+            + '  <button type="button" class="btn-save at-save-btn"><i class="fas fa-save"></i> Save</button>'
+            + '</div>';
+        wrap.appendChild(card);
+        card.querySelector('.at-name').value   = member.name || '';
+        card.querySelector('.at-role').value   = member.role || '';
+        wireAvatarPicker(card, member.avatar_path || '', () => pushPreviewDebounced.about());
+        card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
+        card.querySelector('.at-save-btn').addEventListener('click', async () => {
+            const payload = {
+                name:   card.querySelector('.at-name').value,
+                role:   card.querySelector('.at-role').value,
+                avatar_path: card.dataset.avatarPath || ''
+            };
+            try {
+                const r = await fetch('/api/admin/team/' + id, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const j = await r.json();
+                showToast(j.message || (j.success ? 'Saved' : 'Failed'), j.success ? 'success' : 'error');
+                if (j.success) refreshPreview('about');
+            } catch (e) { showToast('Error: ' + e.message, 'error'); }
+        });
+        card.querySelector('.ao-remove').addEventListener('click', () => {
+            confirmAction('Xóa thành viên này khỏi Our Team?', async () => {
                 try {
-                    const r = await fetch('/api/admin/team/' + slot, {
-                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
-                    });
+                    const r = await fetch('/api/admin/team/' + id, { method: 'DELETE' });
                     const j = await r.json();
-                    showToast(j.message || (j.success ? 'Saved' : 'Failed'), j.success ? 'success' : 'error');
-                    if (j.success) refreshPreview('about');
+                    showToast(j.message || (j.success ? 'Đã xóa' : 'Failed'), j.success ? 'success' : 'error');
+                    if (j.success) { await loadAboutTeam(); refreshPreview('about'); }
                 } catch (e) { showToast('Error: ' + e.message, 'error'); }
             });
         });
-    } catch (e) { console.error('loadAboutTeam:', e); }
+    });
+}
+
+async function addAboutTeamMember() {
+    try {
+        const r = await fetch('/api/admin/team', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: '', role: '', avatar_path: '' })
+        });
+        const j = await r.json();
+        if (j.success) { await loadAboutTeam(); refreshPreview('about'); }
+        else showToast(j.message || 'Failed', 'error');
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
 }
 
 async function loadHomeAbout() {

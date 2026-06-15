@@ -178,9 +178,11 @@ app.get('/api/admin/footer-persons', homeContentController.getFooterPersons);
 app.get('/api/admin/footer-persons/:slot', homeContentController.getFooterPersonBySlot);
 app.put('/api/admin/footer-persons/:slot', homeContentController.updateFooterPerson);
 
-// v13: /about Our Team
+// v13 / v22: /about Our Team (dynamic add/remove)
 app.get('/api/admin/team', homeContentController.getTeamMembers);
-app.put('/api/admin/team/:slot', homeContentController.updateTeamMember);
+app.post('/api/admin/team', homeContentController.createTeamMember);
+app.put('/api/admin/team/:id', homeContentController.updateTeamMember);
+app.delete('/api/admin/team/:id', requireAdmin, homeContentController.deleteTeamMember);
 
 app.get('/api/admin/media', mediaController.getMedia);
 

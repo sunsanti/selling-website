@@ -469,10 +469,15 @@
             </form>
             </div>
 
-            <!-- v13: Our Team editor (6 slots, team_members table) -->
+            <!-- v13 / v22 / v23: Our Team editor — dynamic list (team_members table), 2 cards per row -->
             <div class="sub-tab-panel" data-subtab-group="about" data-subtab-panel="about-team">
-            <div class="form-section-divider"><span><i class="fas fa-users"></i> /about — Our Team (6 members)</span></div>
-            <div id="about-team-cards"></div>
+            <div class="form-section-divider"><span><i class="fas fa-users"></i> /about — Our Team</span></div>
+            <div class="settings-panel">
+                <div id="about-team-cards" class="team-cards-grid"></div>
+                <div class="form-actions" style="justify-content:flex-start; margin-top:16px">
+                    <button type="button" class="btn-add" onclick="addAboutTeamMember()"><i class="fas fa-plus"></i> Add Member</button>
+                </div>
+            </div>
             </div>
 
             <!-- Live Preview — /about page -->

@@ -133,19 +133,47 @@ const getTeamMembers = async (req, res) => {
 };
 const updateTeamMember = async (req, res) => {
     try {
-        const slot = parseInt(req.params.slot, 10);
+        const id = parseInt(req.params.id, 10);
         const { name, role, avatar_path } = req.body;
-        const ok = await teamMemberModel.updateBySlot(slot, { name, role, avatar_path });
+        const ok = await teamMemberModel.updateById(id, { name, role, avatar_path });
         if (!ok) return res.status(400).json({ success: false, message: 'Không có thay đổi nào' });
         auditLogModel.log({
-            req, action: 'TEAM_MEMBER_UPDATE', target_type: 'team_member', target_id: slot,
+            req, action: 'TEAM_MEMBER_UPDATE', target_type: 'team_member', target_id: id,
             details: { fields: Object.keys(req.body || {}) }
         });
         res.json({ success: true, message: 'Cập nhật thành công' });
     } catch (err) {
         console.error('updateTeamMember:', err.message);
-        const isValidation = err.message.startsWith('slot must');
+        const isValidation = err.message.startsWith('id must');
         res.status(isValidation ? 400 : 500).json({ success: false, message: isValidation ? err.message : 'Lỗi server' });
+    }
+};
+
+// v22: dynamic add/remove for Our Team members
+const createTeamMember = async (req, res) => {
+    try {
+        const { name, role, avatar_path } = req.body;
+        const id = await teamMemberModel.create({ name, role, avatar_path });
+        auditLogModel.log({
+            req, action: 'TEAM_MEMBER_CREATE', target_type: 'team_member', target_id: id,
+            details: { name }
+        });
+        res.json({ success: true, message: 'Đã thêm thành viên', data: { id } });
+    } catch (err) {
+        console.error('createTeamMember:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+const deleteTeamMember = async (req, res) => {
+    try {
+        const id = parseInt(req.params.id, 10);
+        const ok = await teamMemberModel.remove(id);
+        if (!ok) return res.status(404).json({ success: false, message: 'Không tìm thấy thành viên' });
+        auditLogModel.log({ req, action: 'TEAM_MEMBER_DELETE', target_type: 'team_member', target_id: id });
+        res.json({ success: true, message: 'Đã xóa thành viên' });
+    } catch (err) {
+        console.error('deleteTeamMember:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
 
@@ -153,6 +181,6 @@ module.exports = {
     getAbout, updateAbout,
     getServices, getServiceBySlot, updateService,
     getFooterPersons, getFooterPersonBySlot, updateFooterPerson,
-    // v13
-    getTeamMembers, updateTeamMember
+    // v13 / v22
+    getTeamMembers, updateTeamMember, createTeamMember, deleteTeamMember
 };
