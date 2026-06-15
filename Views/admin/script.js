@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     loadHomeAbout();
     ensurePreviewLoaded('settings');
     setupNavigation();
+    setupSubTabs();
     setupForms();
     setupSettingsUpload();
 
@@ -136,6 +137,26 @@ function setupNavigation() {
             switchSection(section);
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             item.classList.add('active');
+        });
+    });
+}
+
+// v20: secondary sub-navbar inside a content-section. Clicking a
+// .sub-nav-item shows the matching .sub-tab-panel and hides its siblings
+// within the same data-subtab-group. Live Preview / always-visible panels
+// live outside .sub-tab-panel and are unaffected.
+function setupSubTabs() {
+    document.querySelectorAll('.sub-nav').forEach(nav => {
+        const group = nav.dataset.subtabGroup;
+        nav.querySelectorAll('.sub-nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.dataset.subtab;
+                nav.querySelectorAll('.sub-nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll(`.sub-tab-panel[data-subtab-group="${group}"]`).forEach(p => {
+                    p.classList.toggle('active', p.dataset.subtabPanel === target);
+                });
+            });
         });
     });
 }

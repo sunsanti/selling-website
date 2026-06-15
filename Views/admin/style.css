@@ -141,6 +141,52 @@ body {
     color: #2c3e50;
 }
 
+/* ================ SUB-TABS (v20) ================ */
+/* Secondary navbar inside a content-section, toggling .sub-tab-panel
+   wrappers. Live Preview / always-visible panels sit outside these. */
+.sub-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.sub-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #7f8c8d;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+}
+
+.sub-nav-item:hover {
+    color: #2c3e50;
+    background: rgba(52, 152, 219, 0.06);
+}
+
+.sub-nav-item.active {
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+.sub-tab-panel {
+    display: none;
+}
+
+.sub-tab-panel.active {
+    display: block;
+}
+
 /* ================ DASHBOARD ================ */
 .dashboard-stats {
     display: grid;
