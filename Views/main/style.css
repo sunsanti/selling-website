@@ -3391,14 +3391,19 @@ img{
     display: flex;
     align-items: flex-start;
     gap: 1.2rem;
-    padding-bottom: 1.6rem;
-    border-bottom: 1px solid rgba(255,255,255,0.1);
-    background: transparent;
+    padding: 1.6rem;
+    border: 1px solid rgba(255,255,255,0.1);
+    border-radius: 12px;
+    box-shadow: none;
+    transition: none;
+    background: rgba(255,255,255,0.03);
     flex-direction: row;
+    flex: none;
     width: 100%;
+    max-width: none;
     margin: 0;
 }
-#footer-col-contact .footer-person:last-child { border-bottom: none; padding-bottom: 0; }
+#footer-col-contact .footer-person:hover { transform: none; box-shadow: none; }
 /* v2: text-only contact-our-team — hide avatar in footer */
 #footer-col-contact .footer-person .img-footer { display: none; }
 #footer-col-contact .footer-person .line { display: none; }
