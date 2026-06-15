@@ -33,12 +33,50 @@ const TABLES = [
             )
         `,
         seed: [
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['logo', 'LOGO']],
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['phone', 'phone number']],
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['main_image', '/uploads/service3.jpg']],
+            // v23 — full snapshot of current settings (38 keys)
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['logo', '/uploads/1779806261352-521765523.jpg']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['phone', '999']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['main_image', '/uploads/1779806261352-521765523.jpg']],
             // F06 — Purpose-Invest video keys
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_url', '']],
-            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_thumbnail', '']]
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_url', '/uploads/1781444338485-487224072.mp4']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_thumbnail', '/uploads/1779791405552-226752425.jpg']],
+            // v11 — Footer dynamic content
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_desc', 'Helping investors and homeowners across Australia build long-term wealth through trusted real-estate guidance.']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_address', 'Level 12, 1 Market Street, Sydney NSW 2000, Australia']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_facebook_url', '']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_linkedin_url', '']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_youtube_url', '']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_tiktok_url', '']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['footer_copyright', '© 2026 Sealand Property | Made By TAOWORK']],
+            // v12 — /about page editable content
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_hero_tag', 'SEALAND PROPERTY']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_hero_title', 'ABOUT US']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_mission', 'Our core mission is to become a trusted agency for buyers, sellers and investors looking to achieve property ownership in Australia — connecting people, knowledge and opportunity across Sydney, Melbourne, Brisbane and the Gold Coast.']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_office_sydney_address', 'Level 20, 135 King Street, Sydney NSW 2000']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_office_sydney_phone', '+61 432 285 678']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_office_sydney_email', 'hello@sealandproperty.com.au']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_office_hcm_address', 'Level 18, 72 Le Thanh Ton, Ben Nghe Ward, District 1, HCMC']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_office_hcm_phone', '+84 905 160 805']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_office_hcm_email', 'vn@sealandproperty.com.au']],
+            // v13 — /about Our Services (3 cards)
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_1_icon', 'fa-house-chimney']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_1_title', 'Real Estate Consultation & Brokerage']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_1_desc', 'Buyer agent advisory, off-the-plan apartments, established homes and investment-grade properties — independent advice grounded in market data.']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_2_icon', 'fa-scale-balanced']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_2_title', 'Legal & Financial Services Support']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_2_desc', 'Conveyancing referrals, mortgage broker introductions, FIRB compliance and finance structuring for overseas investors.']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_3_icon', 'fa-suitcase-rolling']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_3_title', 'Resettlement Assistance']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['about_service_3_desc', 'Settling-in support for overseas families relocating to Australia — schools, neighbourhoods, banking, healthcare and post-purchase management.']],
+            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_tagline', 'WHY INVEST IN AUSTRALIA']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_heading', 'A Strong Market.\nA Brighter Future.']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_list_1', 'Stable economy and secure legal system']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_list_2', 'High rental demand and low vacancy rates']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_list_3', 'Capital growth in key locations']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_list_4', 'Foreign ownership opportunities']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_cta_text', 'LEARN MORE ABOUT AUSTRALIA']],
+            ['INSERT IGNORE INTO settings (setting_key, setting_value) VALUES (?, ?)', ['purpose_video_caption', "Discover why Australia is one of the world's most trusted property markets."]]
         ],
         summaryCols: ['setting_key', 'setting_value']
     },
@@ -60,11 +98,33 @@ const TABLES = [
                 display_order INT DEFAULT 0,
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                price VARCHAR(50) NOT NULL DEFAULT '',
+                beds VARCHAR(20) NOT NULL DEFAULT '',
+                baths VARCHAR(20) NOT NULL DEFAULT '',
+                cars VARCHAR(20) NOT NULL DEFAULT '',
+                address VARCHAR(255) NOT NULL DEFAULT '',
+                state VARCHAR(20) NOT NULL DEFAULT '',
+                property_type VARCHAR(50) NOT NULL DEFAULT '',
+                area_label VARCHAR(100) NOT NULL DEFAULT '',
+                is_featured TINYINT(1) NOT NULL DEFAULT 0,
                 INDEX idx_projects_area_status (area, status),
-                INDEX idx_projects_display_order (display_order)
+                INDEX idx_projects_display_order (display_order),
+                INDEX idx_projects_featured (is_featured)
             )
         `,
-        seed: [],
+        seed: [
+            // v23 — full snapshot of current projects (ids preserved for tableimages FK)
+            ['INSERT IGNORE INTO projects (id, name, area, square_meters, category, year, style, small_content, image_path, status, display_order, price, beds, baths, cars, address, state, property_type, area_label, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [8, 'Botanica Test', 'sydney', 75, 'Apartment', 2026, 'Modern', 'yet so', '/uploads/service1.jpg', 'active', 1, 'From $999,000', '2-3', '2', '1', '99 Smoke Test Ave, Sydney', 'NSW', 'apartment', 'SYDNEY', 1]],
+            ['INSERT IGNORE INTO projects (id, name, area, square_meters, category, year, style, small_content, image_path, status, display_order, price, beds, baths, cars, address, state, property_type, area_label, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [9, 'Test', 'sydney', 20, 'Apartment', 2026, 'Modern', 'I just want to say I just want to sayI just want to say I just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to sayI just want to say', '/uploads/project2.jpg', 'active', 2, 'From $200,000', '10', '1', '1', 'abc', 'WA', 'apartment', 'SYDNEY', 0]],
+            ['INSERT IGNORE INTO projects (id, name, area, square_meters, category, year, style, small_content, image_path, status, display_order, price, beds, baths, cars, address, state, property_type, area_label, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [10, 'test2', 'melbourne', 30, 'LIVING ROOM', 2025, 'MODERN', 'Best in AUS', '/uploads/project1.jpg', 'active', 0, 'From $200,000', '2', '3', '1', 'address here', 'TAS', 'townhouse', 'MELBOURNE', 1]],
+            ['INSERT IGNORE INTO projects (id, name, area, square_meters, category, year, style, small_content, image_path, status, display_order, price, beds, baths, cars, address, state, property_type, area_label, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [11, 'test3', 'goldcoast', 25, 'Apartment', 2020, 'MODERN', 'Testing here\n', '/uploads/service3_3.jpg', 'active', 0, 'From $600,000', '2', '1', '1', 'address here2', 'SA', 'house', 'GOLD COAST', 1]],
+            ['INSERT IGNORE INTO projects (id, name, area, square_meters, category, year, style, small_content, image_path, status, display_order, price, beds, baths, cars, address, state, property_type, area_label, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
+                [12, 'test4', 'brisbane', 20, 'BEDROOM ROOM', 2025, 'MODERN', '', '/uploads/service3_3.jpg', 'active', 0, 'From $600,000', '2', '1', '2', 'address here3', 'WA', 'house', 'BRISBANE', 1]]
+        ],
         summaryCols: ['id', 'name', 'area', 'status']
     },
 
@@ -81,7 +141,30 @@ const TABLES = [
                 FOREIGN KEY (project_id) REFERENCES projects(id) ON DELETE CASCADE
             )
         `,
-        seed: [],
+        seed: [
+            // v23 — full snapshot of current tableimages (FK → projects ids 8-12 above)
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [1, 8, '/uploads/service1.jpg', 1]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [2, 8, '/uploads/service2.jpg', 2]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [3, 8, '/uploads/service3_3.jpg', 3]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [4, 8, '/uploads/main_image.jpg', 4]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [5, 9, '/uploads/project2.jpg', 1]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [6, 9, '/uploads/project1_1.jpg', 2]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [7, 9, '/uploads/project1.jpg', 3]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [8, 10, '/uploads/project1.jpg', 1]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [9, 10, '/uploads/main_image.jpg', 2]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [10, 10, '/uploads/fillinfo.jpg', 3]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [11, 10, '/uploads/project4.jpg', 4]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [12, 11, '/uploads/service3_3.jpg', 1]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [13, 11, '/uploads/service2.jpg', 2]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [14, 11, '/uploads/service1.jpg', 3]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [15, 11, '/uploads/main_image.jpg', 4]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [16, 12, '/uploads/service3_3.jpg', 1]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [17, 12, '/uploads/project1_1.jpg', 2]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [18, 12, '/uploads/project1.jpg', 3]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [19, 12, '/uploads/main_image.jpg', 4]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [20, 12, '/uploads/service1.jpg', 5]],
+            ['INSERT IGNORE INTO tableimages (id, project_id, image_path, display_order) VALUES (?, ?, ?, ?)', [21, 12, '/uploads/project3.jpg', 6]]
+        ],
         summaryCols: ['id', 'project_id', 'image_path']
     },
 
@@ -115,9 +198,14 @@ const TABLES = [
             )
         `,
         seed: [
+            // v23 — full snapshot of current accounts
             [
                 'INSERT IGNORE INTO accounts (username, password, name, role) VALUES (?, ?, ?, ?)',
-                ['admin', '$2b$10$yfdejtIDbvDGhuudguCFVOZTBz.U1EC0vDNZ1LNmsURHW7vEutvQa', 'Administrator', 'admin']
+                ['admin', '$2b$10$UVY54S1hF/8DRTTBYhHWzexIAszIGxu52XYb.KXQnwd3ALRUyMlCe', 'Administrator', 'admin']
+            ],
+            [
+                'INSERT IGNORE INTO accounts (username, password, name, role) VALUES (?, ?, ?, ?)',
+                ['test', '$2b$10$SgDZ0AgCRdiCU.0rU78o3OaYG68B8AKz/U3qsjAbg6SNeGN7oPWcO', 'Employee', 'employee']
             ]
         ],
         summaryCols: ['id', 'username', 'name', 'role']
@@ -136,14 +224,10 @@ const TABLES = [
             )
         `,
         seed: [
+            // v23 — full snapshot of current about_section (cleared by admin)
             [
                 'INSERT IGNORE INTO about_section (id, banner, paragraph_left, paragraph_right) VALUES (?, ?, ?, ?)',
-                [
-                    1,
-                    'MANY BEAUTIFUL PLACES ARE WAITING FOR YOU TO SEE',
-                    'We are a passionate real estate team dedicated to developing modern and sustainable properties that blend aesthetic design with practical functionality, creating high-quality living and working spaces that offer lasting value and reflect distinctive character.',
-                    'With a strong commitment to quality and professionalism, we collaborate closely with our clients to turn their real estate goals into reality. From project planning and development to final delivery, we focus on exceeding expectations and providing properties that offer comfort, value, and long-term satisfaction.'
-                ]
+                [1, '', '', '']
             ]
         ],
         summaryCols: ['id', 'banner']
@@ -161,11 +245,11 @@ const TABLES = [
             )
         `,
         seed: [
-            // F04 Premium labels — admin can override via UI; INSERT IGNORE skips existing rows
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [1, '500+', 'Happy Clients']],
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [2, '$300M+', 'Property Sold']],
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [3, '10+', 'Years Experience']],
-            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [4, '50+', 'Projects Completed']]
+            // v23 — full snapshot of current about_stats (admin-edited)
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [1, '20+', 'years of experience']],
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [2, '200+', 'projects have done']],
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [3, '7+', 'awards received']],
+            ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [4, '15+', 'team members']]
         ],
         summaryCols: ['slot', 'num', 'label']
     },
@@ -179,30 +263,32 @@ const TABLES = [
                 title VARCHAR(255) NOT NULL DEFAULT '',
                 description TEXT NOT NULL,
                 image_path VARCHAR(255) NOT NULL DEFAULT '',
-                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+                updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                icon VARCHAR(50) NOT NULL DEFAULT ''
             )
         `,
         seed: [
+            // v23 — full snapshot of current services (icon column included)
             [
-                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
-                [1, 'See more about our business', 'Our company specializes in buying and selling real estate with a focus on value and long-term investment.', '/uploads/service1.jpg']
+                'INSERT IGNORE INTO services (slot, title, description, image_path, icon) VALUES (?, ?, ?, ?, ?)',
+                [1, 'See more about our business', 'Our company specializes in buying and selling real estate with a focus on value and long-term investment.', '/uploads/service1.jpg', 'fa-house']
             ],
             [
-                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
-                [2, 'Take a look at our projects', 'Take a look at our projects and discover properties designed for value, quality, and long-term investment.', '/uploads/service2.jpg']
+                'INSERT IGNORE INTO services (slot, title, description, image_path, icon) VALUES (?, ?, ?, ?, ?)',
+                [2, 'Take a look at our projects', 'Take a look at our projects and discover properties designed for value, quality, and long-term investment.', '/uploads/service2.jpg', 'fa-chart-line']
             ],
             [
-                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
-                [3, 'Be confident to be one of our partner', 'Sell or buy properties from our company', '/uploads/service3_3.jpg']
+                'INSERT IGNORE INTO services (slot, title, description, image_path, icon) VALUES (?, ?, ?, ?, ?)',
+                [3, 'Be confident to be one of our partner', 'Sell or buy properties from our company', '/uploads/service3_3.jpg', 'fa-building']
             ],
             // F07: 2 more slots for 5-card grid (Loan & Finance + FIRB Support)
             [
-                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
-                [4, 'Loan & Finance', 'Connect with trusted mortgage brokers to secure your investment.', '']
+                'INSERT IGNORE INTO services (slot, title, description, image_path, icon) VALUES (?, ?, ?, ?, ?)',
+                [4, 'Loan & Finance', 'Connect with trusted mortgage brokers to secure your investment.', '', 'fa-hand-holding-dollar']
             ],
             [
-                'INSERT IGNORE INTO services (slot, title, description, image_path) VALUES (?, ?, ?, ?)',
-                [5, 'FIRB Support', 'We help overseas buyers comply with Foreign Investment Review Board rules.', '']
+                'INSERT IGNORE INTO services (slot, title, description, image_path, icon) VALUES (?, ?, ?, ?, ?)',
+                [5, 'FIRB Support', 'We help overseas buyers comply with Foreign Investment Review Board rules.', '', 'fa-shield-halved']
             ]
         ],
         summaryCols: ['slot', 'title']
@@ -222,26 +308,30 @@ const TABLES = [
                 status ENUM('active','inactive') DEFAULT 'active',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                external_url VARCHAR(500) NOT NULL DEFAULT '',
+                is_featured TINYINT(1) NOT NULL DEFAULT 0,
                 INDEX idx_news_status_order (status, display_order),
-                INDEX idx_news_created (created_at DESC)
+                INDEX idx_news_created (created_at DESC),
+                INDEX idx_news_featured (is_featured)
             )
         `,
         seed: [
-            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+            // v23 — full snapshot of current news (external_url + is_featured included)
+            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order, external_url, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [1, 'THE ALBANESE GOVERNMENT WILL DELIVER NEW HOUSING POLICY',
                  'New federal policy expected to boost foreign investment in the Australian property market.',
                  'The Albanese government has announced a new national housing policy designed to stimulate foreign investment while protecting first-home buyers.\n\nThe policy includes simplified FIRB processes, additional incentives for build-to-rent developments, and stronger oversight of foreign ownership in residential markets.\n\nIndustry analysts expect the changes to take effect in the second half of 2026.',
-                 '/uploads/main_image.jpg', 1]],
-            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                 '/uploads/main_image.jpg', 1, 'https://www.abc.net.au/news/test', 1]],
+            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order, external_url, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [2, 'SYDNEY HOUSE PRICES UP 8% IN Q1 2026',
                  'Sydney property market shows strong growth despite global headwinds and rising rates.',
                  'Sydney property prices rose 8% in the first quarter of 2026, outperforming all other capital cities. Key drivers include inner-city apartment demand, limited new supply, and renewed international migration.\n\nAnalysts predict continued growth through Q2.',
-                 '/uploads/main_image.jpg', 2]],
-            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order) VALUES (?, ?, ?, ?, ?, ?)',
+                 '/uploads/main_image.jpg', 2, '', 1]],
+            ['INSERT IGNORE INTO news (id, title, summary, content, cover_image, display_order, external_url, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
                 [3, 'FIRB UPDATES RULES FOR OVERSEAS BUYERS',
                  'New compliance requirements coming into effect July 2026 — what investors need to know.',
                  'The Foreign Investment Review Board has tightened compliance rules for overseas property buyers. Changes include mandatory pre-approval for off-the-plan apartments, stricter source-of-funds checks, and updated thresholds.\n\nContact our team for personalised advice.',
-                 '/uploads/main_image.jpg', 3]]
+                 '/uploads/main_image.jpg', 3, '', 1]]
         ],
         summaryCols: ['id', 'title', 'status']
     },
@@ -260,17 +350,18 @@ const TABLES = [
                 status ENUM('active','inactive') DEFAULT 'active',
                 created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+                is_featured TINYINT(1) NOT NULL DEFAULT 0,
                 INDEX idx_videos_status_order (status, display_order),
-                INDEX idx_videos_created (created_at DESC)
+                INDEX idx_videos_created (created_at DESC),
+                INDEX idx_videos_featured (is_featured)
             )
         `,
         seed: [
-            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order) VALUES (?, ?, ?, ?, ?, ?)',
-                [1, 'SYDNEY MARKET UPDATE',   '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/1', '12.4K', 1]],
-            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order) VALUES (?, ?, ?, ?, ?, ?)',
-                [2, 'INVESTMENT TIPS 2026',   '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/2', '8.2K',  2]],
-            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order) VALUES (?, ?, ?, ?, ?, ?)',
-                [3, 'MELBOURNE INSIDE LOOK',  '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/3', '15.1K', 3]]
+            // v23 — full snapshot of current videos (id=2 was removed by admin; is_featured included)
+            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [1, 'SYDNEY MARKET UPDATE',   '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/1', '12.4K', 1, 1]],
+            ['INSERT IGNORE INTO videos (id, title, thumbnail_path, tiktok_url, views_count, display_order, is_featured) VALUES (?, ?, ?, ?, ?, ?, ?)',
+                [3, 'MELBOURNE INSIDE LOOK',  '/uploads/main_image.jpg', 'https://www.tiktok.com/@sealandproperty/video/3', '15.1K', 3, 1]]
         ],
         summaryCols: ['id', 'title', 'status']
     },
@@ -291,13 +382,14 @@ const TABLES = [
             )
         `,
         seed: [
+            // v23 — full snapshot of current footer_persons (avatar_path updated)
             [
                 'INSERT IGNORE INTO footer_persons (slot, name, avatar_path, email, phone1, phone2, facebook_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [1, 'Hoang Long', '/uploads/footer-Long.jpg', 'Leong@sealandproperty.com.au', '+61 432 285 678', '+84 905 160 805', 'https://www.facebook.com/longg1313']
+                [1, 'Hoang Long', '/uploads/1777904991160-438175381.jpg', 'Leong@sealandproperty.com.au', '+61 432 285 678', '+84 905 160 805', 'https://www.facebook.com/longg1313']
             ],
             [
                 'INSERT IGNORE INTO footer_persons (slot, name, avatar_path, email, phone1, phone2, facebook_url) VALUES (?, ?, ?, ?, ?, ?, ?)',
-                [2, 'Tran Minh Phat (Jeremy)', '/uploads/footer-Phat.jpg', 'Jeremy@sealandproperty.com.au', '+61 45 246 7893', '+84 787665388', 'https://www.facebook.com/minhphat88']
+                [2, 'Tran Minh Phat (Jeremy)', '/uploads/1777905362602-653637808.jpg', 'Jeremy@sealandproperty.com.au', '+61 45 246 7893', '+84 787665388', 'https://www.facebook.com/minhphat88']
             ]
         ],
         summaryCols: ['slot', 'name', 'email']
