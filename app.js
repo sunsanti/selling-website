@@ -28,9 +28,46 @@ app.use(session({
     }
 }));
 
+// Favicon: respond 204 to avoid 404 spam in console (no favicon file present)
+app.get('/favicon.ico', (req, res) => res.status(204).end());
+
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));
+
+// F05c: /projects list page + /projects/:id detail page
+// Explicit GET routes FIRST (pretty URLs) → static fallback for asset files
+// (style.css / list.js / detail.js). Express 5 path-to-regexp no longer
+// accepts inline :id([0-9]+) — use regex literal.
+app.get('/projects', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/projects/list.html'));
+});
+app.get(/^\/projects\/(\d+)\/?$/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/projects/detail.html'));
+});
+app.use('/projects', express.static(path.join(__dirname, 'Views/projects')));
+
+// F08: /videos list page (explicit route → static fallback)
+app.get('/videos', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/videos/index.html'));
+});
+app.use('/videos', express.static(path.join(__dirname, 'Views/videos')));
+
+// v3: /about page (explicit GET → static fallback for assets)
+app.get('/about', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/about/index.html'));
+});
+app.use('/about', express.static(path.join(__dirname, 'Views/about')));
+
+// F09: /news list + /news/:id detail pages.
+// Express 5 path-to-regexp no longer accepts inline :id([0-9]+) — use regex literal.
+app.get('/news', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/news/list.html'));
+});
+app.get(/^\/news\/(\d+)\/?$/, (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/news/detail.html'));
+});
+app.use('/news', express.static(path.join(__dirname, 'Views/news')));
 
 // Admin: gate the HTML entry behind login; static assets (CSS/JS) pass through
 // so the page can load styles after redirect bounce. API endpoints have their
@@ -65,6 +102,8 @@ const contactController = require('./Controllers/contactController');
 const homeContentController = require('./Controllers/homeContentController');
 const mediaController = require('./Controllers/mediaController');
 const auditLogController = require('./Controllers/auditLogController');
+const videoController = require('./Controllers/videoController');
+const newsController = require('./Controllers/newsController');
 
 app.get('/', (req, res) => res.redirect('/main'));
 app.get('/login', loginController.getLoginPage);
@@ -74,10 +113,22 @@ app.get('/main', loginController.getMainPage);
 // Public read-only API (no auth) - used by /main public page
 app.get('/api/public/settings', adminController.getSettings);
 app.get('/api/public/projects', adminController.getProjects);
+app.get('/api/public/projects/featured', adminController.getFeaturedProjects);
 app.get('/api/public/projects/:id', adminController.getProjectById);
 app.get('/api/public/about', homeContentController.getAbout);
 app.get('/api/public/services', homeContentController.getServices);
 app.get('/api/public/footer-persons', homeContentController.getFooterPersons);
+// v13: /about Our Team grid
+app.get('/api/public/team', homeContentController.getTeamMembers);
+// F08: public videos
+app.get('/api/public/videos', videoController.getPublic);
+// v3: featured videos for /main carousel
+app.get('/api/public/videos/featured', videoController.getFeatured);
+// F09: public news
+app.get('/api/public/news', newsController.getPublic);
+// v3: featured news for /main carousel
+app.get('/api/public/news/featured', newsController.getFeatured);
+app.get('/api/public/news/:id', newsController.getPublicById);
 
 app.use('/api/admin', requireAuth);
 
@@ -86,6 +137,8 @@ app.put('/api/admin/settings', adminController.updateSettings);
 
 app.get('/api/admin/projects', adminController.getProjects);
 app.get('/api/admin/projects/search', adminController.searchProjects);
+app.get('/api/admin/projects/featured', adminController.getFeaturedProjects);
+app.put('/api/admin/projects/featured', adminController.setFeaturedProjects);
 app.get('/api/admin/projects/:id', adminController.getProjectById);
 app.post('/api/admin/projects', adminController.createProject);
 app.put('/api/admin/projects/:id', adminController.updateProject);
@@ -125,10 +178,36 @@ app.get('/api/admin/footer-persons', homeContentController.getFooterPersons);
 app.get('/api/admin/footer-persons/:slot', homeContentController.getFooterPersonBySlot);
 app.put('/api/admin/footer-persons/:slot', homeContentController.updateFooterPerson);
 
+// v13 / v22: /about Our Team (dynamic add/remove)
+app.get('/api/admin/team', homeContentController.getTeamMembers);
+app.post('/api/admin/team', homeContentController.createTeamMember);
+app.put('/api/admin/team/:id', homeContentController.updateTeamMember);
+app.delete('/api/admin/team/:id', requireAdmin, homeContentController.deleteTeamMember);
+
 app.get('/api/admin/media', mediaController.getMedia);
 
 app.get('/api/admin/audit-log', requireAdmin, auditLogController.getAuditLog);
 app.get('/api/admin/audit-log/actions', requireAdmin, auditLogController.getActions);
+
+// F08: Videos admin endpoints (auth via requireAuth above; DELETE needs admin role)
+app.get('/api/admin/videos', videoController.getAll);
+app.get('/api/admin/videos/featured', videoController.getFeatured);
+app.put('/api/admin/videos/featured', videoController.setFeatured);
+app.get('/api/admin/videos/:id', videoController.getById);
+app.post('/api/admin/videos', videoController.create);
+app.put('/api/admin/videos/:id', videoController.update);
+app.put('/api/admin/videos/:id/soft-delete', videoController.softDelete);
+app.delete('/api/admin/videos/:id', requireAdmin, videoController.hardDelete);
+
+// F09: News admin endpoints
+app.get('/api/admin/news', newsController.getAll);
+app.get('/api/admin/news/featured', newsController.getFeatured);
+app.put('/api/admin/news/featured', newsController.setFeatured);
+app.get('/api/admin/news/:id', newsController.getById);
+app.post('/api/admin/news', newsController.create);
+app.put('/api/admin/news/:id', newsController.update);
+app.put('/api/admin/news/:id/soft-delete', newsController.softDelete);
+app.delete('/api/admin/news/:id', requireAdmin, newsController.hardDelete);
 
 app.post('/api/admin/translate', adminController.translateText);
 app.post('/api/admin/detect-language', adminController.detectTextLanguage);

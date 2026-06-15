@@ -1,0 +1,324 @@
+/* v4: /about page — modelled on en.myaustralianproperty.com/about
+   Sections: hero, mission, leadership x2, team grid, services 3-col, offices 2-col */
+.about-page {
+    background: #fff;
+    color: var(--color-navy, #1B2635);
+}
+
+/* ============ HERO ============ */
+.about-hero {
+    position: relative;
+    margin-top: -80px;
+    min-height: 360px;
+    background: var(--color-navy);
+    display: flex;
+    align-items: center;
+    text-align: center;
+    overflow: hidden;
+}
+.about-hero-bg {
+    position: absolute;
+    inset: 0;
+    background:
+        linear-gradient(135deg, rgba(27,38,53,0.86) 0%, rgba(27,38,53,0.65) 100%),
+        url('/uploads/main_image.jpg') center/cover;
+    z-index: 0;
+}
+.about-hero-inner {
+    position: relative;
+    z-index: 1;
+    margin: 0 auto;
+    padding: calc(80px + 5rem) 6% 5rem;
+    color: #fff;
+}
+.about-hero-tag {
+    display: inline-block;
+    color: var(--color-gold);
+    font-size: 1.2rem;
+    text-transform: uppercase;
+    letter-spacing: 0.3em;
+    margin-bottom: 1.2rem;
+    font-family: 'Poppins', sans-serif;
+}
+.about-hero-title {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(3.4rem, 5vw, 5rem);
+    letter-spacing: 0.05em;
+    margin: 0;
+    color: #fff;
+}
+
+/* ============ MISSION ============ */
+.about-mission {
+    padding: 5rem 5%;
+    background: #fff;
+}
+.about-mission-inner {
+    max-width: 880px;
+    margin: 0 auto;
+    text-align: center;
+}
+.about-mission-text {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(1.8rem, 2.2vw, 2.4rem);
+    line-height: 1.5;
+    color: var(--color-navy);
+    margin: 0;
+    font-style: italic;
+}
+.about-mission-text strong { color: var(--color-gold); font-style: normal; }
+
+/* ============ Section header helpers ============ */
+.about-section-header {
+    margin-bottom: 3.4rem;
+}
+.about-section-header--centered {
+    text-align: center;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.about-tag {
+    display: inline-block;
+    color: var(--color-gold);
+    font-size: 1.05rem;
+    letter-spacing: 0.28em;
+    text-transform: uppercase;
+    margin-bottom: 0.8rem;
+    font-weight: 600;
+}
+.about-section-h2 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(2.4rem, 3.2vw, 3.2rem);
+    color: var(--color-navy);
+    line-height: 1.2;
+    margin: 0;
+}
+
+/* ============ LEADERSHIP (2 stacked rows, photo + quote) ============ */
+.about-leadership {
+    padding: 5rem 5%;
+    background: var(--color-cream, #EBE9E8);
+}
+.leadership-row {
+    max-width: 1200px;
+    margin: 0 auto 5rem;
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 4rem;
+    align-items: center;
+}
+.leadership-row:last-child { margin-bottom: 0; }
+.leadership-row.leadership-flip {
+    grid-template-columns: 1fr 320px;
+}
+.leadership-row.leadership-flip .leadership-photo { order: 2; }
+.leadership-row.leadership-flip .leadership-info  { order: 1; }
+.leadership-photo {
+    width: 320px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    overflow: hidden;
+    background: #d9d6d3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 16px 40px rgba(27,38,53,0.18);
+    margin: 0 auto;
+}
+.leadership-photo img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.leadership-photo i  { font-size: 6rem; color: rgba(27,38,53,0.3); }
+.leadership-role {
+    display: inline-block;
+    color: var(--color-gold);
+    font-size: 1.05rem;
+    letter-spacing: 0.28em;
+    font-weight: 700;
+    text-transform: uppercase;
+    margin-bottom: 0.6rem;
+}
+.leadership-name {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: clamp(2.2rem, 2.8vw, 2.8rem);
+    color: var(--color-navy);
+    margin: 0 0 1.4rem;
+    line-height: 1.2;
+}
+.leadership-quote {
+    font-size: 1.35rem;
+    line-height: 1.65;
+    color: rgba(27,38,53,0.8);
+    font-style: italic;
+    margin: 0 0 1.4rem;
+    border-left: 3px solid var(--color-gold);
+    padding-left: 1.4rem;
+}
+.leadership-contact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem 1.8rem;
+    margin-top: 1.2rem;
+}
+.leadership-contact a {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: var(--color-navy);
+    font-size: 1.15rem;
+    text-decoration: none;
+}
+.leadership-contact a:hover { color: var(--color-gold); }
+.leadership-contact i { color: var(--color-gold); }
+
+/* ============ TEAM GRID (6 cards) ============ */
+.about-team-grid {
+    padding: 5rem 5%;
+    background: #fff;
+}
+.about-team-grid .about-section-header {
+    text-align: center;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.team-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2.4rem;
+}
+.team-member {
+    text-align: center;
+    padding: 1.6rem;
+}
+.team-photo {
+    width: 150px;
+    aspect-ratio: 1/1;
+    border-radius: 50%;
+    background: var(--color-cream, #EBE9E8);
+    margin: 0 auto 1.4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.team-photo i { font-size: 4rem; color: rgba(27,38,53,0.3); }
+.team-photo img { width: 100%; height: 100%; object-fit: cover; }
+.team-member h4 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1.7rem;
+    color: var(--color-navy);
+    margin: 0 0 0.4rem;
+}
+.team-member p {
+    font-size: 1.15rem;
+    color: var(--color-gold);
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-weight: 500;
+    margin: 0;
+}
+
+/* ============ SERVICES 3-col ============ */
+.about-services {
+    padding: 5rem 5%;
+    background: var(--color-cream, #EBE9E8);
+}
+.about-services-grid {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 2rem;
+}
+.about-service-card {
+    background: #fff;
+    padding: 2.6rem 2rem;
+    border-radius: 10px;
+    text-align: center;
+    transition: transform 0.25s, box-shadow 0.25s;
+}
+.about-service-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 18px 40px rgba(27,38,53,0.08);
+}
+.about-service-icon {
+    font-size: 3.4rem;
+    color: var(--color-gold);
+    margin-bottom: 1.4rem;
+}
+.about-service-card h3 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1.7rem;
+    color: var(--color-navy);
+    line-height: 1.3;
+    margin: 0 0 1rem;
+}
+.about-service-card p {
+    font-size: 1.2rem;
+    line-height: 1.6;
+    color: rgba(27,38,53,0.7);
+    margin: 0;
+}
+
+/* ============ OFFICES 2-col ============ */
+.about-offices {
+    padding: 5rem 5%;
+    background: #fff;
+}
+.offices-grid {
+    max-width: 1100px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 3rem;
+}
+.office-card {
+    background: var(--color-cream, #EBE9E8);
+    border-radius: 10px;
+    padding: 2.4rem 2rem;
+}
+.office-city {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 2rem;
+    color: var(--color-navy);
+    margin: 0 0 1.4rem;
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+}
+.office-flag { font-size: 1.6rem; }
+.office-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    font-size: 1.2rem;
+    color: rgba(27,38,53,0.85);
+    margin: 0 0 0.9rem;
+    line-height: 1.5;
+}
+.office-row i {
+    color: var(--color-gold);
+    margin-top: 0.3rem;
+    width: 16px;
+    text-align: center;
+    flex-shrink: 0;
+}
+.office-row a { color: inherit; text-decoration: none; }
+.office-row a:hover { color: var(--color-gold); }
+
+@media (max-width: 1024px) {
+    .leadership-row,
+    .leadership-row.leadership-flip { grid-template-columns: 1fr; text-align: center; }
+    .leadership-row.leadership-flip .leadership-photo { order: 0; }
+    .leadership-quote { border-left: none; border-top: 3px solid var(--color-gold); padding: 1rem 0 0; text-align: left; }
+    .leadership-contact { justify-content: center; }
+    .team-grid { grid-template-columns: repeat(2, 1fr); }
+    .about-services-grid { grid-template-columns: 1fr; max-width: 600px; }
+    .offices-grid { grid-template-columns: 1fr; }
+}
+@media (max-width: 600px) {
+    .team-grid { grid-template-columns: 1fr; }
+    .leadership-photo { width: 220px; }
+}

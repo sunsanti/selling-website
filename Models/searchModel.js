@@ -220,10 +220,13 @@ async function searchProjects(keyword, status = 'active') {
         'SELECT * FROM projects ORDER BY display_order ASC, id DESC'
     );
 
-    // Normalize image_path
+    // F10.fix: normalize image_path under /uploads/ (rewrite legacy /images/ + bare filenames)
     rows.forEach(p => {
-        if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-            p.image_path = '/images/' + p.image_path;
+        if (!p.image_path) return;
+        if (p.image_path.startsWith('/images/')) {
+            p.image_path = '/uploads/' + p.image_path.slice('/images/'.length);
+        } else if (!p.image_path.startsWith('/uploads/') && !/^https?:\/\//i.test(p.image_path) && !p.image_path.startsWith('data:') && !p.image_path.startsWith('/')) {
+            p.image_path = '/uploads/' + p.image_path;
         }
     });
 

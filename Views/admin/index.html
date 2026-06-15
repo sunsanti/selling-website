@@ -37,9 +37,21 @@
                 <i class="fas fa-concierge-bell"></i>
                 <span>Services</span>
             </a>
+            <a href="#" class="nav-item" data-section="invest">
+                <i class="fas fa-chart-line"></i>
+                <span>Invest</span>
+            </a>
             <a href="#" class="nav-item" data-section="home-footer">
                 <i class="fas fa-id-card"></i>
                 <span>Footer</span>
+            </a>
+            <a href="#" class="nav-item" data-section="videos">
+                <i class="fas fa-video"></i>
+                <span>Videos</span>
+            </a>
+            <a href="#" class="nav-item" data-section="news">
+                <i class="fas fa-newspaper"></i>
+                <span>News</span>
             </a>
             <a href="#" class="nav-item" data-section="accounts">
                 <i class="fas fa-users"></i>
@@ -93,10 +105,24 @@
                 </div>
             </div>
 
+            <!-- v20: Dashboard sub-tabs -->
+            <div class="sub-nav" data-subtab-group="dashboard">
+                <button type="button" class="sub-nav-item active" data-subtab="dashboard-settings">
+                    <i class="fas fa-cog"></i> Website Settings
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="dashboard-stats">
+                    <i class="fas fa-chart-bar"></i> About Stats
+                </button>
+            </div>
+
             <!-- Settings Form -->
+            <div class="sub-tab-panel active" data-subtab-group="dashboard" data-subtab-panel="dashboard-settings">
             <div class="settings-panel">
                 <h2><i class="fas fa-cog"></i> Website Settings</h2>
                 <form id="settings-form" class="settings-form">
+                    <div class="form-section-divider">
+                        <span><i class="fas fa-house"></i> /main — Header &amp; Hero</span>
+                    </div>
                     <div class="form-group">
                         <label>Logo Image</label>
                         <div class="settings-image-area">
@@ -146,6 +172,25 @@
                     </div>
                 </form>
             </div>
+            </div>
+
+            <!-- v13: About-stats moved here from About tab — shown on /main -->
+            <div class="sub-tab-panel" data-subtab-group="dashboard" data-subtab-panel="dashboard-stats">
+            <div class="settings-panel">
+                <form id="home-about-form" class="settings-form">
+                    <textarea id="about-input-banner" style="display:none"></textarea>
+                    <textarea id="about-input-left" style="display:none"></textarea>
+                    <textarea id="about-input-right" style="display:none"></textarea>
+                    <div class="form-section-divider">
+                        <span><i class="fas fa-chart-bar"></i> About Stats (4 blocks — shown on /main)</span>
+                    </div>
+                    <div class="form-row" id="about-stats-grid"></div>
+                    <div class="form-actions">
+                        <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Stats</button>
+                    </div>
+                </form>
+            </div>
+            </div>
 
             <!-- Live Preview (settings) -->
             <div class="live-preview-panel">
@@ -168,6 +213,7 @@
                     <i class="fas fa-plus"></i> Add Project
                 </button>
             </div>
+
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="project-search" placeholder="Search projects by name or area...">
@@ -175,7 +221,41 @@
                 <button class="btn-reset" onclick="resetProjectSearch()">Reset</button>
             </div>
 
+            <!-- v20: Projects sub-tabs -->
+            <div class="sub-nav" data-subtab-group="projects">
+                <button type="button" class="sub-nav-item active" data-subtab="projects-featured">
+                    <i class="fas fa-star"></i> Featured
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="projects-active">
+                    <i class="fas fa-check-circle"></i> Active Projects
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="projects-inactive">
+                    <i class="fas fa-ban"></i> Inactive Projects
+                </button>
+            </div>
+
+            <!-- v2: Featured selection (up to 4 shown on /main carousel) -->
+            <div class="sub-tab-panel active" data-subtab-group="projects" data-subtab-panel="projects-featured">
+            <div class="featured-panel">
+                <div class="featured-panel-header">
+                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 projects sẽ hiển thị ở trang chủ)</small></h3>
+                    <button type="button" class="btn-save" onclick="saveFeaturedProjects()">
+                        <i class="fas fa-check"></i> Lưu chọn
+                    </button>
+                </div>
+                <p id="featured-counter" class="featured-counter">0 / 4 selected</p>
+
+                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
+                <div id="featured-selected-grid" class="featured-grid featured-grid-selected"></div>
+
+                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả Projects đang Active</div>
+                <div id="featured-available-grid" class="featured-grid"></div>
+                <div id="featured-pagination" class="pagination"></div>
+            </div>
+            </div>
+
             <!-- Active Projects -->
+            <div class="sub-tab-panel" data-subtab-group="projects" data-subtab-panel="projects-active">
             <div class="project-section-title">
                 <h3><i class="fas fa-check-circle"></i> Active Projects</h3>
             </div>
@@ -196,9 +276,12 @@
                     <tbody id="active-projects-tbody">
                     </tbody>
                 </table>
+                <div class="pagination" id="active-projects-pagination"></div>
+            </div>
             </div>
 
             <!-- Inactive Projects -->
+            <div class="sub-tab-panel" data-subtab-group="projects" data-subtab-panel="projects-inactive">
             <div class="project-section-title">
                 <h3><i class="fas fa-ban" style="color:#e74c3c"></i> Inactive Projects</h3>
             </div>
@@ -219,6 +302,8 @@
                     <tbody id="inactive-projects-tbody">
                     </tbody>
                 </table>
+                <div class="pagination" id="inactive-projects-pagination"></div>
+            </div>
             </div>
         </section>
 
@@ -248,6 +333,7 @@
                     <tbody id="contacts-tbody">
                     </tbody>
                 </table>
+                <div class="pagination" id="contacts-pagination"></div>
             </div>
         </section>
 
@@ -274,6 +360,7 @@
                     <tbody id="accounts-tbody">
                     </tbody>
                 </table>
+                <div class="pagination" id="accounts-pagination"></div>
             </div>
         </section>
 
@@ -306,46 +393,100 @@
                     </thead>
                     <tbody id="audit-log-tbody"></tbody>
                 </table>
+                <div class="pagination" id="audit-log-pagination"></div>
             </div>
         </section>
 
         <!-- About Section -->
         <section id="home-about" class="content-section">
             <div class="section-header">
-                <h1>About Section</h1>
+                <h1>About — /about page editor</h1>
+                <p style="color:#888;font-size:1.2rem">Tất cả nội dung trên trang <strong>/about</strong>. (Stats 4 blocks đã chuyển sang Dashboard.)</p>
             </div>
-            <form id="home-about-form" class="settings-form">
-                <div class="form-group">
-                    <label>Banner Heading</label>
-                    <textarea id="about-input-banner" rows="2" maxlength="500" placeholder="MANY BEAUTIFUL PLACES ARE WAITING FOR YOU TO SEE"></textarea>
-                </div>
+
+            <!-- v20: About sub-tabs -->
+            <div class="sub-nav" data-subtab-group="about">
+                <button type="button" class="sub-nav-item active" data-subtab="about-leadership">
+                    <i class="fas fa-user-tie"></i> Leadership
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="about-content">
+                    <i class="fas fa-house"></i> Page Content
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="about-services">
+                    <i class="fas fa-cogs"></i> Services
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="about-team">
+                    <i class="fas fa-users"></i> Team
+                </button>
+            </div>
+
+            <!-- v13: Director + Co-Founder editor (reuses footer_persons API) -->
+            <div class="sub-tab-panel active" data-subtab-group="about" data-subtab-panel="about-leadership">
+            <div class="form-section-divider"><span><i class="fas fa-user-tie"></i> Leadership — Director &amp; Co-Founder</span></div>
+            <p style="color:#888;font-size:1.15rem;margin:0 0 1rem">Hai nhân sự này hiển thị ở khối Leadership trên <strong>/about</strong> và <em>cũng</em> ở "CONTACT OUR TEAM" trong footer (cùng nguồn dữ liệu).</p>
+            <div id="about-leadership-cards"></div>
+            </div>
+
+            <!-- v12: /about page editable content -->
+            <div class="sub-tab-panel" data-subtab-group="about" data-subtab-panel="about-content">
+            <form id="about-content-form" class="settings-form settings-panel" onsubmit="event.preventDefault(); saveAboutContent();">
+                <div class="form-section-divider"><span><i class="fas fa-house"></i> /about Page — Hero &amp; Mission</span></div>
                 <div class="form-row">
                     <div class="form-group">
-                        <label>Paragraph Left</label>
-                        <textarea id="about-input-left" rows="6" maxlength="2000"></textarea>
+                        <label>Hero Tag (small uppercase above title)</label>
+                        <input type="text" id="setting-about-hero-tag" maxlength="100" placeholder="SEALAND PROPERTY">
                     </div>
                     <div class="form-group">
-                        <label>Paragraph Right</label>
-                        <textarea id="about-input-right" rows="6" maxlength="2000"></textarea>
+                        <label>Hero Title</label>
+                        <input type="text" id="setting-about-hero-title" maxlength="200" placeholder="ABOUT US">
                     </div>
                 </div>
-                <div class="project-section-title">
-                    <h3><i class="fas fa-chart-bar"></i> Stats (4 blocks)</h3>
+                <div class="form-group full-row">
+                    <label>Mission paragraph</label>
+                    <textarea id="setting-about-mission" rows="6" maxlength="2000" placeholder="Our core mission is to become a trusted agency..."></textarea>
                 </div>
-                <div class="form-row" id="about-stats-grid">
+
+                <div class="form-subsection-label"><i class="fas fa-building"></i> Offices</div>
+                <div id="about-offices-cards" class="office-cards-grid"></div>
+                <div class="form-actions" style="grid-column:1/-1; justify-content:flex-start; margin-top:0">
+                    <button type="button" class="btn-add" onclick="addAboutOffice()"><i class="fas fa-plus"></i> Add Office</button>
                 </div>
+
                 <div class="form-actions">
-                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save About</button>
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save /about Content</button>
                 </div>
             </form>
+            </div>
 
-            <!-- Live Preview (about) -->
+            <!-- v13: Our Services 3-card editor (settings keys) -->
+            <div class="sub-tab-panel" data-subtab-group="about" data-subtab-panel="about-services">
+            <form id="about-services-form" class="settings-form" onsubmit="event.preventDefault(); saveAboutServices();">
+                <div class="form-section-divider"><span><i class="fas fa-cogs"></i> /about — Our Services (3 cards)</span></div>
+                <div id="about-services-cards"></div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Services</button>
+                </div>
+            </form>
+            </div>
+
+            <!-- v13 / v22 / v23: Our Team editor — dynamic list (team_members table), 2 cards per row -->
+            <div class="sub-tab-panel" data-subtab-group="about" data-subtab-panel="about-team">
+            <div class="form-section-divider"><span><i class="fas fa-users"></i> /about — Our Team</span></div>
+            <div class="settings-panel">
+                <div id="about-team-cards" class="team-cards-grid"></div>
+                <div class="form-actions" style="justify-content:flex-start; margin-top:16px">
+                    <button type="button" class="btn-add" onclick="addAboutTeamMember()"><i class="fas fa-plus"></i> Add Member</button>
+                </div>
+            </div>
+            </div>
+
+            <!-- Live Preview — /about page -->
             <div class="live-preview-panel">
                 <div class="live-preview-header">
-                    <h3><i class="fas fa-eye"></i> Live Preview — About Section</h3>
+                    <h3><i class="fas fa-eye"></i> Live Preview — /about page</h3>
                     <div class="live-preview-actions">
                         <button type="button" class="btn-add" onclick="refreshPreview('about')"><i class="fas fa-sync"></i> Refresh</button>
-                        <a href="/main#about-us" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                        <a href="/about" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
                     </div>
                 </div>
                 <iframe id="preview-iframe-about" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
@@ -373,12 +514,183 @@
             </div>
         </section>
 
+        <!-- v15: Invest Section — /main "Why Invest in Australia" content + video -->
+        <section id="invest" class="content-section">
+            <div class="section-header">
+                <h1>Invest — /main "Why Invest in Australia"</h1>
+            </div>
+
+            <form id="invest-content-form" class="settings-form settings-panel" onsubmit="event.preventDefault(); saveInvestContent();">
+                <div class="form-section-divider">
+                    <span><i class="fas fa-chart-line"></i> /main — "Why Invest in Australia"</span>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Tagline (small uppercase text)</label>
+                        <input type="text" id="setting-purpose-tagline" maxlength="100" placeholder="WHY INVEST IN AUSTRALIA">
+                    </div>
+                    <div class="form-group">
+                        <label>Button Text</label>
+                        <input type="text" id="setting-purpose-cta-text" maxlength="100" placeholder="LEARN MORE ABOUT AUSTRALIA">
+                    </div>
+                </div>
+                <div class="form-group full-row">
+                    <label>Heading (use a new line for the 2nd line)</label>
+                    <textarea id="setting-purpose-heading" rows="3" maxlength="300" placeholder="A Strong Market.&#10;A Brighter Future."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Bullet point 1</label>
+                        <input type="text" id="setting-purpose-list-1" maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Bullet point 2</label>
+                        <input type="text" id="setting-purpose-list-2" maxlength="200">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Bullet point 3</label>
+                        <input type="text" id="setting-purpose-list-3" maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Bullet point 4</label>
+                        <input type="text" id="setting-purpose-list-4" maxlength="200">
+                    </div>
+                </div>
+
+                <div class="form-subsection-label"><i class="fas fa-video"></i> Video</div>
+                <div class="form-row-3">
+                    <div class="form-group">
+                        <label>Video Thumbnail Image</label>
+                        <div class="settings-image-area">
+                            <div class="settings-image-preview" id="purpose-thumb-preview-area">
+                                <img id="current-purpose-thumb-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                                <span id="purpose-thumb-preview-placeholder" class="settings-preview-placeholder">
+                                    <i class="fas fa-image"></i> No thumbnail uploaded
+                                </span>
+                            </div>
+                            <div class="settings-image-actions">
+                                <button type="button" class="btn-add" id="purpose-thumb-pick-btn">
+                                    <i class="fas fa-images"></i> Chọn thumbnail
+                                </button>
+                                <button type="button" class="btn-cancel" id="purpose-thumb-remove-btn" style="display:none" onclick="removePurposeThumb()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Video Caption</label>
+                        <input type="text" id="setting-purpose-video-caption" maxlength="300">
+                    </div>
+                    <div class="form-group">
+                        <label>Video File (MP4 upload)</label>
+                        <div class="settings-image-area">
+                            <div class="settings-image-preview" id="purpose-video-preview-area">
+                                <video id="current-purpose-video" src="" style="display:none" controls muted></video>
+                                <span id="purpose-video-preview-placeholder" class="settings-preview-placeholder">
+                                    <i class="fas fa-video"></i> No video uploaded
+                                </span>
+                            </div>
+                            <div class="settings-image-actions">
+                                <button type="button" class="btn-add" id="purpose-video-pick-btn">
+                                    <i class="fas fa-video"></i> Chọn video
+                                </button>
+                                <button type="button" class="btn-cancel" id="purpose-video-remove-btn" style="display:none" onclick="removePurposeVideo()">
+                                    <i class="fas fa-times"></i> Remove
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Invest Content</button>
+                </div>
+            </form>
+
+            <!-- Live Preview (invest) -->
+            <div class="live-preview-panel">
+                <div class="live-preview-header">
+                    <h3><i class="fas fa-eye"></i> Live Preview — "Why Invest" Section</h3>
+                    <div class="live-preview-actions">
+                        <button type="button" class="btn-add" onclick="refreshPreview('invest')"><i class="fas fa-sync"></i> Refresh</button>
+                        <a href="/main#purpose-invest" target="_blank" class="btn-add"><i class="fas fa-external-link-alt"></i> Open in new tab</a>
+                    </div>
+                </div>
+                <iframe id="preview-iframe-invest" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
+            </div>
+        </section>
+
         <!-- Footer Section -->
         <section id="home-footer" class="content-section">
             <div class="section-header">
-                <h1>Footer (2 slots)</h1>
+                <h1>Footer</h1>
+            </div>
+
+            <!-- v20: Footer sub-tabs -->
+            <div class="sub-nav" data-subtab-group="footer">
+                <button type="button" class="sub-nav-item active" data-subtab="footer-content">
+                    <i class="fas fa-id-card"></i> Site-wide Content
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="footer-team">
+                    <i class="fas fa-users"></i> Contact Team
+                </button>
+            </div>
+
+            <!-- v12: Site-wide footer dynamic content (moved here from Dashboard) -->
+            <div class="sub-tab-panel active" data-subtab-group="footer" data-subtab-panel="footer-content">
+            <form id="footer-content-form" class="settings-form settings-panel" onsubmit="event.preventDefault(); saveFooterContent();">
+                <div class="form-section-divider">
+                    <span>Footer — Site-wide Content</span>
+                </div>
+                <div class="form-group full-row">
+                    <label>Description (paragraph)</label>
+                    <textarea id="setting-footer-desc" rows="4" maxlength="2000" placeholder="Helping investors and homeowners across Australia..."></textarea>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Address</label>
+                        <input type="text" id="setting-footer-address" maxlength="500" placeholder="Level 12, 1 Market Street, Sydney NSW 2000, Australia">
+                    </div>
+                    <div class="form-group">
+                        <label>Copyright text</label>
+                        <input type="text" id="setting-footer-copyright" maxlength="500" placeholder="© 2026 Sealand Property. All rights reserved.">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Facebook URL</label>
+                        <input type="url" id="setting-footer-facebook" maxlength="500" placeholder="https://facebook.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>LinkedIn URL</label>
+                        <input type="url" id="setting-footer-linkedin" maxlength="500" placeholder="https://linkedin.com/...">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>YouTube URL</label>
+                        <input type="url" id="setting-footer-youtube" maxlength="500" placeholder="https://youtube.com/...">
+                    </div>
+                    <div class="form-group">
+                        <label>TikTok URL</label>
+                        <input type="url" id="setting-footer-tiktok" maxlength="500" placeholder="https://tiktok.com/...">
+                    </div>
+                </div>
+                <div class="form-actions">
+                    <button type="submit" class="btn-save"><i class="fas fa-save"></i> Save Footer Content</button>
+                </div>
+            </form>
+            </div>
+
+            <div class="sub-tab-panel" data-subtab-group="footer" data-subtab-panel="footer-team">
+            <div class="form-section-divider">
+                <span>Footer — Contact Team (2 slots)</span>
             </div>
             <div id="home-footer-cards">
+            </div>
             </div>
 
             <!-- Live Preview (footer) -->
@@ -393,7 +705,234 @@
                 <iframe id="preview-iframe-footer" class="live-preview-iframe" src="about:blank" loading="lazy"></iframe>
             </div>
         </section>
+
+        <!-- F08: Videos Section -->
+        <section id="videos" class="content-section">
+            <div class="section-header">
+                <h1>Videos Management</h1>
+                <button class="btn-add" onclick="openVideoModal()">
+                    <i class="fas fa-plus"></i> Add Video
+                </button>
+            </div>
+
+            <!-- v20: Videos sub-tabs -->
+            <div class="sub-nav" data-subtab-group="videos">
+                <button type="button" class="sub-nav-item active" data-subtab="videos-featured">
+                    <i class="fas fa-star"></i> Featured
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="videos-all">
+                    <i class="fas fa-list"></i> All Videos
+                </button>
+            </div>
+
+            <!-- v3: Featured selection (up to 4 shown on /main carousel) -->
+            <div class="sub-tab-panel active" data-subtab-group="videos" data-subtab-panel="videos-featured">
+            <div class="featured-panel">
+                <div class="featured-panel-header">
+                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 videos sẽ hiển thị ở trang chủ)</small></h3>
+                    <button type="button" class="btn-save" onclick="saveFeaturedVideos()">
+                        <i class="fas fa-check"></i> Lưu chọn
+                    </button>
+                </div>
+                <p id="featured-videos-counter" class="featured-counter">0 / 4 selected</p>
+
+                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
+                <div id="featured-videos-selected-grid" class="featured-grid featured-grid-selected"></div>
+
+                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả Videos đang Active</div>
+                <div id="featured-videos-available-grid" class="featured-grid"></div>
+                <div id="featured-videos-pagination" class="pagination"></div>
+            </div>
+            </div>
+
+            <div class="sub-tab-panel" data-subtab-group="videos" data-subtab-panel="videos-all">
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Thumbnail</th>
+                            <th>Title</th>
+                            <th>TikTok URL</th>
+                            <th>Views</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="videos-table-body"></tbody>
+                </table>
+                <div class="pagination" id="videos-pagination"></div>
+            </div>
+            </div>
+        </section>
+
+        <!-- F09: News Section -->
+        <section id="news" class="content-section">
+            <div class="section-header">
+                <h1>News Management</h1>
+                <button class="btn-add" onclick="openNewsModal()">
+                    <i class="fas fa-plus"></i> Add News
+                </button>
+            </div>
+
+            <!-- v20: News sub-tabs -->
+            <div class="sub-nav" data-subtab-group="news">
+                <button type="button" class="sub-nav-item active" data-subtab="news-featured">
+                    <i class="fas fa-star"></i> Featured
+                </button>
+                <button type="button" class="sub-nav-item" data-subtab="news-all">
+                    <i class="fas fa-list"></i> All News
+                </button>
+            </div>
+
+            <!-- v3: Featured selection (up to 4 shown on /main carousel) -->
+            <div class="sub-tab-panel active" data-subtab-group="news" data-subtab-panel="news-featured">
+            <div class="featured-panel">
+                <div class="featured-panel-header">
+                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 news sẽ hiển thị ở trang chủ)</small></h3>
+                    <button type="button" class="btn-save" onclick="saveFeaturedNews()">
+                        <i class="fas fa-check"></i> Lưu chọn
+                    </button>
+                </div>
+                <p id="featured-news-counter" class="featured-counter">0 / 4 selected</p>
+
+                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
+                <div id="featured-news-selected-grid" class="featured-grid featured-grid-selected"></div>
+
+                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả News đang Active</div>
+                <div id="featured-news-available-grid" class="featured-grid"></div>
+                <div id="featured-news-pagination" class="pagination"></div>
+            </div>
+            </div>
+
+            <div class="sub-tab-panel" data-subtab-group="news" data-subtab-panel="news-all">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="news-search" placeholder="Tìm theo tiêu đề...">
+                <button class="btn-search" onclick="searchNews()">Search</button>
+            </div>
+            <div class="table-container">
+                <table class="data-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Title</th>
+                            <th>Status</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="news-table-body"></tbody>
+                </table>
+                <div class="pagination" id="news-pagination"></div>
+            </div>
+            </div>
+        </section>
     </main>
+</div>
+
+<!-- F08: Video Modal -->
+<div id="video-modal-admin" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2 id="video-modal-title">Add Video</h2>
+            <button class="modal-close" onclick="closeVideoModalAdmin()">&times;</button>
+        </div>
+        <form id="video-form" class="modal-form" onsubmit="event.preventDefault(); saveVideo();">
+            <input type="hidden" id="video-id">
+            <div class="form-group">
+                <label>Title *</label>
+                <input type="text" id="video-title-input" placeholder="e.g. SYDNEY MARKET UPDATE" required maxlength="255">
+            </div>
+            <div class="form-group">
+                <label>TikTok URL *</label>
+                <input type="text" id="video-tiktok-url" placeholder="https://www.tiktok.com/@user/video/..." required maxlength="500">
+                <small style="color:#888">Must start with https://www.tiktok.com/, https://vt.tiktok.com/, or https://m.tiktok.com/</small>
+            </div>
+            <div class="form-group">
+                <label>Thumbnail</label>
+                <div class="settings-image-area">
+                    <div class="settings-image-preview" id="video-thumb-preview-area">
+                        <img id="video-thumb-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                        <span id="video-thumb-placeholder" class="settings-preview-placeholder">
+                            <i class="fas fa-image"></i> No thumbnail
+                        </span>
+                    </div>
+                    <div class="settings-image-actions">
+                        <button type="button" class="btn-add" onclick="pickVideoThumb()">
+                            <i class="fas fa-images"></i> Chọn thumbnail
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="video-thumb-path">
+            </div>
+            <div class="form-group">
+                <label>Views Count</label>
+                <input type="text" id="video-views" placeholder="e.g. 12.4K" maxlength="20">
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeVideoModalAdmin()">Cancel</button>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- F09: News Modal -->
+<div id="news-modal-admin" class="modal">
+    <div class="modal-content modal-content-wide">
+        <div class="modal-header">
+            <h2 id="news-modal-title">Add News</h2>
+            <button class="modal-close" onclick="closeNewsModalAdmin()">&times;</button>
+        </div>
+        <form id="news-form" class="modal-form" onsubmit="event.preventDefault(); saveNewsItem();">
+            <input type="hidden" id="news-id">
+            <div class="form-group">
+                <label>Title * <small style="color:#888">(max 255)</small></label>
+                <input type="text" id="news-form-title" placeholder="e.g. Sydney house prices up 8%" required maxlength="255">
+            </div>
+            <div class="form-group">
+                <label>Summary <small style="color:#888">(max 500, shown on card)</small></label>
+                <textarea id="news-form-summary" rows="4" maxlength="500" placeholder="One-paragraph teaser"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Cover Image</label>
+                <div class="settings-image-area">
+                    <div class="settings-image-preview" id="news-cover-preview-area">
+                        <img id="news-cover-img" src="" alt="" style="display:none" onerror="this.style.display='none'">
+                        <span id="news-cover-placeholder" class="settings-preview-placeholder">
+                            <i class="fas fa-image"></i> No cover
+                        </span>
+                    </div>
+                    <div class="settings-image-actions">
+                        <button type="button" class="btn-add" onclick="pickNewsCover()">
+                            <i class="fas fa-images"></i> Chọn ảnh bìa
+                        </button>
+                    </div>
+                </div>
+                <input type="hidden" id="news-form-cover">
+            </div>
+            <div class="form-group">
+                <label>External Article URL <small style="color:#888">(optional — when set, READ MORE opens this link in a new tab)</small></label>
+                <input type="url" id="news-form-external-url" placeholder="https://www.example.com/full-article" maxlength="500">
+            </div>
+            <div class="form-group">
+                <label>Content <small style="color:#888">(plain text — line breaks preserved; shown on /news/:id when no external URL)</small></label>
+                <textarea id="news-form-content" rows="12" placeholder="Full article body"></textarea>
+            </div>
+            <div class="form-group">
+                <label>Status</label>
+                <select id="news-form-status">
+                    <option value="active">Hiển thị</option>
+                    <option value="inactive">Đã ẩn</option>
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="button" class="btn-cancel" onclick="closeNewsModalAdmin()">Cancel</button>
+                <button type="submit" class="btn-save">Save</button>
+            </div>
+        </form>
+    </div>
 </div>
 
 <!-- Project Modal -->
@@ -451,6 +990,62 @@
                     <input type="text" id="project-style" placeholder="e.g. Modern">
                 </div>
             </div>
+
+            <!-- F05d: 8 extended fields for Premium card + Property Search -->
+            <div class="form-section-divider">
+                <span>Property Details (F05 — Premium Card)</span>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Price <small style="color:#888">(number only — displays as "From $X,XXX")</small></label>
+                    <input type="number" id="project-price" placeholder="e.g. 699000" min="0">
+                </div>
+                <div class="form-group">
+                    <label>State</label>
+                    <select id="project-state">
+                        <option value="">— None —</option>
+                        <option value="NSW">NSW</option>
+                        <option value="VIC">VIC</option>
+                        <option value="QLD">QLD</option>
+                        <option value="WA">WA</option>
+                        <option value="SA">SA</option>
+                        <option value="TAS">TAS</option>
+                        <option value="ACT">ACT</option>
+                        <option value="NT">NT</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Property Type</label>
+                    <select id="project-property-type">
+                        <option value="">— None —</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="house">House</option>
+                        <option value="townhouse">Townhouse</option>
+                        <option value="land">Land</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Address</label>
+                    <input type="text" id="project-address" placeholder="e.g. 12 Riverside Dr, Liverpool">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Beds</label>
+                    <input type="text" id="project-beds" placeholder="e.g. 1-3 or 2">
+                </div>
+                <div class="form-group">
+                    <label>Baths</label>
+                    <input type="text" id="project-baths" placeholder="e.g. 2">
+                </div>
+                <div class="form-group">
+                    <label>Cars</label>
+                    <input type="text" id="project-cars" placeholder="e.g. 1">
+                </div>
+            </div>
+
             <div class="form-group">
                 <label>Project Images</label>
                 <div class="project-images-area" id="project-images-area">
@@ -473,7 +1068,7 @@
                         <i class="fas fa-globe"></i> JA
                     </button>
                 </label>
-                <textarea id="project-content" rows="3" placeholder="Brief description..."></textarea>
+                <textarea id="project-content" rows="4" placeholder="Brief description..."></textarea>
             </div>
             <div class="form-actions">
                 <button type="button" class="btn-cancel" onclick="closeProjectModal()">Cancel</button>
@@ -523,14 +1118,14 @@
 <div id="media-modal" class="modal">
     <div class="modal-content media-modal-content">
         <div class="modal-header">
-            <h2><i class="fas fa-images"></i> Thư viện ảnh</h2>
+            <h2><i class="fas fa-images"></i> Thư viện Media</h2>
             <button class="modal-close" onclick="closeMediaLibrary()">&times;</button>
         </div>
         <div class="media-toolbar">
             <button type="button" class="btn-add" onclick="document.getElementById('media-upload-input').click()">
                 <i class="fas fa-upload"></i> Upload
             </button>
-            <input type="file" id="media-upload-input" accept="image/*" style="display:none">
+            <input type="file" id="media-upload-input" accept="image/*,video/mp4,video/webm,video/quicktime" style="display:none">
             <input type="text" id="media-search-input" class="media-search" placeholder="Tìm theo tên file...">
             <span class="media-count" id="media-count"></span>
         </div>
@@ -538,7 +1133,7 @@
             <div id="media-grid" class="media-grid"></div>
             <div id="media-empty" class="media-empty" style="display:none">
                 <i class="fas fa-image"></i>
-                <p>Chưa có ảnh — bấm Upload để thêm</p>
+                <p>Chưa có file — bấm Upload để thêm</p>
             </div>
         </div>
         <div class="form-actions media-actions">

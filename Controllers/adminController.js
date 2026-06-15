@@ -30,11 +30,110 @@ const getSettings = async (req, res) => {
 
 const updateSettings = async (req, res) => {
     try {
-        const { logo, phone, main_image } = req.body;
+        const {
+            logo, phone, main_image, purpose_video_url, purpose_video_thumbnail,
+            // v11: footer dynamic content
+            footer_desc, footer_address, footer_copyright,
+            footer_facebook_url, footer_linkedin_url, footer_youtube_url, footer_tiktok_url,
+            // v12 — /about page content
+            about_hero_tag, about_hero_title, about_mission,
+            // v16 — /about Offices (dynamic list, JSON array of {name, flag, address, phone, email})
+            about_offices,
+            // v13 — /about Our Services (3 cards × icon/title/desc)
+            about_service_1_icon, about_service_1_title, about_service_1_desc,
+            about_service_2_icon, about_service_2_title, about_service_2_desc,
+            about_service_3_icon, about_service_3_title, about_service_3_desc,
+            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
+            purpose_tagline, purpose_heading,
+            purpose_list_1, purpose_list_2, purpose_list_3, purpose_list_4,
+            purpose_cta_text, purpose_video_caption
+        } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
         if (main_image !== undefined) {
-            await settingModel.updateSetting('main_image', main_image.replace(/^\/images\//, ''));
+            // F10.fix: store path as-is; Media Library always returns /uploads/<file>
+            await settingModel.updateSetting('main_image', String(main_image).slice(0, 500));
+        }
+        // F06: Purpose-Invest video — thumbnail (image path) + url (mp4)
+        if (purpose_video_thumbnail !== undefined) {
+            const thumb = String(purpose_video_thumbnail).slice(0, 500);
+            await settingModel.updateSetting('purpose_video_thumbnail', thumb);
+        }
+        if (purpose_video_url !== undefined) {
+            const url = String(purpose_video_url).slice(0, 500);
+            // Allow empty (clear), relative /uploads/..., or http(s)
+            if (url === '' || /^(\/uploads\/|https?:\/\/)/i.test(url)) {
+                await settingModel.updateSetting('purpose_video_url', url);
+            } else {
+                return res.status(400).json({ success: false, message: 'Video URL phải bắt đầu bằng /uploads/ hoặc https://' });
+            }
+        }
+
+        // v11: Footer dynamic content
+        const setFooterText = async (key, val, max = 1000) => {
+            if (val === undefined) return;
+            await settingModel.updateSetting(key, String(val).slice(0, max));
+        };
+        const setFooterUrl = async (key, val) => {
+            if (val === undefined) return;
+            const url = String(val).trim();
+            if (url === '' || /^https?:\/\//i.test(url)) {
+                await settingModel.updateSetting(key, url.slice(0, 500));
+            } else {
+                throw Object.assign(new Error(`${key} phải bắt đầu bằng http(s)://`), { status: 400 });
+            }
+        };
+        try {
+            await setFooterText('footer_desc', footer_desc, 2000);
+            await setFooterText('footer_address', footer_address, 500);
+            await setFooterText('footer_copyright', footer_copyright, 500);
+            await setFooterUrl('footer_facebook_url', footer_facebook_url);
+            await setFooterUrl('footer_linkedin_url', footer_linkedin_url);
+            await setFooterUrl('footer_youtube_url', footer_youtube_url);
+            await setFooterUrl('footer_tiktok_url', footer_tiktok_url);
+            // v12 /about content
+            await setFooterText('about_hero_tag', about_hero_tag, 100);
+            await setFooterText('about_hero_title', about_hero_title, 200);
+            await setFooterText('about_mission', about_mission, 2000);
+            // v16 — /about Offices (dynamic list, replaces fixed Sydney/HCM fields)
+            if (about_offices !== undefined) {
+                let list = about_offices;
+                if (typeof list === 'string') {
+                    try { list = JSON.parse(list); } catch (_) { list = []; }
+                }
+                if (!Array.isArray(list)) list = [];
+                const clean = list.slice(0, 12).map(o => ({
+                    name:    String((o && o.name)    || '').slice(0, 100),
+                    flag:    String((o && o.flag)    || '').slice(0, 10),
+                    address: String((o && o.address) || '').slice(0, 300),
+                    phone:   String((o && o.phone)   || '').slice(0, 50),
+                    email:   String((o && o.email)   || '').slice(0, 255)
+                }));
+                await settingModel.updateSetting('about_offices', JSON.stringify(clean));
+            }
+            // v13 — /about Our Services (3 cards × 3 fields)
+            const svc = {
+                1: { icon: about_service_1_icon, title: about_service_1_title, desc: about_service_1_desc },
+                2: { icon: about_service_2_icon, title: about_service_2_title, desc: about_service_2_desc },
+                3: { icon: about_service_3_icon, title: about_service_3_title, desc: about_service_3_desc }
+            };
+            for (const i of [1, 2, 3]) {
+                await setFooterText(`about_service_${i}_icon`,  svc[i].icon,  60);
+                await setFooterText(`about_service_${i}_title`, svc[i].title, 200);
+                await setFooterText(`about_service_${i}_desc`,  svc[i].desc,  1000);
+            }
+            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
+            await setFooterText('purpose_tagline', purpose_tagline, 100);
+            await setFooterText('purpose_heading', purpose_heading, 300);
+            await setFooterText('purpose_list_1', purpose_list_1, 200);
+            await setFooterText('purpose_list_2', purpose_list_2, 200);
+            await setFooterText('purpose_list_3', purpose_list_3, 200);
+            await setFooterText('purpose_list_4', purpose_list_4, 200);
+            await setFooterText('purpose_cta_text', purpose_cta_text, 100);
+            await setFooterText('purpose_video_caption', purpose_video_caption, 300);
+        } catch (e) {
+            if (e.status === 400) return res.status(400).json({ success: false, message: e.message });
+            throw e;
         }
         auditLogModel.log({
             req,
@@ -49,20 +148,52 @@ const updateSettings = async (req, res) => {
 };
 
 // ===================== PROJECTS =====================
+// v2: featured projects (up to 4) — used by /main carousel
+const getFeaturedProjects = async (req, res) => {
+    try {
+        const list = await projectModel.getFeaturedProjects(4);
+        res.json({ success: true, data: list });
+    } catch (err) {
+        console.error('getFeaturedProjects:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
+// v2: replace featured selection (max 4)
+const setFeaturedProjects = async (req, res) => {
+    try {
+        const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
+        if (ids.length > 4) {
+            return res.status(400).json({ success: false, message: 'Tối đa 4 projects featured' });
+        }
+        const applied = await projectModel.setFeaturedIds(ids);
+        auditLogModel.log({
+            req, action: 'PROJECT_FEATURED_SET', target_type: 'project',
+            details: { ids: applied }
+        });
+        res.json({ success: true, message: 'Đã cập nhật featured projects', ids: applied });
+    } catch (err) {
+        console.error('setFeaturedProjects:', err.message);
+        res.status(500).json({ success: false, message: 'Lỗi server' });
+    }
+};
+
 const getProjects = async (req, res) => {
     try {
-        const includeInactive = req.query.includeInactive === 'true';
-        const projects = includeInactive
+        const { state, suburb, type, price, area, includeInactive } = req.query;
+        // F05a: if any filter present, use whitelist-based searchProjects
+        if (state || suburb || type || price || area) {
+            const projects = await projectModel.searchProjects({ state, suburb, type, price, area });
+            return res.json({ success: true, data: projects });
+        }
+        const useInactive = includeInactive === 'true';
+        const projects = useInactive
             ? await projectModel.getAllProjects(true)
             : await projectModel.getAllProjects();
-        // Normalize image_path with /images/ prefix
-        projects.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
-            }
-        });
+        // F10.fix: projectModel already normalizes image_path to /uploads/ — no extra prefix work here
         res.json({ success: true, data: projects });
     } catch (error) {
+        console.error('Lỗi getProjects:', error.message);
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
@@ -82,14 +213,27 @@ const getProjectById = async (req, res) => {
 
 const createProject = async (req, res) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path } = req.body;
+        const {
+            name, area, square_meters, category, year, style, small_content, image_path,
+            // F05d extended fields
+            price, beds, baths, cars, address, state, property_type, area_label
+        } = req.body;
         if (!name || !area) {
             return res.status(400).json({ success: false, message: 'Thiếu thông tin bắt buộc' });
         }
-        const cleanImagePath = (image_path || '').replace(/^\/images\//, '');
+        // F10.fix: store image_path verbatim (Media Library returns /uploads/<file>)
         const id = await projectModel.createProject({
             name, area, square_meters, category, year, style,
-            small_content, image_path: cleanImagePath
+            small_content, image_path: image_path || '',
+            // F05d
+            price: price ? String(price).slice(0, 50) : null,
+            beds: beds ? String(beds).slice(0, 20) : null,
+            baths: baths ? String(baths).slice(0, 20) : null,
+            cars: cars ? String(cars).slice(0, 20) : null,
+            address: address ? String(address).slice(0, 255) : null,
+            state: state ? String(state).toUpperCase().slice(0, 20) : null,
+            property_type: property_type ? String(property_type).toLowerCase().slice(0, 50) : null,
+            area_label: area_label ? String(area_label).slice(0, 100) : null
         });
         auditLogModel.log({
             req, action: 'PROJECT_CREATE', target_type: 'project', target_id: id,
@@ -104,7 +248,11 @@ const createProject = async (req, res) => {
 
 const updateProject = async (req, res) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path, display_order } = req.body;
+        const {
+            name, area, square_meters, category, year, style, small_content, image_path, display_order,
+            // F05d extended fields
+            price, beds, baths, cars, address, state, property_type, area_label
+        } = req.body;
 
         // Build fields to update (only defined values)
         const fields = {};
@@ -116,9 +264,19 @@ const updateProject = async (req, res) => {
         if (style !== undefined) fields.style = style;
         if (small_content !== undefined) fields.small_content = small_content;
         if (image_path !== undefined) {
-            fields.image_path = image_path.replace(/^\/images\//, '');
+            // F10.fix: store image_path verbatim under /uploads/
+            fields.image_path = String(image_path || '').slice(0, 255);
         }
         if (display_order !== undefined) fields.display_order = display_order;
+        // F05d extended
+        if (price !== undefined) fields.price = String(price).slice(0, 50);
+        if (beds !== undefined) fields.beds = String(beds).slice(0, 20);
+        if (baths !== undefined) fields.baths = String(baths).slice(0, 20);
+        if (cars !== undefined) fields.cars = String(cars).slice(0, 20);
+        if (address !== undefined) fields.address = String(address).slice(0, 255);
+        if (state !== undefined) fields.state = String(state).toUpperCase().slice(0, 20);
+        if (property_type !== undefined) fields.property_type = String(property_type).toLowerCase().slice(0, 50);
+        if (area_label !== undefined) fields.area_label = String(area_label).slice(0, 100);
 
         const success = await projectModel.updateProjectFields(req.params.id, fields);
         if (!success) {
@@ -188,12 +346,7 @@ const searchProjects = async (req, res) => {
     try {
         const { keyword, status } = req.query;
         const projects = await searchModel.searchProjects(keyword || '', status || 'active');
-        // Normalize image_path with /images/ prefix
-        projects.forEach(p => {
-            if (p.image_path && !p.image_path.startsWith('/images/') && !p.image_path.startsWith('/uploads/')) {
-                p.image_path = '/images/' + p.image_path;
-            }
-        });
+        // F10.fix: searchModel already normalizes image_path to /uploads/
         res.json({ success: true, data: projects });
     } catch (error) {
         res.status(500).json({ success: false, message: 'Lỗi server' });
@@ -461,6 +614,9 @@ module.exports = {
     restoreProject,
     deleteProject,
     searchProjects,
+    // v2
+    getFeaturedProjects,
+    setFeaturedProjects,
     getContacts,
     searchContacts,
     deleteContact,

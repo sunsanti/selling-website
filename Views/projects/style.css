@@ -1,0 +1,356 @@
+/* F05c — /projects list + /projects/:id detail page styles */
+
+.projects-page {
+    background: var(--color-cream, #EBE9E8);
+    padding: 12rem 5% 6rem;
+    min-height: calc(100vh - 200px);
+}
+
+.projects-page-header {
+    max-width: 1320px;
+    margin: 0 auto 4rem;
+    text-align: center;
+}
+.projects-page-header .section-tagline {
+    display: inline-block;
+    color: var(--color-gold, #D1AE6B);
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.22em;
+    text-transform: uppercase;
+    margin-bottom: 1.4rem;
+}
+.projects-page-title {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 4.6rem);
+    color: #0a1f3d;
+    font-weight: 700;
+    margin: 0 0 1.4rem;
+}
+.projects-page-subtitle {
+    color: rgba(10,31,61,0.7);
+    font-size: 1.5rem;
+    margin: 0;
+    max-width: 600px;
+    margin: 0 auto;
+}
+
+/* v2: search bar wrapper on /projects (reuses .property-search styles from /main) */
+.projects-page-search {
+    max-width: 1400px;
+    margin: 0 auto 2.5rem;
+    padding: 0 2%;
+}
+.projects-page-search .property-search {
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 8px 20px rgba(27,38,53,0.06);
+    padding: 1.2rem 1.4rem;
+}
+
+/* Active filter chips */
+.projects-filter-chips {
+    max-width: 1320px;
+    margin: 0 auto 2.4rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.8rem;
+    align-items: center;
+}
+.filter-chip {
+    display: inline-flex;
+    align-items: center;
+    background: #fff;
+    border: 1px solid rgba(10,31,61,0.1);
+    border-radius: 999px;
+    padding: 0.6rem 1.4rem;
+    font-size: 1.15rem;
+    color: rgba(10,31,61,0.65);
+    letter-spacing: 0.08em;
+}
+.filter-chip strong {
+    color: #0a1f3d;
+    margin-left: 0.3rem;
+    font-weight: 700;
+}
+.filter-chip-clear {
+    color: var(--color-gold, #D1AE6B);
+    font-size: 1.15rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-left: auto;
+    text-decoration: none;
+}
+.filter-chip-clear:hover { text-decoration: underline; }
+
+.projects-grid-wrapper {
+    max-width: 1320px;
+    margin: 0 auto;
+}
+.projects-grid-wrapper .project-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 2rem;
+}
+.empty-state {
+    text-align: center;
+    padding: 4rem 2rem;
+    color: rgba(10,31,61,0.6);
+    font-size: 1.4rem;
+}
+.btn-clear-filters {
+    display: inline-block;
+    margin-top: 1.4rem;
+    padding: 1rem 2rem;
+    border: 2px solid var(--color-gold, #D1AE6B);
+    color: #0a1f3d;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    font-size: 1.15rem;
+    transition: background 0.25s;
+}
+.btn-clear-filters:hover { background: var(--color-gold, #D1AE6B); }
+
+.projects-page-footer {
+    text-align: center;
+    padding: 2rem 5%;
+    background: var(--color-cream, #EBE9E8);
+    color: rgba(10,31,61,0.55);
+    font-size: 1.15rem;
+    border-top: 1px solid rgba(10,31,61,0.06);
+}
+.projects-page-footer a {
+    color: var(--color-gold, #D1AE6B);
+    text-decoration: none;
+    margin-left: 0.4rem;
+}
+
+/* ============== /projects/:id DETAIL ============== */
+.project-detail-page {
+    background: var(--color-cream, #EBE9E8);
+    padding: 10rem 0 6rem;
+    min-height: calc(100vh - 200px);
+}
+.detail-hero {
+    position: relative;
+    width: 100%;
+    height: 60vh;
+    min-height: 420px;
+    overflow: hidden;
+    background: #1a1a1a;
+}
+.detail-hero img {
+    width: 100%; height: 100%; object-fit: cover;
+}
+.detail-hero::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(to bottom, transparent 40%, rgba(10,31,61,0.7) 100%);
+}
+.detail-overlay-content {
+    position: absolute;
+    bottom: 4rem;
+    left: 5%;
+    right: 5%;
+    z-index: 2;
+    color: #fff;
+    max-width: 1320px;
+    margin: 0 auto;
+}
+.detail-area-badge {
+    display: inline-block;
+    background: rgba(10,31,61,0.85);
+    color: var(--color-gold, #D1AE6B);
+    padding: 0.5rem 1.4rem;
+    border-radius: 4px;
+    font-size: 1.15rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 1.4rem;
+}
+.detail-name {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(3rem, 5vw, 4.8rem);
+    margin: 0 0 0.8rem;
+    line-height: 1.1;
+}
+.detail-address {
+    font-size: 1.4rem;
+    opacity: 0.9;
+}
+
+.detail-body {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 0 5%;
+    display: grid;
+    grid-template-columns: 1fr 360px;
+    gap: 4rem;
+    margin-top: -4rem;
+    position: relative;
+    z-index: 3;
+}
+.detail-main {
+    background: #fff;
+    border-radius: 12px;
+    padding: 3rem;
+    box-shadow: 0 10px 36px rgba(10,31,61,0.08);
+}
+.detail-main .detail-price {
+    color: var(--color-gold, #D1AE6B);
+    font-size: 2.4rem;
+    font-weight: 700;
+    margin: 0 0 2rem;
+}
+.detail-specs-row {
+    display: flex;
+    gap: 2rem;
+    flex-wrap: wrap;
+    border-top: 1px solid #eee;
+    border-bottom: 1px solid #eee;
+    padding: 2rem 0;
+    margin-bottom: 2.4rem;
+}
+.detail-specs-row .detail-spec {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    color: #0a1f3d;
+    font-size: 1.4rem;
+}
+.detail-specs-row .detail-spec i {
+    color: var(--color-gold, #D1AE6B);
+    font-size: 1.5rem;
+}
+.detail-specs-row .detail-spec strong {
+    font-weight: 700;
+}
+.detail-description {
+    color: rgba(10,31,61,0.78);
+    line-height: 1.7;
+    font-size: 1.4rem;
+    white-space: pre-line;
+}
+
+.detail-side {
+    background: #fff;
+    border-radius: 12px;
+    padding: 2.4rem;
+    box-shadow: 0 10px 36px rgba(10,31,61,0.08);
+    align-self: flex-start;
+    position: sticky;
+    top: 100px;
+}
+.detail-side h3 {
+    font-family: 'Playfair Display', serif;
+    color: #0a1f3d;
+    margin: 0 0 1.6rem;
+    font-size: 1.8rem;
+}
+.detail-side dl {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem 0.8rem;
+    margin: 0 0 2rem;
+    font-size: 1.25rem;
+}
+.detail-side dt {
+    color: #999;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    font-size: 1rem;
+    font-weight: 600;
+}
+.detail-side dd {
+    color: #0a1f3d;
+    font-weight: 500;
+    margin: 0;
+}
+.detail-cta {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.6rem;
+    justify-content: center;
+    width: 100%;
+    padding: 1.4rem;
+    background: #0a1f3d;
+    color: #fff;
+    border-radius: 6px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    font-size: 1.15rem;
+    text-decoration: none;
+    transition: background 0.25s;
+}
+.detail-cta:hover {
+    background: var(--color-gold, #D1AE6B);
+    color: #0a1f3d;
+}
+
+.detail-gallery {
+    max-width: 1100px;
+    margin: 4rem auto 0;
+    padding: 0 5%;
+}
+.detail-gallery h3 {
+    font-family: 'Playfair Display', serif;
+    color: #0a1f3d;
+    font-size: 2.2rem;
+    margin: 0 0 2rem;
+}
+.detail-gallery-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.6rem;
+}
+.detail-gallery-grid img {
+    width: 100%;
+    aspect-ratio: 4/3;
+    object-fit: cover;
+    border-radius: 8px;
+}
+
+#detail-not-found {
+    max-width: 600px;
+    margin: 8rem auto;
+    padding: 4rem;
+    text-align: center;
+    background: #fff;
+    border-radius: 12px;
+}
+#detail-not-found h2 {
+    font-family: 'Playfair Display', serif;
+    color: #0a1f3d;
+    font-size: 2.4rem;
+    margin: 0 0 1rem;
+}
+#detail-not-found a {
+    color: var(--color-gold, #D1AE6B);
+    font-weight: 600;
+    text-decoration: none;
+}
+
+/* ============== Responsive ============== */
+@media (max-width: 1024px) {
+    .projects-grid-wrapper .project-grid { grid-template-columns: repeat(2, 1fr); }
+    .detail-body { grid-template-columns: 1fr; }
+    .detail-side { position: static; }
+    .detail-gallery-grid { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 768px) {
+    .projects-page { padding: 10rem 4% 4rem; }
+    .projects-grid-wrapper .project-grid { grid-template-columns: 1fr; }
+    .detail-body { padding: 0 4%; gap: 2.4rem; }
+    .detail-main { padding: 2rem; }
+    .detail-side { padding: 1.8rem; }
+    .detail-specs-row { gap: 1.2rem; }
+    .detail-gallery-grid { grid-template-columns: 1fr; }
+    .detail-overlay-content { left: 4%; right: 4%; bottom: 2.4rem; }
+}

@@ -8,10 +8,62 @@ let currentProjectImages = []; // { id: dbId|null, image_path: string, isNew: bo
 let imageUploadQueue = [];    // files to upload on form submit
 let translateLoadingEl = null;
 
+// v16: per-table pagination state — each table keeps its full dataset
+// client-side and slices PAGE_SIZE rows per page.
+let _activeProjectsAll = [];
+let _activeProjectsPage = 1;
+let _inactiveProjectsAll = [];
+let _inactiveProjectsPage = 1;
+let _contactsAll = [];
+let _contactsPage = 1;
+let _accountsAll = [];
+let _accountsPage = 1;
+let _auditLogAll = [];
+let _auditLogPage = 1;
+let _videosAll = [];
+let _videosPage = 1;
+let _newsAll = [];
+let _newsPage = 1;
+
+// ===================== PAGINATION =====================
+const PAGE_SIZE = 10;
+
+function paginate(data, page) {
+    const start = (page - 1) * PAGE_SIZE;
+    return (data || []).slice(start, start + PAGE_SIZE);
+}
+
+function renderPagination(containerId, totalItems, currentPage, onPageChange) {
+    const el = document.getElementById(containerId);
+    if (!el) return;
+    const totalPages = Math.max(1, Math.ceil((totalItems || 0) / PAGE_SIZE));
+    if (totalPages <= 1) { el.innerHTML = ''; return; }
+    let html = `<button class="page-btn" data-page="${currentPage - 1}" ${currentPage <= 1 ? 'disabled' : ''} title="Previous"><i class="fas fa-chevron-left"></i></button>`;
+    for (let p = 1; p <= totalPages; p++) {
+        html += `<button class="page-btn${p === currentPage ? ' active' : ''}" data-page="${p}">${p}</button>`;
+    }
+    html += `<button class="page-btn" data-page="${currentPage + 1}" ${currentPage >= totalPages ? 'disabled' : ''} title="Next"><i class="fas fa-chevron-right"></i></button>`;
+    el.innerHTML = html;
+    el.querySelectorAll('.page-btn').forEach(btn => {
+        btn.addEventListener('click', () => {
+            if (btn.disabled) return;
+            const page = parseInt(btn.dataset.page, 10);
+            if (!page || page === currentPage) return;
+            onPageChange(page);
+        });
+    });
+}
+
 // ===================== INIT =====================
 document.addEventListener('DOMContentLoaded', () => {
     loadDashboard();
+    // v14: Dashboard is the default active section on load, but the
+    // About-Stats grid previously only loaded via switchSection('dashboard')
+    // on click — leaving it empty until the user clicked the tab.
+    loadHomeAbout();
+    ensurePreviewLoaded('settings');
     setupNavigation();
+    setupSubTabs();
     setupForms();
     setupSettingsUpload();
 
@@ -89,19 +141,45 @@ function setupNavigation() {
     });
 }
 
+// v20: secondary sub-navbar inside a content-section. Clicking a
+// .sub-nav-item shows the matching .sub-tab-panel and hides its siblings
+// within the same data-subtab-group. Live Preview / always-visible panels
+// live outside .sub-tab-panel and are unaffected.
+function setupSubTabs() {
+    document.querySelectorAll('.sub-nav').forEach(nav => {
+        const group = nav.dataset.subtabGroup;
+        nav.querySelectorAll('.sub-nav-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const target = item.dataset.subtab;
+                nav.querySelectorAll('.sub-nav-item').forEach(i => i.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll(`.sub-tab-panel[data-subtab-group="${group}"]`).forEach(p => {
+                    p.classList.toggle('active', p.dataset.subtabPanel === target);
+                });
+            });
+        });
+    });
+}
+
 function switchSection(section) {
     document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
     document.getElementById(section).classList.add('active');
 
     switch (section) {
-        case 'dashboard': loadDashboard(); ensurePreviewLoaded('settings'); break;
+        case 'dashboard': loadDashboard(); loadHomeAbout(); ensurePreviewLoaded('settings'); break;
         case 'projects': loadProjects(); break;
         case 'contacts': loadContacts(); break;
         case 'accounts': loadAccounts(); break;
         case 'audit-log': loadAuditLog(); break;
-        case 'home-about': loadHomeAbout(); ensurePreviewLoaded('about'); break;
+        case 'home-about':
+            loadAboutContent(); loadAboutServices(); loadAboutLeadership(); loadAboutTeam();
+            ensurePreviewLoaded('about');
+            break;
         case 'home-services': loadHomeServices(); ensurePreviewLoaded('services'); break;
-        case 'home-footer': loadHomeFooter(); ensurePreviewLoaded('footer'); break;
+        case 'home-footer': loadHomeFooter(); loadFooterContent(); ensurePreviewLoaded('footer'); break;
+        case 'invest': loadInvestContent(); ensurePreviewLoaded('invest'); break;
+        case 'videos': loadVideosAdmin(); break;
+        case 'news': loadNewsAdmin(); break;
     }
 }
 
@@ -167,6 +245,94 @@ async function loadDashboard() {
     }
 }
 
+// ===================== INVEST SECTION =====================
+// v15: "Why Invest in Australia" content + video now live in their own tab
+async function loadInvestContent() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        const result = await res.json();
+        if (!result.success || !result.data) return;
+        const s = result.data;
+
+        document.getElementById('setting-purpose-tagline').value = s.purpose_tagline || '';
+        document.getElementById('setting-purpose-heading').value = s.purpose_heading || '';
+        [1, 2, 3, 4].forEach(i => {
+            document.getElementById('setting-purpose-list-' + i).value = s['purpose_list_' + i] || '';
+        });
+        document.getElementById('setting-purpose-cta-text').value = s.purpose_cta_text || '';
+        document.getElementById('setting-purpose-video-caption').value = s.purpose_video_caption || '';
+
+        window._currentPurposeThumb = s.purpose_video_thumbnail || '';
+        window._currentPurposeVideo = s.purpose_video_url || '';
+
+        const thumbVal = window._currentPurposeThumb;
+        const thumbImg = document.getElementById('current-purpose-thumb-img');
+        const thumbPh = document.getElementById('purpose-thumb-preview-placeholder');
+        const thumbRm = document.getElementById('purpose-thumb-remove-btn');
+        if (thumbVal && thumbImg) {
+            thumbImg.src = thumbVal.startsWith('/') ? thumbVal : '/' + thumbVal;
+            thumbImg.style.display = 'block';
+            if (thumbPh) thumbPh.style.display = 'none';
+            if (thumbRm) thumbRm.style.display = 'inline-flex';
+        } else if (thumbImg) {
+            thumbImg.style.display = 'none';
+            if (thumbPh) thumbPh.style.display = 'flex';
+            if (thumbRm) thumbRm.style.display = 'none';
+        }
+
+        // B: Invest video is an uploaded file picked via Media Library
+        const videoVal = window._currentPurposeVideo;
+        const videoEl = document.getElementById('current-purpose-video');
+        const videoPh = document.getElementById('purpose-video-preview-placeholder');
+        const videoRm = document.getElementById('purpose-video-remove-btn');
+        if (videoVal && videoEl) {
+            videoEl.src = videoVal.startsWith('/') || /^https?:\/\//i.test(videoVal) ? videoVal : '/' + videoVal;
+            videoEl.style.display = 'block';
+            if (videoPh) videoPh.style.display = 'none';
+            if (videoRm) videoRm.style.display = 'inline-flex';
+        } else if (videoEl) {
+            videoEl.style.display = 'none';
+            videoEl.src = '';
+            if (videoPh) videoPh.style.display = 'flex';
+            if (videoRm) videoRm.style.display = 'none';
+        }
+    } catch (error) {
+        console.error('Error loading invest content:', error);
+    }
+}
+
+async function saveInvestContent() {
+    const data = {
+        purpose_tagline: document.getElementById('setting-purpose-tagline').value,
+        purpose_heading: document.getElementById('setting-purpose-heading').value,
+        purpose_list_1: document.getElementById('setting-purpose-list-1').value,
+        purpose_list_2: document.getElementById('setting-purpose-list-2').value,
+        purpose_list_3: document.getElementById('setting-purpose-list-3').value,
+        purpose_list_4: document.getElementById('setting-purpose-list-4').value,
+        purpose_cta_text: document.getElementById('setting-purpose-cta-text').value,
+        purpose_video_caption: document.getElementById('setting-purpose-video-caption').value,
+        purpose_video_thumbnail: window._currentPurposeThumb || '',
+        purpose_video_url: window._currentPurposeVideo || ''
+    };
+
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data)
+        });
+        const result = await res.json();
+        if (result.success) {
+            showToast('Invest content saved successfully!', 'success');
+            refreshPreview('invest');
+        } else {
+            showToast(result.message || 'Error saving invest content', 'error');
+        }
+    } catch (error) {
+        showToast('Error saving invest content', 'error');
+    }
+}
+
 // ===================== SETTINGS UPLOAD HELPERS =====================
 function setupSettingsUpload() {
     // Logo upload
@@ -208,6 +374,66 @@ function setupSettingsUpload() {
             });
         });
     }
+
+    // F06: Purpose-Invest video thumbnail picker
+    const purposeThumbBtn = document.getElementById('purpose-thumb-pick-btn');
+    if (purposeThumbBtn) {
+        purposeThumbBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    window._currentPurposeThumb = url;
+                    const img = document.getElementById('current-purpose-thumb-img');
+                    const ph = document.getElementById('purpose-thumb-preview-placeholder');
+                    const rm = document.getElementById('purpose-thumb-remove-btn');
+                    if (img) { img.src = url; img.style.display = 'block'; }
+                    if (ph) ph.style.display = 'none';
+                    if (rm) rm.style.display = 'inline-flex';
+                    postPreviewData('invest');
+                }
+            });
+        });
+    }
+
+    // B: Purpose-Invest video file picker (uploaded MP4, via Media Library)
+    const purposeVideoBtn = document.getElementById('purpose-video-pick-btn');
+    if (purposeVideoBtn) {
+        purposeVideoBtn.addEventListener('click', () => {
+            openMediaLibrary({
+                mode: 'single',
+                onSelect: ([url]) => {
+                    window._currentPurposeVideo = url;
+                    const video = document.getElementById('current-purpose-video');
+                    const ph = document.getElementById('purpose-video-preview-placeholder');
+                    const rm = document.getElementById('purpose-video-remove-btn');
+                    if (video) { video.src = url; video.style.display = 'block'; }
+                    if (ph) ph.style.display = 'none';
+                    if (rm) rm.style.display = 'inline-flex';
+                    postPreviewData('invest');
+                }
+            });
+        });
+    }
+}
+
+function removePurposeThumb() {
+    window._currentPurposeThumb = '';
+    const img = document.getElementById('current-purpose-thumb-img');
+    const ph = document.getElementById('purpose-thumb-preview-placeholder');
+    const rm = document.getElementById('purpose-thumb-remove-btn');
+    if (img) img.style.display = 'none';
+    if (ph) ph.style.display = 'flex';
+    if (rm) rm.style.display = 'none';
+}
+
+function removePurposeVideo() {
+    window._currentPurposeVideo = '';
+    const video = document.getElementById('current-purpose-video');
+    const ph = document.getElementById('purpose-video-preview-placeholder');
+    const rm = document.getElementById('purpose-video-remove-btn');
+    if (video) { video.style.display = 'none'; video.src = ''; }
+    if (ph) ph.style.display = 'flex';
+    if (rm) rm.style.display = 'none';
 }
 
 function removeLogoImage() {
@@ -257,7 +483,8 @@ document.getElementById('settings-form').addEventListener('submit', async (e) =>
             const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: formData });
             const result = await res.json();
             if (result.success) {
-                mainImageValue = result.path.replace(/^\/images\//, '');
+                // F10.fix: upload handler already returns /uploads/<file> — store verbatim
+                mainImageValue = result.path;
             }
         } catch (error) {
             showToast('Error uploading main image', 'error');
@@ -375,7 +602,11 @@ function loadActiveProjects() {
     fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=active`)
         .then(res => res.json())
         .then(data => {
-            if (data.success) renderActiveProjects(data.data);
+            if (data.success) {
+                _activeProjectsAll = data.data || [];
+                _activeProjectsPage = 1;
+                renderActiveProjects();
+            }
         });
 }
 
@@ -384,19 +615,26 @@ function loadInactiveProjects() {
     fetch(`/api/admin/projects/search?keyword=${encodeURIComponent(keyword)}&status=inactive`)
         .then(res => res.json())
         .then(data => {
-            if (data.success) renderInactiveProjects(data.data);
+            if (data.success) {
+                _inactiveProjectsAll = data.data || [];
+                _inactiveProjectsPage = 1;
+                renderInactiveProjects();
+            }
         });
 }
 
-function renderActiveProjects(projects) {
+function renderActiveProjects() {
     const tbody = document.getElementById('active-projects-tbody');
-    if (!projects || projects.length === 0) {
+    if (_activeProjectsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#95a5a6;">No active projects</td></tr>';
+        renderPagination('active-projects-pagination', 0, 1, () => {});
         return;
     }
+    const projects = paginate(_activeProjectsAll, _activeProjectsPage);
+    const offset = (_activeProjectsPage - 1) * PAGE_SIZE;
     tbody.innerHTML = projects.map((p, i) => `
         <tr>
-            <td>${i + 1}</td>
+            <td>${offset + i + 1}</td>
             <td><img src="${p.image_path || 'placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/80x60?text=No+Img'"></td>
             <td>${escapeHtml(p.name)}</td>
             <td><span class="status-badge status-${p.area}">${capitalize(p.area)}</span></td>
@@ -411,17 +649,24 @@ function renderActiveProjects(projects) {
             </td>
         </tr>
     `).join('');
+    renderPagination('active-projects-pagination', _activeProjectsAll.length, _activeProjectsPage, (page) => {
+        _activeProjectsPage = page;
+        renderActiveProjects();
+    });
 }
 
-function renderInactiveProjects(projects) {
+function renderInactiveProjects() {
     const tbody = document.getElementById('inactive-projects-tbody');
-    if (!projects || projects.length === 0) {
+    if (_inactiveProjectsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;padding:30px;color:#95a5a6;">No inactive projects</td></tr>';
+        renderPagination('inactive-projects-pagination', 0, 1, () => {});
         return;
     }
+    const projects = paginate(_inactiveProjectsAll, _inactiveProjectsPage);
+    const offset = (_inactiveProjectsPage - 1) * PAGE_SIZE;
     tbody.innerHTML = projects.map((p, i) => `
         <tr>
-            <td>${i + 1}</td>
+            <td>${offset + i + 1}</td>
             <td><img src="${p.image_path || 'placeholder.jpg'}" alt="" onerror="this.src='https://via.placeholder.com/80x60?text=No+Img'"></td>
             <td>${escapeHtml(p.name)}</td>
             <td><span class="status-badge status-${p.area}">${capitalize(p.area)}</span></td>
@@ -436,6 +681,20 @@ function renderInactiveProjects(projects) {
             </td>
         </tr>
     `).join('');
+    renderPagination('inactive-projects-pagination', _inactiveProjectsAll.length, _inactiveProjectsPage, (page) => {
+        _inactiveProjectsPage = page;
+        renderInactiveProjects();
+    });
+}
+
+// A2: price is stored as "From $X,XXX" — admin enters/edits just the plain number
+function parsePriceNumber(priceStr) {
+    return String(priceStr || '').replace(/[^0-9]/g, '');
+}
+function formatPriceFromNumber(numStr) {
+    const digits = String(numStr || '').replace(/[^0-9]/g, '');
+    if (!digits) return '';
+    return 'From $' + parseInt(digits, 10).toLocaleString('en-US');
 }
 
 async function editProject(id) {
@@ -454,6 +713,14 @@ async function editProject(id) {
         document.getElementById('project-year').value = p.year || '';
         document.getElementById('project-style').value = p.style || '';
         document.getElementById('project-content').value = p.small_content || '';
+        // F05d: 8 extended fields
+        document.getElementById('project-price').value = parsePriceNumber(p.price);
+        document.getElementById('project-state').value = p.state || '';
+        document.getElementById('project-property-type').value = p.property_type || '';
+        document.getElementById('project-address').value = p.address || '';
+        document.getElementById('project-beds').value = p.beds || '';
+        document.getElementById('project-baths').value = p.baths || '';
+        document.getElementById('project-cars').value = p.cars || '';
 
         // Load images from tableimages
         await loadProjectImagesForEdit(id);
@@ -564,14 +831,25 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
     imageUploadQueue = []; // clear queue after upload
 
     // Step 2: Save project
+    const areaSelect = document.getElementById('project-area');
+    const areaLabel = areaSelect.selectedOptions[0] ? areaSelect.selectedOptions[0].text.toUpperCase() : '';
     const payload = {
         name: document.getElementById('project-name').value,
-        area: document.getElementById('project-area').value,
+        area: areaSelect.value,
         square_meters: document.getElementById('project-square').value,
         category: document.getElementById('project-category').value,
         year: document.getElementById('project-year').value,
         style: document.getElementById('project-style').value,
-        small_content: document.getElementById('project-content').value
+        small_content: document.getElementById('project-content').value,
+        // F05d: 8 extended fields
+        price: formatPriceFromNumber(document.getElementById('project-price').value),
+        state: document.getElementById('project-state').value,
+        property_type: document.getElementById('project-property-type').value,
+        area_label: areaLabel,
+        address: document.getElementById('project-address').value.trim(),
+        beds: document.getElementById('project-beds').value.trim(),
+        baths: document.getElementById('project-baths').value.trim(),
+        cars: document.getElementById('project-cars').value.trim()
     };
 
     try {
@@ -661,12 +939,13 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
             console.log('Step 5 - fetched images:', firstImgData);
             if (firstImgData.success && firstImgData.data && firstImgData.data.length > 0) {
                 const firstImg = firstImgData.data[0];
-                const cleanPath = (firstImg.image_path || '').replace(/^\/images\//, '').replace(/^\/uploads\//, '');
-                console.log('Setting image_path to:', cleanPath);
+                // F10.fix: sync image_path verbatim (already /uploads/<file> from Media Library)
+                const syncPath = firstImg.image_path || '';
+                console.log('Setting image_path to:', syncPath);
                 await fetch(`/api/admin/projects/${projectId}`, {
                     method: 'PUT',
                     headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ image_path: cleanPath })
+                    body: JSON.stringify({ image_path: syncPath })
                 });
                 console.log('image_path synced!');
             } else {
@@ -695,6 +974,132 @@ async function searchProjects() {
 function loadProjects() {
     loadActiveProjects();
     loadInactiveProjects();
+    loadFeaturedPanel();   // v2
+}
+
+// ===================== v2: FEATURED PROJECTS PANEL =====================
+// v3: split into 2 rows — "Đã chọn" (selected, max 4) on top and
+// "Tất cả Projects đang Active" (unselected, paginated 5/page) below.
+// Selecting a card moves it up to the selected row; deselecting moves it back down.
+let _featuredSelection = new Set();
+let _featuredAllActive = [];
+let _featuredPage = 1;
+const FEATURED_PAGE_SIZE = 5;
+
+async function loadFeaturedPanel() {
+    const grid = document.getElementById('featured-available-grid');
+    if (!grid) return;
+    try {
+        const [allRes, featRes] = await Promise.all([
+            fetch('/api/admin/projects'),
+            fetch('/api/admin/projects/featured')
+        ]);
+        const allJson = await allRes.json();
+        const featJson = await featRes.json();
+        _featuredAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(p => p.status === 'active') : [];
+        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(p => p.id) : [];
+        _featuredSelection = new Set(featuredIds);
+        _featuredPage = 1;
+        renderFeaturedPanel();
+    } catch (err) {
+        console.error('loadFeaturedPanel:', err);
+    }
+}
+
+function featuredCardHtml(p) {
+    const isSel = _featuredSelection.has(p.id);
+    const cover = (p.image_path || '/uploads/main_image.jpg');
+    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${p.id}" onclick="toggleFeatured(${p.id})">
+        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="featured-card-body">
+            <p class="featured-card-name">${(p.name || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+            <span class="featured-card-area">${(p.area || '').toString()}</span>
+        </div>
+    </div>`;
+}
+
+function renderFeaturedPanel() {
+    const selGrid = document.getElementById('featured-selected-grid');
+    const availGrid = document.getElementById('featured-available-grid');
+    if (!selGrid || !availGrid) return;
+
+    const selected = _featuredAllActive.filter(p => _featuredSelection.has(p.id));
+    const available = _featuredAllActive.filter(p => !_featuredSelection.has(p.id));
+
+    selGrid.innerHTML = selected.length
+        ? selected.map(featuredCardHtml).join('')
+        : '<p class="featured-empty">Chưa chọn project nào</p>';
+
+    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_PAGE_SIZE));
+    if (_featuredPage > totalPages) _featuredPage = totalPages;
+    const start = (_featuredPage - 1) * FEATURED_PAGE_SIZE;
+    const pageItems = available.slice(start, start + FEATURED_PAGE_SIZE);
+
+    availGrid.innerHTML = pageItems.length
+        ? pageItems.map(featuredCardHtml).join('')
+        : '<p class="featured-empty">Không còn project nào</p>';
+
+    renderFeaturedPagination(totalPages);
+    updateFeaturedCounter();
+}
+
+function renderFeaturedPagination(totalPages) {
+    const pag = document.getElementById('featured-pagination');
+    if (!pag) return;
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${_featuredPage === 1 ? 'disabled' : ''} onclick="changeFeaturedPage(${_featuredPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === _featuredPage ? 'active' : ''}" onclick="changeFeaturedPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${_featuredPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedPage(${_featuredPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    pag.innerHTML = html;
+}
+
+function changeFeaturedPage(page) {
+    _featuredPage = page;
+    renderFeaturedPanel();
+}
+
+function updateFeaturedCounter() {
+    const c = document.getElementById('featured-counter');
+    if (c) c.textContent = `${_featuredSelection.size} / 4 selected`;
+    // disable available cards once 4 are selected
+    document.querySelectorAll('#featured-available-grid .featured-card').forEach(card => {
+        if (_featuredSelection.size >= 4) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
+        }
+    });
+}
+
+function toggleFeatured(id) {
+    if (_featuredSelection.has(id)) {
+        _featuredSelection.delete(id);
+    } else {
+        if (_featuredSelection.size >= 4) {
+            showToast('Tối đa 4 projects featured', 'error');
+            return;
+        }
+        _featuredSelection.add(id);
+    }
+    renderFeaturedPanel();
+}
+
+async function saveFeaturedProjects() {
+    try {
+        const ids = Array.from(_featuredSelection);
+        const res = await fetch('/api/admin/projects/featured', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(`Đã lưu ${ids.length} featured projects`, 'success');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
 }
 
 // ===================== CONTACTS =====================
@@ -703,20 +1108,24 @@ async function loadContacts() {
         const res = await fetch('/api/admin/contacts');
         const data = await res.json();
         if (data.success) {
-            renderContactsTable(data.data);
+            _contactsAll = data.data || [];
+            _contactsPage = 1;
+            renderContactsTable();
         }
     } catch (error) {
         console.error('Error loading contacts:', error);
     }
 }
 
-function renderContactsTable(contacts) {
+function renderContactsTable() {
     const tbody = document.getElementById('contacts-tbody');
-    if (!contacts || contacts.length === 0) {
+    if (_contactsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:30px;color:#95a5a6;">No contacts found</td></tr>';
+        renderPagination('contacts-pagination', 0, 1, () => {});
         return;
     }
 
+    const contacts = paginate(_contactsAll, _contactsPage);
     tbody.innerHTML = contacts.map(c => `
         <tr>
             <td>${c.id}</td>
@@ -731,6 +1140,10 @@ function renderContactsTable(contacts) {
             </td>
         </tr>
     `).join('');
+    renderPagination('contacts-pagination', _contactsAll.length, _contactsPage, (page) => {
+        _contactsPage = page;
+        renderContactsTable();
+    });
 }
 
 async function searchContacts() {
@@ -743,7 +1156,9 @@ async function searchContacts() {
         const res = await fetch(`/api/admin/contacts/search?keyword=${encodeURIComponent(keyword)}`);
         const data = await res.json();
         if (data.success) {
-            renderContactsTable(data.data);
+            _contactsAll = data.data || [];
+            _contactsPage = 1;
+            renderContactsTable();
         }
     } catch (error) {
         showToast('Error searching contacts', 'error');
@@ -776,20 +1191,24 @@ async function loadAccounts() {
         const res = await fetch('/api/admin/accounts');
         const data = await res.json();
         if (data.success) {
-            renderAccountsTable(data.data);
+            _accountsAll = data.data || [];
+            _accountsPage = 1;
+            renderAccountsTable();
         }
     } catch (error) {
         console.error('Error loading accounts:', error);
     }
 }
 
-function renderAccountsTable(accounts) {
+function renderAccountsTable() {
     const tbody = document.getElementById('accounts-tbody');
-    if (!accounts || accounts.length === 0) {
+    if (_accountsAll.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;padding:30px;color:#95a5a6;">No accounts found</td></tr>';
+        renderPagination('accounts-pagination', 0, 1, () => {});
         return;
     }
 
+    const accounts = paginate(_accountsAll, _accountsPage);
     tbody.innerHTML = accounts.map(a => `
         <tr>
             <td>${a.id}</td>
@@ -805,6 +1224,10 @@ function renderAccountsTable(accounts) {
             </td>
         </tr>
     `).join('');
+    renderPagination('accounts-pagination', _accountsAll.length, _accountsPage, (page) => {
+        _accountsPage = page;
+        renderAccountsTable();
+    });
 }
 
 async function editAccount(id) {
@@ -1026,7 +1449,9 @@ function refreshPreview(target) {
     const iframe = document.getElementById('preview-iframe-' + target);
     if (!iframe) return;
     PREVIEW_READY.delete(target);
-    iframe.src = '/main?preview=1&scope=' + target + '&t=' + Date.now();
+    // v12: the 'about' iframe targets the dedicated /about page; others use /main
+    const base = (target === 'about') ? '/about' : '/main';
+    iframe.src = base + '?preview=1&scope=' + target + '&t=' + Date.now();
 }
 
 function ensurePreviewLoaded(target) {
@@ -1047,13 +1472,9 @@ function postPreviewData(target) {
 
 function gatherPreviewData(target) {
     if (target === 'settings') {
-        return {
-            logo: window._pendingLogoDataUrl || currentLogoPath || '',
-            phone: (document.getElementById('setting-phone') || {}).value || '',
-            main_image: window._pendingMainImageDataUrl || currentMainImagePath || ''
-        };
-    }
-    if (target === 'about') {
+        const v = id => (document.getElementById(id) || {}).value || '';
+        // v13: About Stats grid (now in Dashboard) — #about-stats-info lives inside
+        // #home-section, so it's visible in the settings-scope preview.
         const stats = [];
         document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
             const slot = parseInt(inp.dataset.slot, 10);
@@ -1063,10 +1484,96 @@ function gatherPreviewData(target) {
             entry[field] = inp.value;
         });
         return {
+            logo: window._pendingLogoDataUrl || currentLogoPath || '',
+            phone: v('setting-phone'),
+            main_image: window._pendingMainImageDataUrl || currentMainImagePath || '',
+            // v11: footer fields driven through the settings scope so the
+            // /main preview iframe (which loads the full footer) reacts live.
+            footer_desc:         v('setting-footer-desc'),
+            footer_address:      v('setting-footer-address'),
+            footer_copyright:    v('setting-footer-copyright'),
+            footer_facebook_url: v('setting-footer-facebook'),
+            footer_linkedin_url: v('setting-footer-linkedin'),
+            footer_youtube_url:  v('setting-footer-youtube'),
+            footer_tiktok_url:   v('setting-footer-tiktok'),
+            stats
+        };
+    }
+    if (target === 'invest') {
+        const v = id => (document.getElementById(id) || {}).value || '';
+        return {
+            purpose_tagline:       v('setting-purpose-tagline'),
+            purpose_heading:       v('setting-purpose-heading'),
+            purpose_list_1:        v('setting-purpose-list-1'),
+            purpose_list_2:        v('setting-purpose-list-2'),
+            purpose_list_3:        v('setting-purpose-list-3'),
+            purpose_list_4:        v('setting-purpose-list-4'),
+            purpose_cta_text:      v('setting-purpose-cta-text'),
+            purpose_video_caption: v('setting-purpose-video-caption'),
+            purpose_video_thumbnail: window._currentPurposeThumb || '',
+            purpose_video_url:     v('setting-purpose-video-url')
+        };
+    }
+    if (target === 'about') {
+        const v = id => (document.getElementById(id) || {}).value || '';
+        const stats = [];
+        document.querySelectorAll('#about-stats-grid input[data-slot]').forEach(inp => {
+            const slot = parseInt(inp.dataset.slot, 10);
+            const field = inp.dataset.field;
+            let entry = stats.find(s => s.slot === slot);
+            if (!entry) { entry = { slot }; stats.push(entry); }
+            entry[field] = inp.value;
+        });
+        // v13: pull Leadership (Director/Co-Founder) from About-tab editor first, fall back to Footer-tab editor
+        const footer_persons = [];
+        const aboutLead = document.querySelectorAll('#about-leadership-cards .settings-panel');
+        const src = aboutLead.length ? aboutLead : document.querySelectorAll('#home-footer-cards .settings-panel');
+        src.forEach(card => {
+            const q = (sel) => (card.querySelector(sel) || {}).value || '';
+            footer_persons.push({
+                slot: parseInt(card.dataset.slot, 10),
+                name:   q('.al-name')   || q('.fp-name'),
+                email:  q('.al-email')  || q('.fp-email'),
+                phone1: q('.al-phone1') || q('.fp-phone1'),
+                phone2: q('.al-phone2') || q('.fp-phone2'),
+                facebook_url: q('.al-fb') || q('.fp-fb'),
+                avatar_path: card.dataset.avatarPath || ''
+            });
+        });
+
+        // v13: Team grid (6 members from About tab)
+        const team_members = [];
+        document.querySelectorAll('#about-team-cards .settings-panel').forEach(card => {
+            team_members.push({
+                slot: parseInt(card.dataset.slot, 10),
+                name: (card.querySelector('.at-name') || {}).value || '',
+                role: (card.querySelector('.at-role') || {}).value || '',
+                avatar_path: card.dataset.avatarPath || ''
+            });
+        });
+
+        // v13: Our Services 3 cards from About tab
+        const svcs = {};
+        document.querySelectorAll('#about-services-cards .service-card-col').forEach(card => {
+            const i = parseInt(card.dataset.slot, 10);
+            svcs[`about_service_${i}_icon`]  = (card.querySelector('.as-icon')  || {}).value || '';
+            svcs[`about_service_${i}_title`] = (card.querySelector('.as-title') || {}).value || '';
+            svcs[`about_service_${i}_desc`]  = (card.querySelector('.as-desc')  || {}).value || '';
+        });
+
+        return {
             banner: (document.getElementById('about-input-banner') || {}).value || '',
             paragraph_left: (document.getElementById('about-input-left') || {}).value || '',
             paragraph_right: (document.getElementById('about-input-right') || {}).value || '',
-            stats
+            stats,
+            // v12: /about page content
+            about_hero_tag:           v('setting-about-hero-tag'),
+            about_hero_title:         v('setting-about-hero-title'),
+            about_mission:            v('setting-about-mission'),
+            about_offices:            gatherAboutOffices(),
+            ...svcs,
+            footer_persons,
+            team_members
         };
     }
     if (target === 'services') {
@@ -1082,6 +1589,7 @@ function gatherPreviewData(target) {
         return { services };
     }
     if (target === 'footer') {
+        const v = id => (document.getElementById(id) || {}).value || '';
         const footer_persons = [];
         document.querySelectorAll('#home-footer-cards .settings-panel').forEach(card => {
             footer_persons.push({
@@ -1094,7 +1602,18 @@ function gatherPreviewData(target) {
                 avatar_path: card.dataset.avatarPath || ''
             });
         });
-        return { footer_persons };
+        return {
+            footer_persons,
+            // v11: include site-wide footer content so the footer preview
+            // iframe also reflects desc/address/socials/copyright edits.
+            footer_desc:         v('setting-footer-desc'),
+            footer_address:      v('setting-footer-address'),
+            footer_copyright:    v('setting-footer-copyright'),
+            footer_facebook_url: v('setting-footer-facebook'),
+            footer_linkedin_url: v('setting-footer-linkedin'),
+            footer_youtube_url:  v('setting-footer-youtube'),
+            footer_tiktok_url:   v('setting-footer-tiktok')
+        };
     }
     return {};
 }
@@ -1108,7 +1627,8 @@ const pushPreviewDebounced = {
     settings: debounce(() => postPreviewData('settings'), 200),
     about: debounce(() => postPreviewData('about'), 200),
     services: debounce(() => postPreviewData('services'), 200),
-    footer: debounce(() => postPreviewData('footer'), 200)
+    footer: debounce(() => postPreviewData('footer'), 200),
+    invest: debounce(() => postPreviewData('invest'), 200)
 };
 
 // Listen for iframe messages (ready + auto-resize)
@@ -1119,8 +1639,8 @@ window.addEventListener('message', (event) => {
         PREVIEW_READY.add(msg.scope);
         postPreviewData(msg.scope);   // push initial state
     } else if (msg.type === 'preview-height') {
-        // Auto-resize all 4 iframes by matching the source frame
-        ['settings', 'about', 'services', 'footer'].forEach(t => {
+        // Auto-resize all 5 iframes by matching the source frame
+        ['settings', 'about', 'services', 'footer', 'invest'].forEach(t => {
             const ifr = document.getElementById('preview-iframe-' + t);
             if (ifr && ifr.contentWindow === event.source && msg.height) {
                 ifr.style.height = Math.min(msg.height, 1200) + 'px';
@@ -1135,14 +1655,61 @@ document.addEventListener('DOMContentLoaded', () => {
     const phone = document.getElementById('setting-phone');
     if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
 
+    // v15: "Why Invest in Australia" section content — push to invest iframe (/main)
+    ['setting-purpose-tagline','setting-purpose-heading','setting-purpose-list-1',
+     'setting-purpose-list-2','setting-purpose-list-3','setting-purpose-list-4',
+     'setting-purpose-cta-text','setting-purpose-video-caption','setting-purpose-video-url'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.addEventListener('input', pushPreviewDebounced.invest);
+    });
+
+    // v12: Footer dynamic content (now in Footer tab) — push to settings + footer iframes
+    ['setting-footer-desc','setting-footer-address','setting-footer-copyright',
+     'setting-footer-facebook','setting-footer-linkedin','setting-footer-youtube',
+     'setting-footer-tiktok'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => {
+            pushPreviewDebounced.settings();
+            pushPreviewDebounced.footer();
+        });
+    });
+
+    // v12: /about page content — push to about iframe (which loads /about?preview=1)
+    ['setting-about-hero-tag','setting-about-hero-title','setting-about-mission'].forEach(id => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('input', () => pushPreviewDebounced.about());
+    });
+
+    // v16: /about — dynamic Offices cards (add/remove, editable name). Delegate
+    // input + remove-click at the container since cards are rendered dynamically.
+    const officesWrap = document.getElementById('about-offices-cards');
+    if (officesWrap) {
+        officesWrap.addEventListener('input', () => pushPreviewDebounced.about());
+        officesWrap.addEventListener('click', (e) => {
+            const btn = e.target.closest('.ao-remove');
+            if (!btn) return;
+            const cards = officesWrap.querySelectorAll('.office-card-admin');
+            if (cards.length <= 1) {
+                showToast('Cần có ít nhất 1 office', 'error');
+                return;
+            }
+            btn.closest('.office-card-admin').remove();
+            relabelAboutOffices();
+            pushPreviewDebounced.about();
+        });
+    }
+
     ['about-input-banner', 'about-input-left', 'about-input-right'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', pushPreviewDebounced.about);
     });
 
-    // about stat inputs are dynamic — use event delegation on the grid
+    // v13: about stat inputs moved to Dashboard — push to settings iframe (/main),
+    // since #about-stats-info lives inside #home-section. Dynamic grid → delegation.
     const statsGrid = document.getElementById('about-stats-grid');
-    if (statsGrid) statsGrid.addEventListener('input', pushPreviewDebounced.about);
+    if (statsGrid) statsGrid.addEventListener('input', pushPreviewDebounced.settings);
 
     // services/footer cards are dynamic — delegate at container
     const svcWrap = document.getElementById('home-services-cards');
@@ -1159,7 +1726,8 @@ document.addEventListener('DOMContentLoaded', () => {
         'dashboard': 'settings',
         'home-about': 'about',
         'home-services': 'services',
-        'home-footer': 'footer'
+        'home-footer': 'footer',
+        'invest': 'invest'
     };
     const active = document.querySelector('.content-section.active');
     if (active) {
@@ -1179,6 +1747,400 @@ async function uploadHomeImage(file) {
 }
 
 // ===================== HOME — ABOUT =====================
+// v12: /about page content (hero + mission + 2 offices). Settings-keyed.
+async function loadAboutContent() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+        setVal('setting-about-hero-tag',      json.data.about_hero_tag);
+        setVal('setting-about-hero-title',    json.data.about_hero_title);
+        setVal('setting-about-mission',       json.data.about_mission);
+        let offices = [];
+        try { offices = JSON.parse(json.data.about_offices || '[]'); } catch (e) { offices = []; }
+        renderAboutOffices(Array.isArray(offices) ? offices : []);
+    } catch (e) {
+        console.error('loadAboutContent:', e);
+    }
+}
+
+// v16: /about — dynamic Offices cards (add/remove, editable name + flag/address/phone/email)
+function renderAboutOffices(offices) {
+    const wrap = document.getElementById('about-offices-cards');
+    if (!wrap) return;
+    if (!offices.length) offices = [{ name: '', flag: '', address: '', phone: '', email: '' }];
+    wrap.innerHTML = offices.map((o, i) => `
+        <div class="office-card-admin settings-panel" data-index="${i}">
+            <h2><span class="ao-label">Office ${i + 1}</span> <button type="button" class="ao-remove" title="Remove office"><i class="fas fa-times"></i></button></h2>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Name</label>
+                    <input type="text" class="ao-name" maxlength="100" placeholder="e.g. Sydney">
+                </div>
+                <div class="form-group">
+                    <label>Flag (emoji, optional)</label>
+                    <input type="text" class="ao-flag" maxlength="10" placeholder="🇦🇺">
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Address</label>
+                <input type="text" class="ao-address" maxlength="300">
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" class="ao-phone" maxlength="50">
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" class="ao-email" maxlength="255">
+                </div>
+            </div>
+        </div>`).join('');
+    offices.forEach((o, i) => {
+        const card = wrap.querySelector(`[data-index="${i}"]`);
+        card.querySelector('.ao-name').value    = o.name    || '';
+        card.querySelector('.ao-flag').value    = o.flag    || '';
+        card.querySelector('.ao-address').value = o.address || '';
+        card.querySelector('.ao-phone').value   = o.phone   || '';
+        card.querySelector('.ao-email').value   = o.email   || '';
+    });
+}
+
+function relabelAboutOffices() {
+    const wrap = document.getElementById('about-offices-cards');
+    if (!wrap) return;
+    wrap.querySelectorAll('.office-card-admin').forEach((card, i) => {
+        card.dataset.index = i;
+        const label = card.querySelector('.ao-label');
+        if (label) label.textContent = `Office ${i + 1}`;
+    });
+}
+
+function gatherAboutOffices() {
+    const wrap = document.getElementById('about-offices-cards');
+    if (!wrap) return [];
+    return Array.from(wrap.querySelectorAll('.office-card-admin')).map(card => ({
+        name:    (card.querySelector('.ao-name')    || {}).value || '',
+        flag:    (card.querySelector('.ao-flag')    || {}).value || '',
+        address: (card.querySelector('.ao-address') || {}).value || '',
+        phone:   (card.querySelector('.ao-phone')   || {}).value || '',
+        email:   (card.querySelector('.ao-email')   || {}).value || ''
+    }));
+}
+
+function addAboutOffice() {
+    const offices = gatherAboutOffices();
+    offices.push({ name: '', flag: '', address: '', phone: '', email: '' });
+    renderAboutOffices(offices);
+    pushPreviewDebounced.about();
+}
+
+async function saveAboutContent() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const payload = {
+        about_hero_tag:   v('setting-about-hero-tag'),
+        about_hero_title: v('setting-about-hero-title'),
+        about_mission:    v('setting-about-mission'),
+        about_offices:    gatherAboutOffices()
+    };
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã lưu /about content' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) refreshPreview('about');
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
+// v13: Our Services 3-card editor (settings keys)
+const ABOUT_SERVICE_ICONS = [
+    ['fa-house-chimney', 'House'],
+    ['fa-scale-balanced', 'Scale'],
+    ['fa-suitcase-rolling', 'Suitcase'],
+    ['fa-handshake', 'Handshake'],
+    ['fa-globe', 'Globe'],
+    ['fa-chart-line', 'Chart'],
+    ['fa-shield-halved', 'Shield'],
+    ['fa-briefcase', 'Briefcase'],
+    ['fa-key', 'Key'],
+    ['fa-building', 'Building']
+];
+async function loadAboutServices() {
+    const wrap = document.getElementById('about-services-cards');
+    if (!wrap) return;
+    try {
+        const res = await fetch('/api/admin/settings');
+        const json = await res.json();
+        if (!json.success) return;
+        const d = json.data;
+        // v15: all 3 services share ONE panel, side-by-side, so the About
+        // tab doesn't stack 3 full-width cards (was "too long").
+        wrap.innerHTML = '<div class="settings-panel"><div class="service-cards-grid">' + [1, 2, 3].map(i => {
+            const opts = ABOUT_SERVICE_ICONS.map(([cls, lbl]) =>
+                `<option value="${cls}">${lbl} (${cls})</option>`).join('');
+            return `
+                <div class="service-card-col" data-slot="${i}">
+                    <h2>Service ${i}</h2>
+                    <div class="form-group">
+                        <label>Icon</label>
+                        <div style="display:flex;gap:1rem;align-items:center">
+                            <i class="svc-icon-preview-${i} fa-solid" style="font-size:2.4rem;color:var(--color-gold);width:42px;text-align:center"></i>
+                            <select class="as-icon" style="flex:1">${opts}</select>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Title</label>
+                        <input type="text" class="as-title" maxlength="200">
+                    </div>
+                    <div class="form-group">
+                        <label>Description</label>
+                        <textarea class="as-desc" rows="4" maxlength="1000"></textarea>
+                    </div>
+                </div>`;
+        }).join('') + '</div></div>';
+        [1, 2, 3].forEach(i => {
+            const card = wrap.querySelector(`[data-slot="${i}"]`);
+            const icon  = d[`about_service_${i}_icon`]  || 'fa-circle';
+            const title = d[`about_service_${i}_title`] || '';
+            const desc  = d[`about_service_${i}_desc`]  || '';
+            card.querySelector('.as-icon').value  = icon;
+            card.querySelector('.as-title').value = title;
+            card.querySelector('.as-desc').value  = desc;
+            card.querySelector(`.svc-icon-preview-${i}`).classList.add(icon);
+            card.querySelectorAll('.as-icon, .as-title, .as-desc').forEach(el => {
+                el.addEventListener('input', () => {
+                    if (el.classList.contains('as-icon')) {
+                        const ic = card.querySelector(`.svc-icon-preview-${i}`);
+                        ic.className = `svc-icon-preview-${i} fa-solid ${el.value}`;
+                        ic.style.fontSize = '2.4rem'; ic.style.color = 'var(--color-gold)'; ic.style.width = '42px'; ic.style.textAlign = 'center';
+                    }
+                    pushPreviewDebounced.about();
+                });
+            });
+        });
+    } catch (e) { console.error('loadAboutServices:', e); }
+}
+
+async function saveAboutServices() {
+    const wrap = document.getElementById('about-services-cards');
+    if (!wrap) return;
+    const payload = {};
+    [1, 2, 3].forEach(i => {
+        const card = wrap.querySelector(`[data-slot="${i}"]`);
+        if (!card) return;
+        payload[`about_service_${i}_icon`]  = card.querySelector('.as-icon').value;
+        payload[`about_service_${i}_title`] = card.querySelector('.as-title').value;
+        payload[`about_service_${i}_desc`]  = card.querySelector('.as-desc').value;
+    });
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã lưu Services' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) refreshPreview('about');
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+// v14: shared avatar picker (media library) — used by Leadership + Team editors
+// so every person/photo field in the admin works the same way: preview +
+// "Chọn ảnh" (opens media library) + Remove, never a raw path/url input.
+function avatarPickerHTML(label) {
+    return '<div class="form-group"><label>' + label + '</label>'
+        + '  <div class="settings-image-area">'
+        + '    <div class="settings-image-preview settings-avatar-preview">'
+        + '      <img class="avatar-preview-img" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
+        + '      <span class="avatar-placeholder settings-preview-placeholder"><i class="fas fa-user"></i> No photo</span>'
+        + '    </div>'
+        + '    <div class="settings-image-actions">'
+        + '      <button type="button" class="btn-add avatar-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
+        + '      <button type="button" class="btn-cancel avatar-remove-btn" style="display:none"><i class="fas fa-times"></i> Remove</button>'
+        + '    </div>'
+        + '  </div>'
+        + '</div>';
+}
+
+function wireAvatarPicker(card, initialPath, onChange) {
+    const img = card.querySelector('.avatar-preview-img');
+    const ph = card.querySelector('.avatar-placeholder');
+    const rm = card.querySelector('.avatar-remove-btn');
+    const pick = card.querySelector('.avatar-pick-btn');
+    const setPath = (path) => {
+        card.dataset.avatarPath = path || '';
+        if (path) {
+            img.src = (path.startsWith('/') || path.startsWith('http') || path.startsWith('data:')) ? path : '/' + path;
+            img.style.display = 'block';
+            ph.style.display = 'none';
+            rm.style.display = 'inline-flex';
+        } else {
+            img.style.display = 'none';
+            img.src = '';
+            ph.style.display = 'flex';
+            rm.style.display = 'none';
+        }
+    };
+    setPath(initialPath);
+    pick.addEventListener('click', () => {
+        openMediaLibrary({ mode: 'single', onSelect: ([url]) => { setPath(url); onChange(); } });
+    });
+    rm.addEventListener('click', () => { setPath(''); onChange(); });
+}
+
+// v13: Leadership editor — reuses footer_persons API but labels slots Director/Co-Founder
+async function loadAboutLeadership() {
+    const wrap = document.getElementById('about-leadership-cards');
+    if (!wrap) return;
+    try {
+        const res = await fetch('/api/admin/footer-persons');
+        const { data } = await res.json();
+        wrap.innerHTML = '';
+        const ROLE_LABELS = { 1: 'Director', 2: 'Co-Founder' };
+        (data || []).forEach(person => {
+            const slot = person.slot;
+            const card = document.createElement('div');
+            card.className = 'settings-panel';
+            card.style.marginBottom = '20px';
+            card.dataset.slot = slot;
+            card.innerHTML = ''
+                + `<h2><i class="fas fa-user-tie"></i> ${ROLE_LABELS[slot] || ('Person ' + slot)}</h2>`
+                + avatarPickerHTML('Photo')
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Name</label>'
+                + '    <input type="text" class="al-name" maxlength="255"></div>'
+                + '  <div class="form-group"><label>Email</label>'
+                + '    <input type="email" class="al-email" maxlength="255"></div>'
+                + '</div>'
+                + '<div class="form-row">'
+                + '  <div class="form-group"><label>Phone 1</label>'
+                + '    <input type="text" class="al-phone1" maxlength="50"></div>'
+                + '  <div class="form-group"><label>Phone 2</label>'
+                + '    <input type="text" class="al-phone2" maxlength="50"></div>'
+                + '</div>'
+                + '<div class="form-group"><label>Facebook URL (https://)</label>'
+                + '  <input type="url" class="al-fb" maxlength="500" pattern="https://.*"></div>'
+                + '<div class="form-actions">'
+                + '  <button type="button" class="btn-save al-save-btn"><i class="fas fa-save"></i> Save</button>'
+                + '</div>';
+            wrap.appendChild(card);
+            card.querySelector('.al-name').value   = person.name || '';
+            card.querySelector('.al-email').value  = person.email || '';
+            card.querySelector('.al-phone1').value = person.phone1 || '';
+            card.querySelector('.al-phone2').value = person.phone2 || '';
+            card.querySelector('.al-fb').value     = person.facebook_url || '';
+            wireAvatarPicker(card, person.avatar_path || '', () => pushPreviewDebounced.about());
+            // Live-preview push on input
+            card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
+            card.querySelector('.al-save-btn').addEventListener('click', async () => {
+                const fb = card.querySelector('.al-fb').value.trim();
+                if (fb && !/^https:\/\//i.test(fb)) { showToast('Facebook URL phải bắt đầu https://', 'error'); return; }
+                const payload = {
+                    name:   card.querySelector('.al-name').value,
+                    email:  card.querySelector('.al-email').value,
+                    phone1: card.querySelector('.al-phone1').value,
+                    phone2: card.querySelector('.al-phone2').value,
+                    facebook_url: fb,
+                    avatar_path: card.dataset.avatarPath || ''
+                };
+                try {
+                    const r = await fetch('/api/admin/footer-persons/' + slot, {
+                        method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(payload)
+                    });
+                    const j = await r.json();
+                    showToast(j.message || (j.success ? 'Saved' : 'Failed'), j.success ? 'success' : 'error');
+                    if (j.success) refreshPreview('about');
+                } catch (e) { showToast('Error: ' + e.message, 'error'); }
+            });
+        });
+    } catch (e) { console.error('loadAboutLeadership:', e); }
+}
+
+// v13 / v22: Team editor — dynamic list (add/remove members), team_members table
+async function loadAboutTeam() {
+    const wrap = document.getElementById('about-team-cards');
+    if (!wrap) return;
+    try {
+        const res = await fetch('/api/admin/team');
+        const { data } = await res.json();
+        renderAboutTeamCards(data || []);
+    } catch (e) { console.error('loadAboutTeam:', e); }
+}
+
+function renderAboutTeamCards(members) {
+    const wrap = document.getElementById('about-team-cards');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    members.forEach((member, i) => {
+        const id = member.id;
+        const card = document.createElement('div');
+        card.className = 'settings-panel office-card-admin';
+        card.dataset.id = id;
+        card.innerHTML = ''
+            + `<h2 style="font-size:1.5rem"><span><i class="fas fa-user"></i> Member ${i + 1}</span> <button type="button" class="ao-remove" title="Remove member"><i class="fas fa-times"></i></button></h2>`
+            + avatarPickerHTML('Photo')
+            + '<div class="form-row">'
+            + '  <div class="form-group"><label>Name</label>'
+            + '    <input type="text" class="at-name" maxlength="255"></div>'
+            + '  <div class="form-group"><label>Role</label>'
+            + '    <input type="text" class="at-role" maxlength="255"></div>'
+            + '</div>'
+            + '<div class="form-actions">'
+            + '  <button type="button" class="btn-save at-save-btn"><i class="fas fa-save"></i> Save</button>'
+            + '</div>';
+        wrap.appendChild(card);
+        card.querySelector('.at-name').value   = member.name || '';
+        card.querySelector('.at-role').value   = member.role || '';
+        wireAvatarPicker(card, member.avatar_path || '', () => pushPreviewDebounced.about());
+        card.querySelectorAll('input').forEach(el => el.addEventListener('input', () => pushPreviewDebounced.about()));
+        card.querySelector('.at-save-btn').addEventListener('click', async () => {
+            const payload = {
+                name:   card.querySelector('.at-name').value,
+                role:   card.querySelector('.at-role').value,
+                avatar_path: card.dataset.avatarPath || ''
+            };
+            try {
+                const r = await fetch('/api/admin/team/' + id, {
+                    method: 'PUT', headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(payload)
+                });
+                const j = await r.json();
+                showToast(j.message || (j.success ? 'Saved' : 'Failed'), j.success ? 'success' : 'error');
+                if (j.success) refreshPreview('about');
+            } catch (e) { showToast('Error: ' + e.message, 'error'); }
+        });
+        card.querySelector('.ao-remove').addEventListener('click', () => {
+            confirmAction('Xóa thành viên này khỏi Our Team?', async () => {
+                try {
+                    const r = await fetch('/api/admin/team/' + id, { method: 'DELETE' });
+                    const j = await r.json();
+                    showToast(j.message || (j.success ? 'Đã xóa' : 'Failed'), j.success ? 'success' : 'error');
+                    if (j.success) { await loadAboutTeam(); refreshPreview('about'); }
+                } catch (e) { showToast('Error: ' + e.message, 'error'); }
+            });
+        });
+    });
+}
+
+async function addAboutTeamMember() {
+    try {
+        const r = await fetch('/api/admin/team', {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ name: '', role: '', avatar_path: '' })
+        });
+        const j = await r.json();
+        if (j.success) { await loadAboutTeam(); refreshPreview('about'); }
+        else showToast(j.message || 'Failed', 'error');
+    } catch (e) { showToast('Error: ' + e.message, 'error'); }
+}
+
 async function loadHomeAbout() {
     try {
         const res = await fetch('/api/admin/about');
@@ -1256,7 +2218,7 @@ document.getElementById('home-about-form').addEventListener('submit', async e =>
         });
         const json = await res.json();
         showToast(json.message || (json.success ? 'Saved' : 'Failed'), json.success ? 'success' : 'error');
-        if (json.success) refreshPreview('about');
+        if (json.success) refreshPreview('settings');
     } catch (err) {
         showToast('Error: ' + err.message, 'error');
     } finally {
@@ -1281,22 +2243,33 @@ async function loadHomeServices() {
             card.className = 'settings-panel';
             card.style.marginBottom = '20px';
             card.dataset.slot = svc.slot;
+            // v2: icon picker (FA class) replaces image picker
+            const ICON_OPTIONS = [
+                ['fa-key', 'Key'],
+                ['fa-chart-line', 'Chart'],
+                ['fa-building', 'Building'],
+                ['fa-hand-holding-dollar', 'Finance'],
+                ['fa-shield-halved', 'Shield'],
+                ['fa-house', 'House'],
+                ['fa-handshake', 'Handshake'],
+                ['fa-magnifying-glass', 'Search'],
+                ['fa-briefcase', 'Briefcase'],
+                ['fa-globe', 'Globe'],
+                ['fa-people-arrows', 'Network'],
+                ['fa-map-location-dot', 'Location']
+            ];
+            const iconOptionsHtml = ICON_OPTIONS.map(([cls, lbl]) =>
+                `<option value="${cls}">${lbl} (${cls})</option>`).join('');
             card.innerHTML = ''
                 + '<h2><i class="fas fa-concierge-bell"></i> Service ' + svc.slot + '</h2>'
                 + '<div class="form-group"><label>Title</label>'
                 + '  <input type="text" class="svc-title" maxlength="255"></div>'
                 + '<div class="form-group"><label>Description</label>'
-                + '  <textarea class="svc-desc" rows="4" maxlength="2000"></textarea></div>'
-                + '<div class="form-group"><label>Image</label>'
-                + '  <div class="settings-image-area">'
-                + '    <div class="settings-image-preview">'
-                + '      <img class="svc-img-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
-                + '      <span class="settings-preview-placeholder svc-img-placeholder">'
-                + '        <i class="fas fa-image"></i> No image</span>'
-                + '    </div>'
-                + '    <div class="settings-image-actions">'
-                + '      <button type="button" class="btn-add svc-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
-                + '    </div>'
+                + '  <textarea class="svc-desc" rows="5" maxlength="2000"></textarea></div>'
+                + '<div class="form-group"><label>Icon <small style="color:#888;font-weight:400">(Font Awesome 6 — chọn 1 trong danh sách)</small></label>'
+                + '  <div style="display:flex;gap:1rem;align-items:center">'
+                + '    <i class="svc-icon-preview fa-solid" style="font-size:2.6rem;color:var(--color-gold);width:48px;text-align:center"></i>'
+                + '    <select class="svc-icon-select" style="flex:1">' + iconOptionsHtml + '</select>'
                 + '  </div></div>'
                 + '<div class="form-actions">'
                 + '  <button type="button" class="btn-save svc-save-btn"><i class="fas fa-save"></i> Save Service ' + svc.slot + '</button>'
@@ -1305,27 +2278,18 @@ async function loadHomeServices() {
 
             card.querySelector('.svc-title').value = svc.title || '';
             card.querySelector('.svc-desc').value = svc.description || '';
-            const imgEl = card.querySelector('.svc-img-preview');
-            const placeholderEl = card.querySelector('.svc-img-placeholder');
-            if (svc.image_path) {
-                imgEl.src = svc.image_path;
-                imgEl.style.display = 'block';
-                placeholderEl.style.display = 'none';
-            }
-            card.dataset.imagePath = svc.image_path || '';
-
-            card.querySelector('.svc-pick-btn').addEventListener('click', () => {
-                openMediaLibrary({
-                    mode: 'single',
-                    onSelect: ([url]) => {
-                        imgEl.src = url;
-                        imgEl.style.display = 'block';
-                        placeholderEl.style.display = 'none';
-                        card.dataset.imagePath = url;
-                        postPreviewData('services');
-                        showToast('Đã chọn ảnh — bấm Save để lưu', 'success');
-                    }
-                });
+            const iconSelect = card.querySelector('.svc-icon-select');
+            const iconPreview = card.querySelector('.svc-icon-preview');
+            const DEFAULT_ICONS = { 1:'fa-key', 2:'fa-chart-line', 3:'fa-building', 4:'fa-hand-holding-dollar', 5:'fa-shield-halved' };
+            const currentIcon = svc.icon || DEFAULT_ICONS[svc.slot] || 'fa-key';
+            iconSelect.value = currentIcon;
+            iconPreview.classList.add(currentIcon);
+            iconSelect.addEventListener('change', () => {
+                iconPreview.className = 'svc-icon-preview fa-solid ' + iconSelect.value;
+                iconPreview.style.fontSize = '2.6rem';
+                iconPreview.style.color = 'var(--color-gold)';
+                iconPreview.style.width = '48px';
+                iconPreview.style.textAlign = 'center';
             });
 
             card.querySelector('.svc-save-btn').addEventListener('click', async () => {
@@ -1334,10 +2298,9 @@ async function loadHomeServices() {
                 try {
                     const payload = {
                         title: card.querySelector('.svc-title').value,
-                        description: card.querySelector('.svc-desc').value
+                        description: card.querySelector('.svc-desc').value,
+                        icon: iconSelect.value
                     };
-                    const currentPath = card.dataset.imagePath;
-                    if (currentPath) payload.image_path = currentPath;
                     const res = await fetch('/api/admin/services/' + svc.slot, {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json' },
@@ -1360,6 +2323,50 @@ async function loadHomeServices() {
 }
 
 // ===================== HOME — FOOTER PERSONS =====================
+// v12: Footer site-wide content (moved from Dashboard). Loaded alongside footer-persons.
+async function loadFooterContent() {
+    try {
+        const res = await fetch('/api/admin/settings');
+        const json = await res.json();
+        if (!json.success || !json.data) return;
+        const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
+        setVal('setting-footer-desc',       json.data.footer_desc);
+        setVal('setting-footer-address',    json.data.footer_address);
+        setVal('setting-footer-facebook',   json.data.footer_facebook_url);
+        setVal('setting-footer-linkedin',   json.data.footer_linkedin_url);
+        setVal('setting-footer-youtube',    json.data.footer_youtube_url);
+        setVal('setting-footer-tiktok',     json.data.footer_tiktok_url);
+        setVal('setting-footer-copyright',  json.data.footer_copyright);
+    } catch (e) {
+        console.error('loadFooterContent:', e);
+    }
+}
+
+async function saveFooterContent() {
+    const v = id => (document.getElementById(id) || {}).value || '';
+    const payload = {
+        footer_desc:         v('setting-footer-desc'),
+        footer_address:      v('setting-footer-address'),
+        footer_copyright:    v('setting-footer-copyright'),
+        footer_facebook_url: v('setting-footer-facebook').trim(),
+        footer_linkedin_url: v('setting-footer-linkedin').trim(),
+        footer_youtube_url:  v('setting-footer-youtube').trim(),
+        footer_tiktok_url:   v('setting-footer-tiktok').trim()
+    };
+    try {
+        const res = await fetch('/api/admin/settings', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã lưu Footer' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) { refreshPreview('footer'); refreshPreview('settings'); }
+    } catch (e) {
+        showToast('Error: ' + e.message, 'error');
+    }
+}
+
 async function loadHomeFooter() {
     try {
         const res = await fetch('/api/admin/footer-persons');
@@ -1378,17 +2385,14 @@ async function loadHomeFooter() {
             card.dataset.slot = person.slot;
             card.innerHTML = ''
                 + '<h2><i class="fas fa-id-card"></i> Person ' + person.slot + '</h2>'
-                + '<div class="form-group"><label>Avatar</label>'
-                + '  <div class="settings-image-area">'
-                + '    <div class="settings-image-preview">'
-                + '      <img class="fp-avatar-preview" src="" alt="" style="display:none" onerror="this.style.display=\'none\'">'
-                + '      <span class="settings-preview-placeholder fp-avatar-placeholder">'
-                + '        <i class="fas fa-user"></i> No avatar</span>'
-                + '    </div>'
-                + '    <div class="settings-image-actions">'
-                + '      <button type="button" class="btn-add fp-pick-btn"><i class="fas fa-images"></i> Chọn ảnh</button>'
-                + '    </div>'
-                + '  </div></div>'
+                // v2: avatar picker hidden (footer is text-only; existing avatars still
+                // appear in the About-us founders block on /main). Hidden span keeps the
+                // existing path stored on the card dataset on save.
+                + '<div class="form-group" style="display:none">'
+                + '  <img class="fp-avatar-preview">'
+                + '  <span class="fp-avatar-placeholder"></span>'
+                + '  <button type="button" class="fp-pick-btn">hidden</button>'
+                + '</div>'
                 + '<div class="form-row">'
                 + '  <div class="form-group"><label>Name</label>'
                 + '    <input type="text" class="fp-name" maxlength="255"></div>'
@@ -1558,18 +2562,28 @@ function renderMediaGrid() {
     empty.style.display = 'none';
     count.textContent = _mediaState.filteredMedia.length + ' / ' + _mediaState.allMedia.length;
 
+    const VIDEO_EXT_RE = /\.(mp4|webm|mov)$/i;
+
     _mediaState.filteredMedia.forEach(m => {
         const item = document.createElement('div');
         item.className = 'media-item';
         if (_mediaState.selectedUrls.has(m.url)) item.classList.add('selected');
         item.dataset.url = m.url;
 
-        const img = document.createElement('img');
-        img.src = m.url;
-        img.alt = '';
-        img.loading = 'lazy';
-        img.onerror = function () { this.style.display = 'none'; };
-        item.appendChild(img);
+        if (VIDEO_EXT_RE.test(m.name || m.url || '')) {
+            const video = document.createElement('video');
+            video.src = m.url;
+            video.muted = true;
+            video.preload = 'metadata';
+            item.appendChild(video);
+        } else {
+            const img = document.createElement('img');
+            img.src = m.url;
+            img.alt = '';
+            img.loading = 'lazy';
+            img.onerror = function () { this.style.display = 'none'; };
+            item.appendChild(img);
+        }
 
         const check = document.createElement('div');
         check.className = 'media-check';
@@ -1671,13 +2685,28 @@ const AUDIT_ACTION_LABELS = {
     'PROJECT_SOFTDELETE': 'Ngừng kinh doanh dự án',
     'PROJECT_RESTORE': 'Khôi phục dự án',
     'PROJECT_DELETE': 'Xóa vĩnh viễn dự án',
+    'PROJECT_FEATURED_SET': 'Cập nhật Featured Projects (trang chủ)',
     'CONTACT_DELETE': 'Xóa liên hệ',
     'ACCOUNT_CREATE': 'Tạo tài khoản',
     'ACCOUNT_UPDATE': 'Cập nhật tài khoản',
     'ACCOUNT_DELETE': 'Xóa tài khoản',
     'ABOUT_UPDATE': 'Cập nhật phần About',
     'SERVICE_UPDATE': 'Cập nhật Service',
-    'FOOTER_PERSON_UPDATE': 'Cập nhật nhân viên Footer'
+    'FOOTER_PERSON_UPDATE': 'Cập nhật nhân viên Footer',
+    // F08: video actions
+    'VIDEO_CREATE': 'Tạo video mới',
+    'VIDEO_UPDATE': 'Cập nhật video',
+    'VIDEO_SOFTDELETE': 'Ẩn video',
+    'VIDEO_DELETE': 'Xóa vĩnh viễn video',
+    // v3: video featured action
+    'VIDEO_FEATURED_SET': 'Cập nhật Featured Videos (trang chủ)',
+    // F09: news actions
+    'NEWS_CREATE': 'Tạo tin tức mới',
+    'NEWS_UPDATE': 'Cập nhật tin tức',
+    'NEWS_SOFTDELETE': 'Ẩn tin tức',
+    'NEWS_DELETE': 'Xóa vĩnh viễn tin tức',
+    // v3: news featured action
+    'NEWS_FEATURED_SET': 'Cập nhật Featured News (trang chủ)'
 };
 
 const AUDIT_TARGET_LABELS = {
@@ -1687,7 +2716,9 @@ const AUDIT_TARGET_LABELS = {
     'settings': 'Cài đặt',
     'about_section': 'Phần About',
     'service': 'Service slot',
-    'footer_person': 'Nhân viên Footer'
+    'footer_person': 'Nhân viên Footer',
+    'video': 'Video',
+    'news': 'Tin tức'
 };
 
 const AUDIT_FIELD_LABELS = {
@@ -1699,6 +2730,18 @@ const AUDIT_FIELD_LABELS = {
     'name': 'Tên',
     'role': 'Vai trò',
     'title': 'Tiêu đề',
+    // F08: video fields
+    'tiktok_url': 'Link TikTok',
+    'thumbnail_path': 'Ảnh thumbnail',
+    'views_count': 'Lượt xem',
+    // F09: news fields
+    'summary': 'Tóm tắt',
+    'content': 'Nội dung',
+    'cover_image': 'Ảnh bìa',
+    'status': 'Trạng thái',
+    'external_url': 'Link bài báo gốc',
+    'is_featured': 'Hiển thị ở trang chủ',
+    'icon': 'Icon',
     'description': 'Mô tả',
     'image_path': 'Ảnh',
     'banner': 'Banner',
@@ -1716,7 +2759,52 @@ const AUDIT_FIELD_LABELS = {
     'phone1': 'SĐT 1',
     'phone2': 'SĐT 2',
     'facebook_url': 'Link Facebook',
-    'avatar_path': 'Ảnh đại diện'
+    'avatar_path': 'Ảnh đại diện',
+    // F06: Purpose-Invest video
+    'purpose_video_thumbnail': 'Ảnh thumbnail video Purpose',
+    'purpose_video_url': 'URL video Purpose',
+    // v14: "Why Invest in Australia" section content
+    'purpose_tagline': 'Invest — Tagline',
+    'purpose_heading': 'Invest — Tiêu đề',
+    'purpose_list_1': 'Invest — Mục 1',
+    'purpose_list_2': 'Invest — Mục 2',
+    'purpose_list_3': 'Invest — Mục 3',
+    'purpose_list_4': 'Invest — Mục 4',
+    'purpose_cta_text': 'Invest — Nút CTA',
+    'purpose_video_caption': 'Invest — Chú thích video',
+    // v11: Footer dynamic content
+    'footer_desc': 'Footer — Mô tả',
+    'footer_address': 'Footer — Địa chỉ',
+    'footer_copyright': 'Footer — Copyright',
+    'footer_facebook_url': 'Footer — Facebook URL',
+    'footer_linkedin_url': 'Footer — LinkedIn URL',
+    'footer_youtube_url': 'Footer — YouTube URL',
+    'footer_tiktok_url': 'Footer — TikTok URL',
+    // v12: /about page content
+    'about_hero_tag': '/about — Hero Tag',
+    'about_hero_title': '/about — Hero Title',
+    'about_mission': '/about — Mission paragraph',
+    // v16: /about Offices (dynamic list, replaces fixed Sydney/HCM fields)
+    'about_offices': '/about — Offices',
+    // v13: /about Our Services (3 cards)
+    'about_service_1_icon': '/about — Service 1 Icon',
+    'about_service_1_title': '/about — Service 1 Title',
+    'about_service_1_desc': '/about — Service 1 Description',
+    'about_service_2_icon': '/about — Service 2 Icon',
+    'about_service_2_title': '/about — Service 2 Title',
+    'about_service_2_desc': '/about — Service 2 Description',
+    'about_service_3_icon': '/about — Service 3 Icon',
+    'about_service_3_title': '/about — Service 3 Title',
+    'about_service_3_desc': '/about — Service 3 Description',
+    // F05d: extended project fields
+    'price': 'Giá',
+    'beds': 'Số phòng ngủ',
+    'baths': 'Số phòng tắm',
+    'cars': 'Chỗ đậu xe',
+    'address': 'Địa chỉ',
+    'state': 'Bang (NSW/VIC/...)',
+    'property_type': 'Loại BĐS',
+    'area_label': 'Nhãn khu vực (badge)'
 };
 
 const AUDIT_AREA_LABELS = {
@@ -1812,61 +2900,73 @@ async function loadAuditLog() {
             return;
         }
         const j = await res.json();
-        const tbody = document.getElementById('audit-log-tbody');
-        tbody.innerHTML = '';
-
-        if (!j.success || !j.data || j.data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#95a5a6">Không có dữ liệu</td></tr>';
-            return;
-        }
-
-        j.data.forEach(row => {
-            const tr = document.createElement('tr');
-
-            const tdTime = document.createElement('td');
-            tdTime.textContent = new Date(row.created_at).toLocaleString('vi-VN');
-            tdTime.style.fontSize = '11px';
-            tdTime.style.whiteSpace = 'nowrap';
-            tr.appendChild(tdTime);
-
-            const tdUser = document.createElement('td');
-            tdUser.textContent = row.username || '(anonymous)';
-            tr.appendChild(tdUser);
-
-            const tdAction = document.createElement('td');
-            const badge = document.createElement('span');
-            badge.className = 'audit-badge';
-            badge.dataset.action = row.action;
-            badge.textContent = AUDIT_ACTION_LABELS[row.action] || row.action;
-            tdAction.appendChild(badge);
-            tr.appendChild(tdAction);
-
-            const tdTarget = document.createElement('td');
-            tdTarget.textContent = formatAuditTarget(row.target_type, row.target_id);
-            tr.appendChild(tdTarget);
-
-            const tdDetails = document.createElement('td');
-            tdDetails.style.fontSize = '12px';
-            tdDetails.style.maxWidth = '320px';
-            tdDetails.style.overflow = 'hidden';
-            tdDetails.style.textOverflow = 'ellipsis';
-            tdDetails.style.whiteSpace = 'nowrap';
-            const readable = formatAuditDetails(row.action, row.details);
-            tdDetails.textContent = readable;
-            tdDetails.title = readable;   // tooltip on hover for truncated values
-            tr.appendChild(tdDetails);
-
-            const tdIp = document.createElement('td');
-            tdIp.textContent = row.ip_address || '-';
-            tdIp.style.fontSize = '11px';
-            tr.appendChild(tdIp);
-
-            tbody.appendChild(tr);
-        });
+        _auditLogAll = (j.success && Array.isArray(j.data)) ? j.data : [];
+        _auditLogPage = 1;
+        renderAuditLog();
     } catch (err) {
         console.error('loadAuditLog:', err);
         showToast('Lỗi tải audit log: ' + err.message, 'error');
     }
+}
+
+function renderAuditLog() {
+    const tbody = document.getElementById('audit-log-tbody');
+    tbody.innerHTML = '';
+
+    if (_auditLogAll.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;padding:20px;color:#95a5a6">Không có dữ liệu</td></tr>';
+        renderPagination('audit-log-pagination', 0, 1, () => {});
+        return;
+    }
+
+    paginate(_auditLogAll, _auditLogPage).forEach(row => {
+        const tr = document.createElement('tr');
+
+        const tdTime = document.createElement('td');
+        tdTime.textContent = new Date(row.created_at).toLocaleString('vi-VN');
+        tdTime.style.fontSize = '11px';
+        tdTime.style.whiteSpace = 'nowrap';
+        tr.appendChild(tdTime);
+
+        const tdUser = document.createElement('td');
+        tdUser.textContent = row.username || '(anonymous)';
+        tr.appendChild(tdUser);
+
+        const tdAction = document.createElement('td');
+        const badge = document.createElement('span');
+        badge.className = 'audit-badge';
+        badge.dataset.action = row.action;
+        badge.textContent = AUDIT_ACTION_LABELS[row.action] || row.action;
+        tdAction.appendChild(badge);
+        tr.appendChild(tdAction);
+
+        const tdTarget = document.createElement('td');
+        tdTarget.textContent = formatAuditTarget(row.target_type, row.target_id);
+        tr.appendChild(tdTarget);
+
+        const tdDetails = document.createElement('td');
+        tdDetails.style.fontSize = '12px';
+        tdDetails.style.maxWidth = '320px';
+        tdDetails.style.overflow = 'hidden';
+        tdDetails.style.textOverflow = 'ellipsis';
+        tdDetails.style.whiteSpace = 'nowrap';
+        const readable = formatAuditDetails(row.action, row.details);
+        tdDetails.textContent = readable;
+        tdDetails.title = readable;   // tooltip on hover for truncated values
+        tr.appendChild(tdDetails);
+
+        const tdIp = document.createElement('td');
+        tdIp.textContent = row.ip_address || '-';
+        tdIp.style.fontSize = '11px';
+        tr.appendChild(tdIp);
+
+        tbody.appendChild(tr);
+    });
+
+    renderPagination('audit-log-pagination', _auditLogAll.length, _auditLogPage, (page) => {
+        _auditLogPage = page;
+        renderAuditLog();
+    });
 }
 
 function resetAuditSearch() {
@@ -1875,4 +2975,622 @@ function resetAuditSearch() {
     const a = document.getElementById('audit-action-filter');
     if (a) a.value = '';
     loadAuditLog();
+}
+
+// ===================== F08 — VIDEOS ADMIN =====================
+const TIKTOK_URL_RE = /^https?:\/\/(www\.|vt\.|m\.)?tiktok\.com\//i;
+
+function _escVid(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+}
+
+async function loadVideosAdmin() {
+    try {
+        const res = await fetch('/api/admin/videos');
+        const json = await res.json();
+        _videosAll = (json.success && Array.isArray(json.data)) ? json.data : [];
+        _videosPage = 1;
+        renderVideosAdmin();
+        loadFeaturedVideosPanel();   // v3
+    } catch (err) {
+        console.error('loadVideosAdmin:', err);
+        showToast('Error loading videos: ' + err.message, 'error');
+    }
+}
+
+function renderVideosAdmin() {
+    const tbody = document.getElementById('videos-table-body');
+    if (!tbody) return;
+    if (_videosAll.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
+        renderPagination('videos-pagination', 0, 1, () => {});
+        return;
+    }
+    tbody.innerHTML = paginate(_videosAll, _videosPage).map(v => {
+        const thumb = _escVid(v.thumbnail_path || '');
+        const thumbHtml = thumb
+            ? `<img src="${thumb}" alt="" style="width:48px;height:64px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`
+            : '<span style="color:#888">—</span>';
+        const statusClass = v.status === 'active' ? 'status-active' : 'status-inactive';
+        const statusLabel = v.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
+        const url = _escVid(v.tiktok_url || '');
+        const urlShort = url.length > 50 ? url.slice(0, 50) + '…' : url;
+        return `
+            <tr data-id="${v.id}">
+                <td>${v.id}</td>
+                <td>${thumbHtml}</td>
+                <td>${_escVid(v.title || '')}</td>
+                <td><a href="${url}" target="_blank" rel="noopener noreferrer">${urlShort}</a></td>
+                <td>${_escVid(v.views_count || '0')}</td>
+                <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                <td>
+                    <div class="action-btns">
+                        <button class="action-btn edit" onclick="editVideo(${v.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        ${v.status === 'active'
+                            ? `<button class="action-btn delete" onclick="confirmAction('Ẩn video này khỏi public site?', () => softDeleteVideo(${v.id}))" title="Hide"><i class="fas fa-eye-slash"></i></button>`
+                            : `<button class="action-btn restore" onclick="restoreVideoStatus(${v.id})" title="Show"><i class="fas fa-eye"></i></button>`}
+                        <button class="action-btn delete" onclick="confirmAction('Xóa VĨNH VIỄN video này? Không thể hoàn tác.', () => hardDeleteVideo(${v.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+    renderPagination('videos-pagination', _videosAll.length, _videosPage, (page) => {
+        _videosPage = page;
+        renderVideosAdmin();
+    });
+}
+
+function openVideoModal() {
+    document.getElementById('video-modal-title').textContent = 'Add Video';
+    document.getElementById('video-id').value = '';
+    document.getElementById('video-title-input').value = '';
+    document.getElementById('video-tiktok-url').value = '';
+    document.getElementById('video-views').value = '';
+    document.getElementById('video-thumb-path').value = '';
+    document.getElementById('video-thumb-img').style.display = 'none';
+    document.getElementById('video-thumb-img').src = '';
+    document.getElementById('video-thumb-placeholder').style.display = 'flex';
+    document.getElementById('video-modal-admin').style.display = 'flex';
+}
+
+function closeVideoModalAdmin() {
+    document.getElementById('video-modal-admin').style.display = 'none';
+}
+
+async function editVideo(id) {
+    try {
+        const res = await fetch('/api/admin/videos/' + id);
+        const json = await res.json();
+        if (!json.success) { showToast('Không tải được video', 'error'); return; }
+        const v = json.data;
+        document.getElementById('video-modal-title').textContent = 'Edit Video #' + v.id;
+        document.getElementById('video-id').value = v.id;
+        document.getElementById('video-title-input').value = v.title || '';
+        document.getElementById('video-tiktok-url').value = v.tiktok_url || '';
+        document.getElementById('video-views').value = v.views_count || '';
+        document.getElementById('video-thumb-path').value = v.thumbnail_path || '';
+        const img = document.getElementById('video-thumb-img');
+        const ph = document.getElementById('video-thumb-placeholder');
+        if (v.thumbnail_path) { img.src = v.thumbnail_path; img.style.display = 'block'; ph.style.display = 'none'; }
+        else { img.style.display = 'none'; ph.style.display = 'flex'; }
+        document.getElementById('video-modal-admin').style.display = 'flex';
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+function pickVideoThumb() {
+    openMediaLibrary({
+        mode: 'single',
+        onSelect: ([url]) => {
+            document.getElementById('video-thumb-path').value = url;
+            const img = document.getElementById('video-thumb-img');
+            img.src = url;
+            img.style.display = 'block';
+            document.getElementById('video-thumb-placeholder').style.display = 'none';
+        }
+    });
+}
+
+async function saveVideo() {
+    const id = document.getElementById('video-id').value;
+    const title = document.getElementById('video-title-input').value.trim();
+    const tiktok_url = document.getElementById('video-tiktok-url').value.trim();
+    const views_count = document.getElementById('video-views').value.trim();
+    const thumbnail_path = document.getElementById('video-thumb-path').value.trim();
+
+    if (!title) { showToast('Tiêu đề không được trống', 'error'); return; }
+    if (!TIKTOK_URL_RE.test(tiktok_url)) {
+        showToast('TikTok URL không hợp lệ — phải bắt đầu bằng https://(www.|vt.|m.)tiktok.com/', 'error');
+        return;
+    }
+    const payload = { title, tiktok_url, thumbnail_path, views_count };
+    try {
+        const res = await fetch(id ? '/api/admin/videos/' + id : '/api/admin/videos', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(id ? 'Cập nhật thành công' : 'Thêm video thành công', 'success');
+        closeVideoModalAdmin();
+        loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function softDeleteVideo(id) {
+    try {
+        const res = await fetch('/api/admin/videos/' + id + '/soft-delete', { method: 'PUT' });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã ẩn' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function restoreVideoStatus(id) {
+    try {
+        const res = await fetch('/api/admin/videos/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'active' })
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã hiện lại' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function hardDeleteVideo(id) {
+    try {
+        const res = await fetch('/api/admin/videos/' + id, { method: 'DELETE' });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast('Đã xóa', 'success');
+        loadVideosAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+// ===================== v3: FEATURED VIDEOS PANEL =====================
+let _featuredVideosSelection = new Set();
+let _featuredVideosAllActive = [];
+let _featuredVideosPage = 1;
+const FEATURED_VIDEOS_PAGE_SIZE = 5;
+
+async function loadFeaturedVideosPanel() {
+    const grid = document.getElementById('featured-videos-available-grid');
+    if (!grid) return;
+    try {
+        const [allRes, featRes] = await Promise.all([
+            fetch('/api/admin/videos'),
+            fetch('/api/admin/videos/featured')
+        ]);
+        const allJson = await allRes.json();
+        const featJson = await featRes.json();
+        _featuredVideosAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(v => v.status === 'active') : [];
+        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(v => v.id) : [];
+        _featuredVideosSelection = new Set(featuredIds);
+        _featuredVideosPage = 1;
+        renderFeaturedVideosPanel();
+    } catch (err) {
+        console.error('loadFeaturedVideosPanel:', err);
+    }
+}
+
+function featuredVideoCardHtml(v) {
+    const isSel = _featuredVideosSelection.has(v.id);
+    const cover = (v.thumbnail_path || '/uploads/main_image.jpg');
+    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${v.id}" onclick="toggleFeaturedVideo(${v.id})">
+        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="featured-card-body">
+            <p class="featured-card-name">${(v.title || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+            <span class="featured-card-area">${(v.views_count || '0').toString()} views</span>
+        </div>
+    </div>`;
+}
+
+function renderFeaturedVideosPanel() {
+    const selGrid = document.getElementById('featured-videos-selected-grid');
+    const availGrid = document.getElementById('featured-videos-available-grid');
+    if (!selGrid || !availGrid) return;
+
+    const selected = _featuredVideosAllActive.filter(v => _featuredVideosSelection.has(v.id));
+    const available = _featuredVideosAllActive.filter(v => !_featuredVideosSelection.has(v.id));
+
+    selGrid.innerHTML = selected.length
+        ? selected.map(featuredVideoCardHtml).join('')
+        : '<p class="featured-empty">Chưa chọn video nào</p>';
+
+    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_VIDEOS_PAGE_SIZE));
+    if (_featuredVideosPage > totalPages) _featuredVideosPage = totalPages;
+    const start = (_featuredVideosPage - 1) * FEATURED_VIDEOS_PAGE_SIZE;
+    const pageItems = available.slice(start, start + FEATURED_VIDEOS_PAGE_SIZE);
+
+    availGrid.innerHTML = pageItems.length
+        ? pageItems.map(featuredVideoCardHtml).join('')
+        : '<p class="featured-empty">Không còn video nào</p>';
+
+    renderFeaturedVideosPagination(totalPages);
+    updateFeaturedVideosCounter();
+}
+
+function renderFeaturedVideosPagination(totalPages) {
+    const pag = document.getElementById('featured-videos-pagination');
+    if (!pag) return;
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${_featuredVideosPage === 1 ? 'disabled' : ''} onclick="changeFeaturedVideosPage(${_featuredVideosPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === _featuredVideosPage ? 'active' : ''}" onclick="changeFeaturedVideosPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${_featuredVideosPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedVideosPage(${_featuredVideosPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    pag.innerHTML = html;
+}
+
+function changeFeaturedVideosPage(page) {
+    _featuredVideosPage = page;
+    renderFeaturedVideosPanel();
+}
+
+function updateFeaturedVideosCounter() {
+    const c = document.getElementById('featured-videos-counter');
+    if (c) c.textContent = `${_featuredVideosSelection.size} / 4 selected`;
+    document.querySelectorAll('#featured-videos-available-grid .featured-card').forEach(card => {
+        if (_featuredVideosSelection.size >= 4) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
+        }
+    });
+}
+
+function toggleFeaturedVideo(id) {
+    if (_featuredVideosSelection.has(id)) {
+        _featuredVideosSelection.delete(id);
+    } else {
+        if (_featuredVideosSelection.size >= 4) {
+            showToast('Tối đa 4 videos featured', 'error');
+            return;
+        }
+        _featuredVideosSelection.add(id);
+    }
+    renderFeaturedVideosPanel();
+}
+
+async function saveFeaturedVideos() {
+    try {
+        const ids = Array.from(_featuredVideosSelection);
+        const res = await fetch('/api/admin/videos/featured', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(`Đã lưu ${ids.length} featured videos`, 'success');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+// ===================== F09 — NEWS ADMIN =====================
+function _escNews(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
+        '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+    })[c]);
+}
+
+async function loadNewsAdmin(query) {
+    try {
+        const url = query
+            ? '/api/admin/news?q=' + encodeURIComponent(query)
+            : '/api/admin/news';
+        const res = await fetch(url);
+        const json = await res.json();
+        _newsAll = (json.success && Array.isArray(json.data)) ? json.data : [];
+        _newsPage = 1;
+        renderNewsAdmin();
+        loadFeaturedNewsPanel();   // v3
+    } catch (err) {
+        console.error('loadNewsAdmin:', err);
+        showToast('Error loading news: ' + err.message, 'error');
+    }
+}
+
+function renderNewsAdmin() {
+    const tbody = document.getElementById('news-table-body');
+    if (!tbody) return;
+    if (_newsAll.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:#888;padding:2rem">Chưa có tin tức</td></tr>';
+        renderPagination('news-pagination', 0, 1, () => {});
+        return;
+    }
+    tbody.innerHTML = paginate(_newsAll, _newsPage).map(n => {
+        const statusClass = n.status === 'active' ? 'status-active' : 'status-inactive';
+        const statusLabel = n.status === 'active' ? 'Hiển thị' : 'Đã ẩn';
+        const created = n.created_at ? new Date(n.created_at).toLocaleDateString('en-AU') : '';
+        return `
+            <tr data-id="${n.id}">
+                <td>${n.id}</td>
+                <td>${_escNews(n.title || '')}</td>
+                <td><span class="status-pill ${statusClass}">${statusLabel}</span></td>
+                <td>${created}</td>
+                <td>
+                    <div class="action-btns">
+                        <button class="action-btn edit" onclick="editNewsItem(${n.id})" title="Edit"><i class="fas fa-edit"></i></button>
+                        ${n.status === 'active'
+                            ? `<button class="action-btn delete" onclick="confirmAction('Ẩn tin này khỏi public site?', () => softDeleteNews(${n.id}))" title="Hide"><i class="fas fa-eye-slash"></i></button>`
+                            : `<button class="action-btn restore" onclick="restoreNewsStatus(${n.id})" title="Show"><i class="fas fa-eye"></i></button>`}
+                        <button class="action-btn delete" onclick="confirmAction('Xóa VĨNH VIỄN tin này? Không thể hoàn tác.', () => hardDeleteNews(${n.id}))" title="Delete"><i class="fas fa-trash"></i></button>
+                    </div>
+                </td>
+            </tr>`;
+    }).join('');
+    renderPagination('news-pagination', _newsAll.length, _newsPage, (page) => {
+        _newsPage = page;
+        renderNewsAdmin();
+    });
+}
+
+function searchNews() {
+    const q = document.getElementById('news-search').value.trim();
+    loadNewsAdmin(q || undefined);
+}
+
+function openNewsModal() {
+    document.getElementById('news-modal-title').textContent = 'Add News';
+    document.getElementById('news-id').value = '';
+    document.getElementById('news-form-title').value = '';
+    document.getElementById('news-form-summary').value = '';
+    document.getElementById('news-form-content').value = '';
+    document.getElementById('news-form-cover').value = '';
+    document.getElementById('news-form-status').value = 'active';
+    const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = '';
+    const img = document.getElementById('news-cover-img');
+    img.style.display = 'none'; img.src = '';
+    document.getElementById('news-cover-placeholder').style.display = 'flex';
+    document.getElementById('news-modal-admin').style.display = 'flex';
+}
+
+function closeNewsModalAdmin() {
+    document.getElementById('news-modal-admin').style.display = 'none';
+}
+
+async function editNewsItem(id) {
+    try {
+        const res = await fetch('/api/admin/news/' + id);
+        const json = await res.json();
+        if (!json.success) { showToast('Không tải được tin tức', 'error'); return; }
+        const n = json.data;
+        document.getElementById('news-modal-title').textContent = 'Edit News #' + n.id;
+        document.getElementById('news-id').value = n.id;
+        document.getElementById('news-form-title').value = n.title || '';
+        document.getElementById('news-form-summary').value = n.summary || '';
+        document.getElementById('news-form-content').value = n.content || '';
+        document.getElementById('news-form-cover').value = n.cover_image || '';
+        document.getElementById('news-form-status').value = n.status || 'active';
+        const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = n.external_url || '';
+        const img = document.getElementById('news-cover-img');
+        const ph = document.getElementById('news-cover-placeholder');
+        if (n.cover_image) { img.src = n.cover_image; img.style.display = 'block'; ph.style.display = 'none'; }
+        else { img.style.display = 'none'; ph.style.display = 'flex'; }
+        document.getElementById('news-modal-admin').style.display = 'flex';
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+function pickNewsCover() {
+    openMediaLibrary({
+        mode: 'single',
+        onSelect: ([url]) => {
+            document.getElementById('news-form-cover').value = url;
+            const img = document.getElementById('news-cover-img');
+            img.src = url; img.style.display = 'block';
+            document.getElementById('news-cover-placeholder').style.display = 'none';
+        }
+    });
+}
+
+async function saveNewsItem() {
+    const id = document.getElementById('news-id').value;
+    const title = document.getElementById('news-form-title').value.trim();
+    const summary = document.getElementById('news-form-summary').value;
+    const content = document.getElementById('news-form-content').value;
+    const cover_image = document.getElementById('news-form-cover').value.trim();
+    const status = document.getElementById('news-form-status').value;
+    const extInp = document.getElementById('news-form-external-url');
+    const external_url = extInp ? extInp.value.trim() : '';
+
+    if (!title) { showToast('Tiêu đề bắt buộc', 'error'); return; }
+    if (title.length > 255) { showToast('Tiêu đề tối đa 255 ký tự', 'error'); return; }
+    if (summary.length > 500) { showToast('Tóm tắt tối đa 500 ký tự', 'error'); return; }
+    if (external_url && !/^https?:\/\//i.test(external_url)) {
+        showToast('External URL phải bắt đầu bằng http:// hoặc https://', 'error');
+        return;
+    }
+
+    const payload = { title, summary, content, cover_image, external_url };
+    if (id) payload.status = status;
+    try {
+        const res = await fetch(id ? '/api/admin/news/' + id : '/api/admin/news', {
+            method: id ? 'PUT' : 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(id ? 'Cập nhật thành công' : 'Tạo tin tức thành công', 'success');
+        closeNewsModalAdmin();
+        loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function softDeleteNews(id) {
+    try {
+        const res = await fetch('/api/admin/news/' + id + '/soft-delete', { method: 'PUT' });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã ẩn' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function restoreNewsStatus(id) {
+    try {
+        const res = await fetch('/api/admin/news/' + id, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ status: 'active' })
+        });
+        const json = await res.json();
+        showToast(json.message || (json.success ? 'Đã hiện lại' : 'Lỗi'), json.success ? 'success' : 'error');
+        if (json.success) loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+async function hardDeleteNews(id) {
+    try {
+        const res = await fetch('/api/admin/news/' + id, { method: 'DELETE' });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast('Đã xóa', 'success');
+        loadNewsAdmin();
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
+}
+
+// ===================== v3: FEATURED NEWS PANEL =====================
+let _featuredNewsSelection = new Set();
+let _featuredNewsAllActive = [];
+let _featuredNewsPage = 1;
+const FEATURED_NEWS_PAGE_SIZE = 5;
+
+async function loadFeaturedNewsPanel() {
+    const grid = document.getElementById('featured-news-available-grid');
+    if (!grid) return;
+    try {
+        const [allRes, featRes] = await Promise.all([
+            fetch('/api/admin/news'),
+            fetch('/api/admin/news/featured')
+        ]);
+        const allJson = await allRes.json();
+        const featJson = await featRes.json();
+        _featuredNewsAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(n => n.status === 'active') : [];
+        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(n => n.id) : [];
+        _featuredNewsSelection = new Set(featuredIds);
+        _featuredNewsPage = 1;
+        renderFeaturedNewsPanel();
+    } catch (err) {
+        console.error('loadFeaturedNewsPanel:', err);
+    }
+}
+
+function featuredNewsCardHtml(n) {
+    const isSel = _featuredNewsSelection.has(n.id);
+    const cover = (n.cover_image || '/uploads/main_image.jpg');
+    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${n.id}" onclick="toggleFeaturedNews(${n.id})">
+        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
+        <div class="featured-card-body">
+            <p class="featured-card-name">${(n.title || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
+        </div>
+    </div>`;
+}
+
+function renderFeaturedNewsPanel() {
+    const selGrid = document.getElementById('featured-news-selected-grid');
+    const availGrid = document.getElementById('featured-news-available-grid');
+    if (!selGrid || !availGrid) return;
+
+    const selected = _featuredNewsAllActive.filter(n => _featuredNewsSelection.has(n.id));
+    const available = _featuredNewsAllActive.filter(n => !_featuredNewsSelection.has(n.id));
+
+    selGrid.innerHTML = selected.length
+        ? selected.map(featuredNewsCardHtml).join('')
+        : '<p class="featured-empty">Chưa chọn tin nào</p>';
+
+    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_NEWS_PAGE_SIZE));
+    if (_featuredNewsPage > totalPages) _featuredNewsPage = totalPages;
+    const start = (_featuredNewsPage - 1) * FEATURED_NEWS_PAGE_SIZE;
+    const pageItems = available.slice(start, start + FEATURED_NEWS_PAGE_SIZE);
+
+    availGrid.innerHTML = pageItems.length
+        ? pageItems.map(featuredNewsCardHtml).join('')
+        : '<p class="featured-empty">Không còn tin nào</p>';
+
+    renderFeaturedNewsPagination(totalPages);
+    updateFeaturedNewsCounter();
+}
+
+function renderFeaturedNewsPagination(totalPages) {
+    const pag = document.getElementById('featured-news-pagination');
+    if (!pag) return;
+    if (totalPages <= 1) { pag.innerHTML = ''; return; }
+    let html = `<button class="page-btn" ${_featuredNewsPage === 1 ? 'disabled' : ''} onclick="changeFeaturedNewsPage(${_featuredNewsPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
+    for (let i = 1; i <= totalPages; i++) {
+        html += `<button class="page-btn ${i === _featuredNewsPage ? 'active' : ''}" onclick="changeFeaturedNewsPage(${i})">${i}</button>`;
+    }
+    html += `<button class="page-btn" ${_featuredNewsPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedNewsPage(${_featuredNewsPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
+    pag.innerHTML = html;
+}
+
+function changeFeaturedNewsPage(page) {
+    _featuredNewsPage = page;
+    renderFeaturedNewsPanel();
+}
+
+function updateFeaturedNewsCounter() {
+    const c = document.getElementById('featured-news-counter');
+    if (c) c.textContent = `${_featuredNewsSelection.size} / 4 selected`;
+    document.querySelectorAll('#featured-news-available-grid .featured-card').forEach(card => {
+        if (_featuredNewsSelection.size >= 4) {
+            card.classList.add('disabled');
+        } else {
+            card.classList.remove('disabled');
+        }
+    });
+}
+
+function toggleFeaturedNews(id) {
+    if (_featuredNewsSelection.has(id)) {
+        _featuredNewsSelection.delete(id);
+    } else {
+        if (_featuredNewsSelection.size >= 4) {
+            showToast('Tối đa 4 news featured', 'error');
+            return;
+        }
+        _featuredNewsSelection.add(id);
+    }
+    renderFeaturedNewsPanel();
+}
+
+async function saveFeaturedNews() {
+    try {
+        const ids = Array.from(_featuredNewsSelection);
+        const res = await fetch('/api/admin/news/featured', {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ids })
+        });
+        const json = await res.json();
+        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
+        showToast(`Đã lưu ${ids.length} featured news`, 'success');
+    } catch (err) {
+        showToast('Error: ' + err.message, 'error');
+    }
 }

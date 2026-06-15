@@ -141,6 +141,52 @@ body {
     color: #2c3e50;
 }
 
+/* ================ SUB-TABS (v20) ================ */
+/* Secondary navbar inside a content-section, toggling .sub-tab-panel
+   wrappers. Live Preview / always-visible panels sit outside these. */
+.sub-nav {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-bottom: 22px;
+    border-bottom: 2px solid #ecf0f1;
+}
+
+.sub-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #7f8c8d;
+    font-size: 14px;
+    font-weight: 500;
+    font-family: inherit;
+    cursor: pointer;
+    transition: all 0.2s;
+    margin-bottom: -2px;
+}
+
+.sub-nav-item:hover {
+    color: #2c3e50;
+    background: rgba(52, 152, 219, 0.06);
+}
+
+.sub-nav-item.active {
+    color: #3498db;
+    border-bottom-color: #3498db;
+}
+
+.sub-tab-panel {
+    display: none;
+}
+
+.sub-tab-panel.active {
+    display: block;
+}
+
 /* ================ DASHBOARD ================ */
 .dashboard-stats {
     display: grid;
@@ -210,7 +256,8 @@ body {
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
 }
 
-.settings-panel h2 {
+.settings-panel h2,
+.service-card-col h2 {
     font-size: 16px;
     font-weight: 600;
     color: #2c3e50;
@@ -218,6 +265,29 @@ body {
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* v15: /about — Our Services cards sit side-by-side inside ONE panel
+   instead of stacking as 3 full-width panels, so the About tab stays
+   compact and the panel's footprint matches the other wrappers in the tab. */
+.service-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 24px;
+}
+
+.service-card-col + .service-card-col {
+    border-left: 1px solid #eee;
+    padding-left: 24px;
+}
+
+@media (max-width: 900px) {
+    .service-card-col + .service-card-col {
+        border-left: none;
+        padding-left: 0;
+        border-top: 1px solid #eee;
+        padding-top: 20px;
+    }
 }
 
 .settings-form {
@@ -228,6 +298,97 @@ body {
 
 .settings-form .form-actions {
     grid-column: 1 / -1;
+}
+
+/* v14: dividers and 2-col rows must span the full settings-form grid,
+   otherwise they collapse into a single auto-fit column among the
+   surrounding form-groups and the layout looks scrambled. */
+.settings-form .form-section-divider,
+.settings-form .form-row,
+.settings-form #about-services-cards,
+.settings-form #about-offices-cards {
+    grid-column: 1 / -1;
+}
+
+/* v17: a lone field/textarea left in the auto-fit grid only fills ONE
+   column, leaving the rest of its row empty — looks tiny and uneven
+   next to full-width rows. .full-row stretches it across the grid. */
+.settings-form .form-group.full-row {
+    grid-column: 1 / -1;
+}
+
+/* v17: 3-equal-column row (e.g. thumbnail + caption + url), spans the
+   full grid width so it doesn't leave a dangling empty column. */
+.settings-form .form-row-3 {
+    grid-column: 1 / -1;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+}
+@media (max-width: 900px) {
+    .settings-form .form-row-3 {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* v17: lightweight sub-section label — replaces extra .form-section-divider
+   bars inside an already-consolidated wrapper. Just a small heading with a
+   thin separator, not another full gradient bar. */
+.settings-form .form-subsection-label {
+    grid-column: 1 / -1;
+    margin: 4px 0 -4px;
+    padding-top: 16px;
+    border-top: 1px dashed #e3e3e3;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    color: #1B2635;
+}
+.settings-form .form-subsection-label i {
+    color: #D1AE6B;
+    margin-right: 6px;
+}
+
+/* v16: /about — dynamic Offices cards (add/remove, editable name) */
+.office-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.office-card-admin {
+    border: 1px solid #eee;
+    border-radius: 8px;
+    padding: 18px;
+}
+
+.office-card-admin h2 {
+    justify-content: space-between;
+}
+
+.office-card-admin .ao-remove {
+    background: none;
+    border: none;
+    color: #c0392b;
+    cursor: pointer;
+    font-size: 14px;
+    padding: 4px;
+}
+
+.office-card-admin .ao-remove:hover {
+    color: #e74c3c;
+}
+
+/* v23: /about — Our Team cards, 2 per row inside one wrapper */
+.team-cards-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+@media (max-width: 900px) {
+    .team-cards-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ================ BUTTONS ================ */
@@ -423,6 +584,49 @@ body {
     overflow-x: auto;
     -webkit-overflow-scrolling: touch;
     box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+}
+
+/* v16: shared pagination controls — appended below every .table-container table */
+.pagination {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    padding: 14px 16px;
+}
+
+.pagination .page-btn {
+    min-width: 34px;
+    height: 34px;
+    padding: 0 8px;
+    border: 1.5px solid #e0e0e0;
+    border-radius: 8px;
+    background: #fff;
+    color: #555;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.15s ease;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pagination .page-btn:hover:not(:disabled):not(.active) {
+    border-color: #3498db;
+    color: #3498db;
+}
+
+.pagination .page-btn.active {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    border-color: transparent;
+    color: #fff;
+}
+
+.pagination .page-btn:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
 }
 
 .data-table {
@@ -678,6 +882,22 @@ body {
 .form-group {
     margin-bottom: 18px;
 }
+
+/* F05d: section divider inside Projects modal */
+.form-section-divider {
+    margin: 22px 0 14px;
+    padding: 10px 14px;
+    background: linear-gradient(90deg, #fff8e1 0%, #EBE9E8 100%);
+    border-left: 3px solid #D1AE6B;
+    border-radius: 4px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    color: #1B2635;
+}
+.form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+.form-row-2 .form-group { margin-bottom: 14px; }
+@media (max-width: 600px) { .form-row-2 { grid-template-columns: 1fr; } }
 
 .form-group label {
     display: block;
@@ -1206,7 +1426,8 @@ body {
     background: #f8f9fa;
 }
 
-.settings-image-preview img {
+.settings-image-preview img,
+.settings-image-preview video {
     width: 100%;
     height: 100%;
     object-fit: contain;
@@ -1235,6 +1456,18 @@ body {
     width: 100%;
     max-width: 300px;
     height: 150px;
+}
+
+/* v14: round avatar preview — used for Leadership (Director/Co-Founder)
+   and Our Team photo pickers so every image field shares one look. */
+.settings-avatar-preview {
+    width: 110px;
+    height: 110px;
+    border-radius: 50%;
+}
+
+.settings-avatar-preview img {
+    object-fit: cover;
 }
 
 /* ================ LIVE PREVIEW PANEL ================ */
@@ -1386,7 +1619,8 @@ body {
     border-color: #27ae60;
 }
 
-.media-item img {
+.media-item img,
+.media-item video {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1522,3 +1756,210 @@ body {
     background: rgba(243, 156, 18, 0.12);
     color: #d68910;
 }
+
+/* ============================================================
+   F10 — Admin recolor pass (navy/gold theme)
+   Constraint: ONLY recolor + typography. NO layout changes:
+   sidebar sticky / drawer / grid / spacing all preserved.
+   ============================================================ */
+:root {
+    --color-navy: #1B2635;
+    --color-gold: #D1AE6B;
+    --color-cream: #EBE9E8;
+}
+
+body { background: var(--color-cream); }
+
+/* Sidebar navy + gold accents */
+.sidebar {
+    background: var(--color-navy);
+    color: #fff;
+}
+.sidebar-header h2,
+.sidebar-header .brand-text,
+.sidebar-header span {
+    color: var(--color-gold);
+    font-family: 'Playfair Display', 'Georgia', serif;
+    letter-spacing: 0.08em;
+}
+.sidebar-nav .nav-item {
+    color: rgba(255,255,255,0.85);
+    transition: background 0.2s, color 0.2s;
+    border-left: 3px solid transparent;
+}
+.sidebar-nav .nav-item:hover {
+    background: rgba(209,174,107,0.08);
+    color: var(--color-gold);
+}
+.sidebar-nav .nav-item.active {
+    background: rgba(209,174,107,0.15);
+    color: var(--color-gold);
+    border-left-color: var(--color-gold);
+}
+.sidebar-nav .nav-item i { color: inherit; }
+.sidebar-footer .back-to-site,
+.sidebar-footer .logout-btn {
+    color: rgba(255,255,255,0.8);
+}
+.sidebar-footer .back-to-site:hover { color: var(--color-gold); }
+
+/* Headings — Playfair navy */
+.content-section h1,
+.content-section h2,
+.section-header h1,
+.section-header h2 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    color: var(--color-navy);
+    letter-spacing: 0.01em;
+}
+
+/* Primary "save" buttons */
+.btn-save {
+    background: var(--color-navy);
+    color: #fff;
+    transition: background 0.2s, color 0.2s;
+}
+.btn-save:hover {
+    background: var(--color-gold);
+    color: var(--color-navy);
+}
+
+/* Add buttons gold */
+.btn-add {
+    background: var(--color-gold);
+    color: var(--color-navy);
+    transition: background 0.2s, color 0.2s;
+}
+.btn-add:hover {
+    background: var(--color-navy);
+    color: var(--color-gold);
+}
+
+/* Search bar accents */
+.btn-search {
+    background: var(--color-navy);
+    color: #fff;
+}
+.btn-search:hover { background: var(--color-gold); color: var(--color-navy); }
+
+/* Tables: navy header + gold column titles */
+.data-table thead {
+    background: var(--color-navy);
+    color: #fff;
+}
+.data-table thead th {
+    color: var(--color-gold);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+}
+
+/* Input focus ring (preserve existing border-radius/spacing) */
+.form-group input:focus,
+.form-group textarea:focus,
+.form-group select:focus,
+input.text-input:focus {
+    border-color: var(--color-gold);
+    outline: 2px solid rgba(209,174,107,0.18);
+}
+
+/* Status pills tinted */
+.status-pill.status-active {
+    background: rgba(76,175,80,0.12);
+    color: #2e7d32;
+}
+.status-pill.status-inactive {
+    background: rgba(120,120,120,0.15);
+    color: #555;
+}
+
+/* Audit log badges keep their semantic colors (don't override) */
+
+/* v2: Featured projects selection panel */
+.featured-panel {
+    background: #fff;
+    border: 1px solid rgba(27,38,53,0.08);
+    border-radius: 10px;
+    padding: 1.6rem;
+    margin-bottom: 1.6rem;
+}
+.featured-panel-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    flex-wrap: wrap;
+    margin-bottom: 0.8rem;
+}
+.featured-panel-header h3 {
+    font-family: 'Playfair Display', 'Georgia', serif;
+    font-size: 1.6rem;
+    color: var(--color-navy);
+    margin: 0;
+}
+.featured-panel-header h3 i { color: var(--color-gold); margin-right: 0.4rem; }
+.featured-counter { color: #6a6a6a; font-size: 1.2rem; margin: 0 0 1rem; }
+.featured-row-label {
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: .3px;
+    color: #1B2635;
+    margin: 4px 0 10px;
+    padding-top: 14px;
+    border-top: 1px dashed #e3e3e3;
+}
+.featured-row-label:first-of-type { padding-top: 0; border-top: none; }
+.featured-row-label i { color: var(--color-gold); margin-right: 6px; }
+.featured-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+.featured-grid-selected:empty,
+.featured-grid:empty {
+    display: block;
+}
+.featured-empty {
+    color: #999;
+    font-size: 1.2rem;
+    font-style: italic;
+    margin: 0;
+}
+.featured-card {
+    position: relative;
+    border: 2px solid transparent;
+    border-radius: 8px;
+    background: #fafafa;
+    cursor: pointer;
+    overflow: hidden;
+    transition: border-color 0.2s, transform 0.2s;
+}
+.featured-card:hover { transform: translateY(-2px); }
+.featured-card.selected {
+    border-color: var(--color-gold);
+    box-shadow: 0 6px 18px rgba(209,174,107,0.3);
+}
+.featured-card.selected::after {
+    content: '\f005';
+    font-family: 'Font Awesome 6 Free';
+    font-weight: 900;
+    position: absolute;
+    top: 8px; right: 8px;
+    background: var(--color-gold);
+    color: var(--color-navy);
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.9rem;
+}
+.featured-card.disabled { opacity: 0.4; cursor: not-allowed; }
+.featured-card img { width: 100%; aspect-ratio: 4/3; object-fit: cover; display: block; }
+.featured-card-body { padding: 0.8rem; }
+.featured-card-name {
+    font-size: 1.2rem; font-weight: 600; color: var(--color-navy);
+    margin: 0 0 0.2rem;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.featured-card-area { font-size: 1rem; color: #888; }
