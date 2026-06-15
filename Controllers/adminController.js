@@ -180,10 +180,10 @@ const setFeaturedProjects = async (req, res) => {
 
 const getProjects = async (req, res) => {
     try {
-        const { state, suburb, type, price, area, includeInactive } = req.query;
+        const { state, type, price, area, includeInactive } = req.query;
         // F05a: if any filter present, use whitelist-based searchProjects
-        if (state || suburb || type || price || area) {
-            const projects = await projectModel.searchProjects({ state, suburb, type, price, area });
+        if (state || type || price || area) {
+            const projects = await projectModel.searchProjects({ state, type, price, area });
             return res.json({ success: true, data: projects });
         }
         const useInactive = includeInactive === 'true';

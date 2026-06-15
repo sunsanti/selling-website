@@ -1058,7 +1058,7 @@ document.addEventListener('DOMContentLoaded', () => {
 function handleSearchSubmit(event) {
     event.preventDefault();
     const params = new URLSearchParams();
-    ['state', 'suburb', 'type', 'price'].forEach(f => {
+    ['state', 'area', 'type', 'price'].forEach(f => {
         const el = document.getElementById('search-' + f);
         if (el && el.value) params.set(f, el.value);
     });
