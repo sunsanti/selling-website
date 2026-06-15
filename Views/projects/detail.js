@@ -20,6 +20,72 @@
         if (el) el.textContent = value == null ? '' : String(value);
     }
 
+    // Gallery lightbox state
+    let galleryImages = [];
+    let galleryIndex = 0;
+    let thumbsRendered = false;
+
+    function renderGalleryThumbs() {
+        const thumbs = document.getElementById('gallery-lightbox-thumbs');
+        thumbs.innerHTML = '';
+        galleryImages.forEach((im, i) => {
+            const img = document.createElement('img');
+            img.src = im.image_path;
+            img.alt = '';
+            img.loading = 'lazy';
+            img.addEventListener('click', () => showGalleryImage(i));
+            thumbs.appendChild(img);
+        });
+        thumbsRendered = true;
+    }
+
+    function showGalleryImage(index) {
+        if (galleryImages.length === 0) return;
+        galleryIndex = (index + galleryImages.length) % galleryImages.length;
+        const mainImg = document.getElementById('gallery-lightbox-image');
+        mainImg.src = galleryImages[galleryIndex].image_path;
+        const thumbs = document.getElementById('gallery-lightbox-thumbs').children;
+        for (let i = 0; i < thumbs.length; i++) {
+            thumbs[i].classList.toggle('is-active', i === galleryIndex);
+        }
+        if (thumbs[galleryIndex]) {
+            thumbs[galleryIndex].scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+        }
+    }
+
+    function openGalleryLightbox(index) {
+        const lightbox = document.getElementById('gallery-lightbox');
+        if (!lightbox) return;
+        if (!thumbsRendered) renderGalleryThumbs();
+        showGalleryImage(index);
+        lightbox.classList.add('is-open');
+        document.body.style.overflow = 'hidden';
+    }
+
+    function closeGalleryLightbox() {
+        const lightbox = document.getElementById('gallery-lightbox');
+        if (!lightbox) return;
+        lightbox.classList.remove('is-open');
+        document.body.style.overflow = '';
+    }
+
+    function initGalleryLightbox() {
+        const lightbox = document.getElementById('gallery-lightbox');
+        if (!lightbox) return;
+        document.getElementById('gallery-lightbox-close').addEventListener('click', closeGalleryLightbox);
+        document.getElementById('gallery-lightbox-prev').addEventListener('click', () => showGalleryImage(galleryIndex - 1));
+        document.getElementById('gallery-lightbox-next').addEventListener('click', () => showGalleryImage(galleryIndex + 1));
+        lightbox.addEventListener('click', e => {
+            if (e.target === lightbox) closeGalleryLightbox();
+        });
+        document.addEventListener('keydown', e => {
+            if (!lightbox.classList.contains('is-open')) return;
+            if (e.key === 'Escape') closeGalleryLightbox();
+            if (e.key === 'ArrowLeft') showGalleryImage(galleryIndex - 1);
+            if (e.key === 'ArrowRight') showGalleryImage(galleryIndex + 1);
+        });
+    }
+
     async function loadDetail() {
         const parts = window.location.pathname.split('/').filter(Boolean);
         // /projects/:id  → parts = ['projects', ':id']
@@ -119,12 +185,13 @@
             const gallery = document.getElementById('detail-gallery');
             const grid = document.getElementById('detail-gallery-grid');
             grid.innerHTML = '';
-            p.images.forEach(im => {
-                if (!im.image_path) return;
+            galleryImages = p.images.filter(im => im.image_path);
+            galleryImages.forEach((im, i) => {
                 const img = document.createElement('img');
                 img.src = im.image_path;
                 img.alt = p.name || '';
                 img.loading = 'lazy';
+                img.addEventListener('click', () => openGalleryLightbox(i));
                 grid.appendChild(img);
             });
             if (grid.children.length > 0) {
@@ -133,5 +200,8 @@
         }
     }
 
-    document.addEventListener('DOMContentLoaded', loadDetail);
+    document.addEventListener('DOMContentLoaded', () => {
+        loadDetail();
+        initGalleryLightbox();
+    });
 })();
