@@ -10,7 +10,6 @@ const PRICE_RANGES = {
     '1m-2m':     [1000000, 2000000],
     '2m+':       [2000000, 999999999]
 };
-const SUBURB_RE = /^[a-z0-9-]{1,50}$/i;
 
 const EXTENDED_FIELDS = ['price', 'beds', 'baths', 'cars', 'address', 'state', 'property_type', 'area_label'];
 
@@ -143,7 +142,7 @@ const createProject = async (projectData) => {
 };
 
 // F05a: Property Search filter — whitelist + prepared statements
-const searchProjects = async ({ state, suburb, type, price, area, status = 'active' } = {}) => {
+const searchProjects = async ({ state, type, price, area, status = 'active' } = {}) => {
     try {
         const where = ['status = ?'];
         const params = [status];
@@ -155,11 +154,6 @@ const searchProjects = async ({ state, suburb, type, price, area, status = 'acti
         if (type && ALLOWED_TYPES.includes(String(type).toLowerCase())) {
             where.push('property_type = ?');
             params.push(String(type).toLowerCase());
-        }
-        if (suburb && SUBURB_RE.test(suburb)) {
-            where.push('(LOWER(address) LIKE ? OR LOWER(area_label) LIKE ?)');
-            const like = '%' + String(suburb).toLowerCase() + '%';
-            params.push(like, like);
         }
         if (price && PRICE_RANGES[price]) {
             const [min, max] = PRICE_RANGES[price];

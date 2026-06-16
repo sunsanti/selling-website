@@ -5,13 +5,19 @@
 (function () {
     const ALLOWED_STATES = ['NSW', 'VIC', 'QLD', 'WA', 'SA', 'TAS', 'ACT', 'NT'];
     const ALLOWED_TYPES = ['apartment', 'house', 'townhouse', 'land'];
+    const ALLOWED_AREAS = ['sydney', 'melbourne', 'brisbane', 'goldcoast'];
+    const AREA_LABELS = {
+        sydney: 'Sydney',
+        melbourne: 'Melbourne',
+        brisbane: 'Brisbane',
+        goldcoast: 'Gold Coast'
+    };
     const PRICE_LABELS = {
         '500k-800k': '$500k – $800k',
         '800k-1m':   '$800k – $1M',
         '1m-2m':     '$1M – $2M',
         '2m+':       '$2M+'
     };
-    const SUBURB_RE = /^[a-z0-9-]{1,50}$/i;
 
     function getFilters() {
         const params = new URLSearchParams(window.location.search);
@@ -20,8 +26,8 @@
         if (ALLOWED_STATES.includes(state)) f.state = state;
         const type = (params.get('type') || '').toLowerCase();
         if (ALLOWED_TYPES.includes(type)) f.type = type;
-        const suburb = params.get('suburb') || '';
-        if (suburb && SUBURB_RE.test(suburb)) f.suburb = suburb;
+        const area = (params.get('area') || '').toLowerCase();
+        if (ALLOWED_AREAS.includes(area)) f.area = area;
         const price = params.get('price') || '';
         if (PRICE_LABELS[price]) f.price = price;
         return f;
@@ -38,7 +44,7 @@
         const chipHtml = entries.map(([k, v]) => {
             let label = v;
             if (k === 'price') label = PRICE_LABELS[v] || v;
-            if (k === 'suburb') label = v.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+            if (k === 'area') label = AREA_LABELS[v] || v;
             if (k === 'type') label = v.charAt(0).toUpperCase() + v.slice(1);
             return `<span class="filter-chip">${escapeHtml(k.toUpperCase())}: <strong>${escapeHtml(label)}</strong></span>`;
         }).join('');
@@ -148,7 +154,7 @@
     // rebuild the URL and reload so chips + grid refresh.
     function prefillSearchBar() {
         const f = getFilters();
-        ['state','suburb','type','price'].forEach(k => {
+        ['state','area','type','price'].forEach(k => {
             const el = document.getElementById('search-' + k);
             if (el && f[k] !== undefined) el.value = f[k];
         });
@@ -158,11 +164,11 @@
         event.preventDefault();
         const params = new URLSearchParams();
         const state = document.getElementById('search-state').value;
-        const suburb = document.getElementById('search-suburb').value;
+        const area = document.getElementById('search-area').value;
         const type = document.getElementById('search-type').value;
         const price = document.getElementById('search-price').value;
         if (state) params.set('state', state);
-        if (suburb) params.set('suburb', suburb);
+        if (area) params.set('area', area);
         if (type) params.set('type', type);
         if (price) params.set('price', price);
         const qs = params.toString();

@@ -48,7 +48,7 @@ const REQUIRED_SELECTORS = [
     '.btn-book-outline',
     '#property-search',
     '#search-state',
-    '#search-suburb',
+    '#search-area',
     '#search-type',
     '#search-price',
     '.btn-search-property'
