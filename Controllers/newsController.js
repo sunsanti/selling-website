@@ -26,8 +26,9 @@ const getPublicById = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const list = req.query.q
-            ? await newsModel.searchByTitle(req.query.q)
+        const { q, date_from, date_to } = req.query;
+        const list = (q || date_from || date_to)
+            ? await newsModel.search({ q, date_from, date_to })
             : await newsModel.getAll();
         res.json({ success: true, data: list });
     } catch (err) {

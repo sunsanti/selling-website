@@ -611,7 +611,7 @@ const NEWS_PER_VIEW = 3;
 
 async function loadNews() {
     try {
-        const res = await fetch('/api/public/news/featured');
+        const res = await fetch('/api/public/news?limit=3');
         const data = await res.json();
         _allNews = (data && data.success && Array.isArray(data.data)) ? data.data : [];
     } catch (e) {
@@ -795,8 +795,8 @@ function renderAboutFounders(persons) {
     if (!wrap) return;
     wrap.innerHTML = '';
     const FOUNDER_BIOS = {
-        1: 'Co-founder & Senior Property Strategist. Over a decade helping local and overseas buyers secure premium investments across Sydney and Melbourne.',
-        2: 'Co-founder & Investment Director. Specialises in build-to-rent and off-the-plan opportunities, FIRB advisory and long-term portfolio growth.'
+        1: 'Senior Property Sales Consultant. Over a decade helping local and overseas buyers secure premium investments across Sydney and Melbourne.',
+        2: 'Property Sales Consultant & Investment Director. Specialises in build-to-rent and off-the-plan opportunities, FIRB advisory and long-term portfolio growth.'
     };
     (persons || []).slice(0, 2).forEach(p => {
         const card = document.createElement('article');
@@ -823,7 +823,7 @@ function renderAboutFounders(persons) {
 
         const role = document.createElement('span');
         role.className = 'founder-role';
-        role.textContent = p.slot === 1 ? 'Co-Founder & Director' : 'Co-Founder & Investment Director';
+        role.textContent = p.slot === 1 ? 'Property Sales Consultant & Director' : 'Property Sales Consultant & Investment Director';
         info.appendChild(role);
 
         const bio = document.createElement('p');

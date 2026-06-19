@@ -22,10 +22,10 @@ const getAll = async (req, res) => {
     }
 };
 
-// v3: featured videos (up to 4) for /main carousel
+// v3: featured videos (up to 6) for /main carousel
 const getFeatured = async (req, res) => {
     try {
-        const list = await videoModel.getFeatured(4);
+        const list = await videoModel.getFeatured(6);
         res.json({ success: true, data: list });
     } catch (err) {
         console.error('getFeatured videos:', err.message);
@@ -33,12 +33,12 @@ const getFeatured = async (req, res) => {
     }
 };
 
-// v3: replace featured selection (max 4)
+// v3: replace featured selection (max 6)
 const setFeatured = async (req, res) => {
     try {
         const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
-        if (ids.length > 4) {
-            return res.status(400).json({ success: false, message: 'Tối đa 4 videos featured' });
+        if (ids.length > 6) {
+            return res.status(400).json({ success: false, message: 'Tối đa 6 videos featured' });
         }
         const applied = await videoModel.setFeaturedIds(ids);
         auditLogModel.log({

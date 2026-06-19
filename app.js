@@ -34,6 +34,13 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));
+app.use('/shared', express.static(path.join(__dirname, 'Views/shared')));
+
+// Contact page
+app.get('/contact', (req, res) => {
+    res.sendFile(path.join(__dirname, 'Views/contact/index.html'));
+});
+app.use('/contact', express.static(path.join(__dirname, 'Views/contact')));
 
 // F05c: /projects list page + /projects/:id detail page
 // Explicit GET routes FIRST (pretty URLs) → static fallback for asset files

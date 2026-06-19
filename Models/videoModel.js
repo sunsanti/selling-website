@@ -1,14 +1,14 @@
-// F08: Video model — TikTok external link cards
+// F08: Video model — TikTok / YouTube external link cards
 const pool = require('../config/database');
 
-// Allow www, vt (short), m (mobile) subdomains; anchor + path required
-const TIKTOK_RE = /^https?:\/\/(www\.|vt\.|m\.)?tiktok\.com\//i;
+// Accept TikTok (www/vt/m subdomains) and YouTube (youtube.com + youtu.be)
+const VIDEO_URL_RE = /^https?:\/\/((www\.|vt\.|m\.)?tiktok\.com\/|(www\.)?youtube\.com\/|youtu\.be\/)/i;
 
-function validateTikTokUrl(url) {
+function validateVideoUrl(url) {
     if (!url || typeof url !== 'string') return false;
     const trimmed = url.trim();
     if (trimmed.length === 0 || trimmed.length > 500) return false;
-    return TIKTOK_RE.test(trimmed);
+    return VIDEO_URL_RE.test(trimmed);
 }
 
 const UPDATABLE_FIELDS = ['title', 'thumbnail_path', 'tiktok_url', 'views_count', 'status'];
@@ -32,9 +32,9 @@ const getById = async (id) => {
     return rows[0] || null;
 };
 
-// v3: featured videos (up to 4) for /main carousel
-const getFeatured = async (limit = 4) => {
-    const lim = Math.min(Math.max(parseInt(limit, 10) || 4, 1), 4);
+// v3: featured videos (up to 6) for /main carousel
+const getFeatured = async (limit = 6) => {
+    const lim = Math.min(Math.max(parseInt(limit, 10) || 6, 1), 6);
     const [rows] = await pool.query(
         "SELECT * FROM videos WHERE status = 'active' AND is_featured = 1 ORDER BY id DESC LIMIT ?",
         [lim]
@@ -42,9 +42,9 @@ const getFeatured = async (limit = 4) => {
     return rows;
 };
 
-// v3: enforce max 4 featured videos atomically
+// v3: enforce max 6 featured videos atomically
 const setFeaturedIds = async (ids) => {
-    const sanitized = (Array.isArray(ids) ? ids : []).map(n => parseInt(n, 10)).filter(n => Number.isInteger(n) && n > 0).slice(0, 4);
+    const sanitized = (Array.isArray(ids) ? ids : []).map(n => parseInt(n, 10)).filter(n => Number.isInteger(n) && n > 0).slice(0, 6);
     const conn = await pool.getConnection();
     try {
         await conn.beginTransaction();
@@ -68,8 +68,8 @@ const create = async ({ title, thumbnail_path, tiktok_url, views_count }) => {
         err.status = 400;
         throw err;
     }
-    if (!validateTikTokUrl(tiktok_url)) {
-        const err = new Error('TikTok URL không hợp lệ — phải bắt đầu bằng https://www.tiktok.com/ (hoặc vt./m.)');
+    if (!validateVideoUrl(tiktok_url)) {
+        const err = new Error('URL không hợp lệ — phải là TikTok (tiktok.com, vt.tiktok.com) hoặc YouTube (youtube.com, youtu.be)');
         err.status = 400;
         throw err;
     }
@@ -86,8 +86,8 @@ const create = async ({ title, thumbnail_path, tiktok_url, views_count }) => {
 };
 
 const update = async (id, fields) => {
-    if (fields.tiktok_url !== undefined && !validateTikTokUrl(fields.tiktok_url)) {
-        const err = new Error('TikTok URL không hợp lệ');
+    if (fields.tiktok_url !== undefined && !validateVideoUrl(fields.tiktok_url)) {
+        const err = new Error('URL video không hợp lệ — cần TikTok hoặc YouTube');
         err.status = 400;
         throw err;
     }
@@ -114,4 +114,4 @@ const hardDelete = async (id) => {
     return r.affectedRows;
 };
 
-module.exports = { getActive, getAll, getById, getFeatured, setFeaturedIds, create, update, softDelete, hardDelete, validateTikTokUrl };
+module.exports = { getActive, getAll, getById, getFeatured, setFeaturedIds, create, update, softDelete, hardDelete, validateVideoUrl };

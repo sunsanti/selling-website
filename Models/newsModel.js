@@ -14,7 +14,7 @@ function truncate(s, n) {
 }
 
 const getActive = async ({ limit = 12 } = {}) => {
-    const lim = Math.min(parseInt(limit, 10) || 12, 50);
+    const lim = Math.min(parseInt(limit, 10) || 12, 500);
     const [rows] = await pool.query(
         "SELECT id, title, summary, cover_image, external_url, created_at FROM news WHERE status = 'active' ORDER BY created_at DESC LIMIT ?",
         [lim]
@@ -77,6 +77,29 @@ const searchByTitle = async (q) => {
     return rows;
 };
 
+const search = async ({ q, date_from, date_to } = {}) => {
+    const conditions = [];
+    const params = [];
+    if (q) {
+        conditions.push('title LIKE ?');
+        params.push('%' + String(q).slice(0, 200) + '%');
+    }
+    if (date_from) {
+        conditions.push('DATE(created_at) >= ?');
+        params.push(String(date_from).slice(0, 10));
+    }
+    if (date_to) {
+        conditions.push('DATE(created_at) <= ?');
+        params.push(String(date_to).slice(0, 10));
+    }
+    const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+    const [rows] = await pool.query(
+        `SELECT id, title, status, is_featured, created_at FROM news ${where} ORDER BY created_at DESC LIMIT 500`,
+        params
+    );
+    return rows;
+};
+
 const create = async ({ title, summary, content, cover_image, external_url }) => {
     const t = String(title || '').trim();
     if (!t) { const err = new Error('Tiêu đề bắt buộc'); err.status = 400; throw err; }
@@ -132,7 +155,7 @@ const hardDelete = async (id) => {
 };
 
 module.exports = {
-    getActive, getActiveById, getAll, getById, searchByTitle,
+    getActive, getActiveById, getAll, getById, searchByTitle, search,
     getFeatured, setFeaturedIds,
     create, update, softDelete, hardDelete,
     SUMMARY_CAP, TITLE_MAX, SUMMARY_MAX
