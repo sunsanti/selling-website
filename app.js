@@ -34,7 +34,6 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 app.use('/main', express.static(path.join(__dirname, 'Views/main')));
-app.use('/shared', express.static(path.join(__dirname, 'Views/shared')));
 
 // Contact page
 app.get('/contact', (req, res) => {
@@ -133,8 +132,6 @@ app.get('/api/public/videos', videoController.getPublic);
 app.get('/api/public/videos/featured', videoController.getFeatured);
 // F09: public news
 app.get('/api/public/news', newsController.getPublic);
-// v3: featured news for /main carousel
-app.get('/api/public/news/featured', newsController.getFeatured);
 app.get('/api/public/news/:id', newsController.getPublicById);
 
 app.use('/api/admin', requireAuth);
@@ -208,8 +205,6 @@ app.delete('/api/admin/videos/:id', requireAdmin, videoController.hardDelete);
 
 // F09: News admin endpoints
 app.get('/api/admin/news', newsController.getAll);
-app.get('/api/admin/news/featured', newsController.getFeatured);
-app.put('/api/admin/news/featured', newsController.setFeatured);
 app.get('/api/admin/news/:id', newsController.getById);
 app.post('/api/admin/news', newsController.create);
 app.put('/api/admin/news/:id', newsController.update);
