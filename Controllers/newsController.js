@@ -26,41 +26,12 @@ const getPublicById = async (req, res) => {
 
 const getAll = async (req, res) => {
     try {
-        const list = req.query.q
-            ? await newsModel.searchByTitle(req.query.q)
+        const { q, date_from, date_to } = req.query;
+        const list = (q || date_from || date_to)
+            ? await newsModel.search({ q, date_from, date_to })
             : await newsModel.getAll();
         res.json({ success: true, data: list });
     } catch (err) {
-        res.status(500).json({ success: false, message: 'Lỗi server' });
-    }
-};
-
-// v3: featured news (up to 4) for /main carousel
-const getFeatured = async (req, res) => {
-    try {
-        const list = await newsModel.getFeatured(4);
-        res.json({ success: true, data: list });
-    } catch (err) {
-        console.error('getFeatured news:', err.message);
-        res.status(500).json({ success: false, message: 'Lỗi server' });
-    }
-};
-
-// v3: replace featured selection (max 4)
-const setFeatured = async (req, res) => {
-    try {
-        const ids = Array.isArray(req.body.ids) ? req.body.ids : [];
-        if (ids.length > 4) {
-            return res.status(400).json({ success: false, message: 'Tối đa 4 news featured' });
-        }
-        const applied = await newsModel.setFeaturedIds(ids);
-        auditLogModel.log({
-            req, action: 'NEWS_FEATURED_SET', target_type: 'news',
-            details: { ids: applied }
-        });
-        res.json({ success: true, message: 'Đã cập nhật featured news', ids: applied });
-    } catch (err) {
-        console.error('setFeatured news:', err.message);
         res.status(500).json({ success: false, message: 'Lỗi server' });
     }
 };
@@ -129,4 +100,4 @@ const hardDelete = async (req, res) => {
     }
 };
 
-module.exports = { getPublic, getPublicById, getAll, getFeatured, setFeatured, getById, create, update, softDelete, hardDelete };
+module.exports = { getPublic, getPublicById, getAll, getById, create, update, softDelete, hardDelete };

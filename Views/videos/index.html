@@ -10,47 +10,7 @@
     <link rel="stylesheet" href="/videos/style.css?v=f08">
 </head>
 <body>
-    <!-- Header shared markup (mirrors /main, light shell) -->
-    <header class="header">
-        <div class="header-zone header-zone-left">
-            <a href="/main" class="logo" id="logo-link">
-                <span id="site-logo-text" class="logo-text">SEALAND PROPERTY</span>
-                <img id="site-logo-img" src="" alt="" style="display:none; height:40px; object-fit:contain;">
-            </a>
-        </div>
-        <nav class="navbar" id="main-navbar">
-            <div class="mobile-nav-header" style="display: none;">
-                <div id="mobile-site-phone" class="mobile-site-phone"></div>
-                <div id="mobile-account" class="mobile-account-name"></div>
-            </div>
-            <a class="nav-item" href="/main">HOME</a>
-            <a class="nav-item" href="/projects">PROJECTS</a>
-            <a class="nav-item" href="/about">ABOUT US</a>
-            <a class="nav-item" href="/main#services">SERVICES</a>
-            <a class="nav-item nav-active" href="/videos">VIDEO</a>
-            <a class="nav-item" href="/main#news">NEWS</a>
-            <a class="nav-item" href="/main#footer">CONTACT</a>
-            <a class="nav-item desktop-admin-btn" id="admin-btn" style="display: none;" onclick="window.location.href='/admin'">ADMIN</a>
-            <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()">LOGOUT</button>
-        </nav>
-        <div class="header-zone header-zone-right">
-            <a href="javascript:void(0)" class="btn-header-phone" id="header-phone-btn">
-                <i class="fa-solid fa-phone"></i>
-                <span id="site-phone">phone number</span>
-            </a>
-            <div class="header-cta logged-out-cta">
-                <a href="/main#footer" class="btn-book-consultation">BOOK CONSULTATION</a>
-            </div>
-            <div class="header-cta logged-in-cta" style="display: none;">
-                <div class="account-name" id="account">Name</div>
-                <button id="logout-btn" onclick="logoutAdmin()"><div>LOGOUT</div></button>
-            </div>
-        </div>
-        <button class="menu-btn" id="menu-btn">
-            <i class="fa-solid fa-bars"></i>
-        </button>
-    </header>
-    <div class="mobile-overlay" id="mobile-overlay"></div>
+    <script src="/main/header.js"></script>
 
     <main class="videos-page">
         <section class="videos-page-header">

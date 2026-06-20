@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Contact Us — Sealand Property</title>
+    <meta name="description" content="Get in touch with Sealand Property. Contact our team for real estate enquiries, investment advice, and property consultations.">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="/main/style.css?v=v1">
+    <link rel="stylesheet" href="/contact/style.css?v=v1">
+</head>
+<body>
+    <script src="/main/header.js"></script>
+
+    <main class="contact-page">
+
+        <!-- Hero -->
+        <section class="contact-hero">
+            <div class="contact-hero-bg"></div>
+            <div class="contact-hero-inner">
+                <span class="contact-hero-tag">WE'D LOVE TO HEAR FROM YOU</span>
+                <h1 class="contact-hero-title">Contact Us</h1>
+            </div>
+        </section>
+
+        <!-- Split: form + info -->
+        <section class="contact-main">
+            <div class="contact-main-inner">
+
+                <!-- Left: form -->
+                <div class="contact-form-panel">
+                    <h2 class="contact-panel-heading">Send Us a Message</h2>
+                    <p class="contact-panel-sub">Fill in your details and we'll get back to you as soon as possible.</p>
+                    <form id="contact-form" onsubmit="submitContactPage(event)" novalidate>
+                        <div class="cf-group">
+                            <input type="text" id="c-name" name="name" placeholder="Full Name *" required maxlength="255" autocomplete="name">
+                        </div>
+                        <div class="cf-group">
+                            <input type="tel" id="c-phone" name="phone" placeholder="Phone Number" maxlength="20" autocomplete="tel">
+                        </div>
+                        <div class="cf-group">
+                            <input type="email" id="c-email" name="email" placeholder="Email Address" maxlength="255" autocomplete="email">
+                        </div>
+                        <button type="submit" class="cf-submit" id="cf-submit-btn">
+                            <i class="fa-solid fa-paper-plane"></i> SEND MESSAGE
+                        </button>
+                    </form>
+                    <div id="cf-status" class="cf-status" role="status" aria-live="polite"></div>
+                </div>
+
+                <!-- Right: office info -->
+                <div class="contact-info-panel">
+                    <h2 class="contact-panel-heading">Our Offices</h2>
+                    <div class="offices-grid" id="contact-offices-grid"></div>
+
+                    <div id="contact-social" style="display:none;">
+                        <h3 class="office-city"><i class="fa-solid fa-share-nodes"></i> Follow Us</h3>
+                        <div class="contact-socials" id="contact-social-links"></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Team cards -->
+        <section class="contact-team">
+            <div class="contact-team-inner">
+                <h2 class="contact-section-title">Contact Our Team</h2>
+                <p class="contact-section-sub">Reach out directly to a member of our team.</p>
+                <div class="contact-team-cards" id="team-cards">
+                    <div class="team-card-skeleton"></div>
+                    <div class="team-card-skeleton"></div>
+                </div>
+            </div>
+        </section>
+
+    </main>
+
+    <script src="/main/script.js"></script>
+    <script src="/contact/contact.js"></script>
+</body>
+</html>

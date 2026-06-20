@@ -2,7 +2,7 @@
 (function () {
     const ROLES = {
         1: { title: 'DIRECTOR', quote: 'Our mission is to help you grow wealth through real estate, thereby building a prosperous future for yourself and your loved ones.' },
-        2: { title: 'CO-FOUNDER', quote: 'We assist Vietnamese families settling abroad — from school choices and banking to long-term portfolio growth.' }
+        2: { title: 'PROPERTY SALES CONSULTANT', quote: 'We assist Vietnamese families settling abroad — from school choices and banking to long-term portfolio growth.' }
     };
     function esc(s) {
         return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({

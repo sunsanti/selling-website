@@ -14,7 +14,7 @@ function truncate(s, n) {
 }
 
 const getActive = async ({ limit = 12 } = {}) => {
-    const lim = Math.min(parseInt(limit, 10) || 12, 50);
+    const lim = Math.min(parseInt(limit, 10) || 12, 500);
     const [rows] = await pool.query(
         "SELECT id, title, summary, cover_image, external_url, created_at FROM news WHERE status = 'active' ORDER BY created_at DESC LIMIT ?",
         [lim]
@@ -39,40 +39,25 @@ const getById = async (id) => {
     return rows[0] || null;
 };
 
-// v3: featured news (up to 4) for /main carousel
-const getFeatured = async (limit = 4) => {
-    const lim = Math.min(Math.max(parseInt(limit, 10) || 4, 1), 4);
-    const [rows] = await pool.query(
-        "SELECT id, title, summary, cover_image, external_url, created_at FROM news WHERE status = 'active' AND is_featured = 1 ORDER BY created_at DESC LIMIT ?",
-        [lim]
-    );
-    return rows.map(r => ({ ...r, summary: truncate(r.summary, SUMMARY_CAP) }));
-};
-
-// v3: enforce max 4 featured news atomically
-const setFeaturedIds = async (ids) => {
-    const sanitized = (Array.isArray(ids) ? ids : []).map(n => parseInt(n, 10)).filter(n => Number.isInteger(n) && n > 0).slice(0, 4);
-    const conn = await pool.getConnection();
-    try {
-        await conn.beginTransaction();
-        await conn.query('UPDATE news SET is_featured = 0');
-        if (sanitized.length > 0) {
-            await conn.query(`UPDATE news SET is_featured = 1 WHERE id IN (${sanitized.map(() => '?').join(',')})`, sanitized);
-        }
-        await conn.commit();
-        return sanitized;
-    } catch (err) {
-        await conn.rollback();
-        throw err;
-    } finally {
-        conn.release();
+const search = async ({ q, date_from, date_to } = {}) => {
+    const conditions = [];
+    const params = [];
+    if (q) {
+        conditions.push('title LIKE ?');
+        params.push('%' + String(q).slice(0, 200) + '%');
     }
-};
-
-const searchByTitle = async (q) => {
+    if (date_from) {
+        conditions.push('DATE(created_at) >= ?');
+        params.push(String(date_from).slice(0, 10));
+    }
+    if (date_to) {
+        conditions.push('DATE(created_at) <= ?');
+        params.push(String(date_to).slice(0, 10));
+    }
+    const where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
     const [rows] = await pool.query(
-        "SELECT id, title, status, is_featured, created_at FROM news WHERE title LIKE ? ORDER BY created_at DESC LIMIT 100",
-        ['%' + String(q).slice(0, 200) + '%']
+        `SELECT id, title, status, is_featured, created_at FROM news ${where} ORDER BY created_at DESC LIMIT 500`,
+        params
     );
     return rows;
 };
@@ -132,8 +117,7 @@ const hardDelete = async (id) => {
 };
 
 module.exports = {
-    getActive, getActiveById, getAll, getById, searchByTitle,
-    getFeatured, setFeaturedIds,
+    getActive, getActiveById, getAll, getById, search,
     create, update, softDelete, hardDelete,
     SUMMARY_CAP, TITLE_MAX, SUMMARY_MAX
 };

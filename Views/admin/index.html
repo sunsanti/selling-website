@@ -422,7 +422,7 @@
 
             <!-- v13: Director + Co-Founder editor (reuses footer_persons API) -->
             <div class="sub-tab-panel active" data-subtab-group="about" data-subtab-panel="about-leadership">
-            <div class="form-section-divider"><span><i class="fas fa-user-tie"></i> Leadership — Director &amp; Co-Founder</span></div>
+            <div class="form-section-divider"><span><i class="fas fa-user-tie"></i> Leadership — Director &amp; Property Sales Consultant</span></div>
             <p style="color:#888;font-size:1.15rem;margin:0 0 1rem">Hai nhân sự này hiển thị ở khối Leadership trên <strong>/about</strong> và <em>cũng</em> ở "CONTACT OUR TEAM" trong footer (cùng nguồn dữ liệu).</p>
             <div id="about-leadership-cards"></div>
             </div>
@@ -746,6 +746,11 @@
             </div>
 
             <div class="sub-tab-panel" data-subtab-group="videos" data-subtab-panel="videos-all">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="video-search" placeholder="Tìm theo tiêu đề..." oninput="searchVideos()">
+                <button class="btn-search" onclick="searchVideos()">Search</button>
+            </div>
             <div class="table-container">
                 <table class="data-table">
                     <thead>
@@ -753,7 +758,7 @@
                             <th>ID</th>
                             <th>Thumbnail</th>
                             <th>Title</th>
-                            <th>TikTok URL</th>
+                            <th>Video URL</th>
                             <th>Views</th>
                             <th>Status</th>
                             <th>Actions</th>
@@ -775,40 +780,11 @@
                 </button>
             </div>
 
-            <!-- v20: News sub-tabs -->
-            <div class="sub-nav" data-subtab-group="news">
-                <button type="button" class="sub-nav-item active" data-subtab="news-featured">
-                    <i class="fas fa-star"></i> Featured
-                </button>
-                <button type="button" class="sub-nav-item" data-subtab="news-all">
-                    <i class="fas fa-list"></i> All News
-                </button>
-            </div>
-
-            <!-- v3: Featured selection (up to 4 shown on /main carousel) -->
-            <div class="sub-tab-panel active" data-subtab-group="news" data-subtab-panel="news-featured">
-            <div class="featured-panel">
-                <div class="featured-panel-header">
-                    <h3><i class="fas fa-star"></i> Featured on Homepage <small style="color:#888;font-weight:400">(chọn tối đa 4 news sẽ hiển thị ở trang chủ)</small></h3>
-                    <button type="button" class="btn-save" onclick="saveFeaturedNews()">
-                        <i class="fas fa-check"></i> Lưu chọn
-                    </button>
-                </div>
-                <p id="featured-news-counter" class="featured-counter">0 / 4 selected</p>
-
-                <div class="featured-row-label"><i class="fas fa-star"></i> Đã chọn (hiển thị ở trang chủ)</div>
-                <div id="featured-news-selected-grid" class="featured-grid featured-grid-selected"></div>
-
-                <div class="featured-row-label"><i class="fas fa-list"></i> Tất cả News đang Active</div>
-                <div id="featured-news-available-grid" class="featured-grid"></div>
-                <div id="featured-news-pagination" class="pagination"></div>
-            </div>
-            </div>
-
-            <div class="sub-tab-panel" data-subtab-group="news" data-subtab-panel="news-all">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="news-search" placeholder="Tìm theo tiêu đề...">
+                <input type="date" id="news-date-from" title="Từ ngày" style="font-family:inherit;font-size:1.3rem;padding:0.5rem 0.8rem;border:1px solid #d1d5db;border-radius:6px;cursor:pointer">
+                <input type="date" id="news-date-to" title="Đến ngày" style="font-family:inherit;font-size:1.3rem;padding:0.5rem 0.8rem;border:1px solid #d1d5db;border-radius:6px;cursor:pointer">
                 <button class="btn-search" onclick="searchNews()">Search</button>
             </div>
             <div class="table-container">
@@ -825,7 +801,6 @@
                     <tbody id="news-table-body"></tbody>
                 </table>
                 <div class="pagination" id="news-pagination"></div>
-            </div>
             </div>
         </section>
     </main>
@@ -845,9 +820,9 @@
                 <input type="text" id="video-title-input" placeholder="e.g. SYDNEY MARKET UPDATE" required maxlength="255">
             </div>
             <div class="form-group">
-                <label>TikTok URL *</label>
-                <input type="text" id="video-tiktok-url" placeholder="https://www.tiktok.com/@user/video/..." required maxlength="500">
-                <small style="color:#888">Must start with https://www.tiktok.com/, https://vt.tiktok.com/, or https://m.tiktok.com/</small>
+                <label>Video URL (TikTok / YouTube) *</label>
+                <input type="text" id="video-tiktok-url" placeholder="https://www.tiktok.com/@user/video/... hoặc https://www.youtube.com/watch?v=..." required maxlength="500">
+                <small style="color:#888">TikTok: tiktok.com, vt.tiktok.com, m.tiktok.com — YouTube: youtube.com, youtu.be</small>
             </div>
             <div class="form-group">
                 <label>Thumbnail</label>
@@ -1120,6 +1095,10 @@
         <div class="modal-header">
             <h2><i class="fas fa-images"></i> Thư viện Media</h2>
             <button class="modal-close" onclick="closeMediaLibrary()">&times;</button>
+        </div>
+        <div class="media-tabs">
+            <button type="button" class="media-tab active" data-tab="images" onclick="switchMediaTab('images')"><i class="fas fa-image"></i> Ảnh</button>
+            <button type="button" class="media-tab" data-tab="videos" onclick="switchMediaTab('videos')"><i class="fas fa-film"></i> Video</button>
         </div>
         <div class="media-toolbar">
             <button type="button" class="btn-add" onclick="document.getElementById('media-upload-input').click()">

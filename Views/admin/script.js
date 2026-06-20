@@ -2002,7 +2002,7 @@ async function loadAboutLeadership() {
         const res = await fetch('/api/admin/footer-persons');
         const { data } = await res.json();
         wrap.innerHTML = '';
-        const ROLE_LABELS = { 1: 'Director', 2: 'Co-Founder' };
+        const ROLE_LABELS = { 1: 'Director', 2: 'Property Sales Consultant' };
         (data || []).forEach(person => {
             const slot = person.slot;
             const card = document.createElement('div');
@@ -2494,22 +2494,37 @@ async function loadHomeFooter() {
 // in multi-mode the new file is auto-added to the selection. Search is
 // case-insensitive substring on filename.
 
+const _MEDIA_VIDEO_RE = /\.(mp4|webm|mov)$/i;
+
 let _mediaState = {
     allMedia: [],
     filteredMedia: [],
     selectedUrls: new Set(),
     mode: 'single',
     onSelect: null,
-    query: ''
+    query: '',
+    tab: 'images'
 };
+
+function switchMediaTab(tab) {
+    _mediaState.tab = tab;
+    document.querySelectorAll('.media-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === tab);
+    });
+    applyMediaFilter();
+}
 
 function openMediaLibrary({ mode = 'single', onSelect = null } = {}) {
     _mediaState.mode = mode;
     _mediaState.onSelect = onSelect;
     _mediaState.selectedUrls = new Set();
     _mediaState.query = '';
+    _mediaState.tab = 'images';
     const searchInp = document.getElementById('media-search-input');
     if (searchInp) searchInp.value = '';
+    document.querySelectorAll('.media-tab').forEach(btn => {
+        btn.classList.toggle('active', btn.dataset.tab === 'images');
+    });
     document.getElementById('media-modal').style.display = 'flex';
     updateMediaSelectedCount();
     loadMediaGrid();
@@ -2542,9 +2557,14 @@ async function loadMediaGrid() {
 
 function applyMediaFilter() {
     const q = (_mediaState.query || '').toLowerCase();
-    _mediaState.filteredMedia = q
-        ? _mediaState.allMedia.filter(m => m.name.toLowerCase().includes(q))
-        : _mediaState.allMedia.slice();
+    const tab = _mediaState.tab || 'all';
+    _mediaState.filteredMedia = _mediaState.allMedia.filter(m => {
+        const isVideo = _MEDIA_VIDEO_RE.test(m.name || m.url || '');
+        if (tab === 'images' && isVideo) return false;
+        if (tab === 'videos' && !isVideo) return false;
+        if (q && !m.name.toLowerCase().includes(q)) return false;
+        return true;
+    });
     renderMediaGrid();
 }
 
@@ -2562,15 +2582,13 @@ function renderMediaGrid() {
     empty.style.display = 'none';
     count.textContent = _mediaState.filteredMedia.length + ' / ' + _mediaState.allMedia.length;
 
-    const VIDEO_EXT_RE = /\.(mp4|webm|mov)$/i;
-
     _mediaState.filteredMedia.forEach(m => {
         const item = document.createElement('div');
         item.className = 'media-item';
         if (_mediaState.selectedUrls.has(m.url)) item.classList.add('selected');
         item.dataset.url = m.url;
 
-        if (VIDEO_EXT_RE.test(m.name || m.url || '')) {
+        if (_MEDIA_VIDEO_RE.test(m.name || m.url || '')) {
             const video = document.createElement('video');
             video.src = m.url;
             video.muted = true;
@@ -2978,7 +2996,8 @@ function resetAuditSearch() {
 }
 
 // ===================== F08 — VIDEOS ADMIN =====================
-const TIKTOK_URL_RE = /^https?:\/\/(www\.|vt\.|m\.)?tiktok\.com\//i;
+const TIKTOK_URL_RE = /^https?:\/\/((www\.|vt\.|m\.)?tiktok\.com\/|(www\.)?youtube\.com\/|youtu\.be\/)/i;
+let _videosQuery = '';
 
 function _escVid(s) {
     return String(s == null ? '' : s).replace(/[&<>"']/g, c => ({
@@ -2986,11 +3005,20 @@ function _escVid(s) {
     })[c]);
 }
 
+function searchVideos() {
+    _videosQuery = (document.getElementById('video-search')?.value || '').trim().toLowerCase();
+    _videosPage = 1;
+    renderVideosAdmin();
+}
+
 async function loadVideosAdmin() {
     try {
         const res = await fetch('/api/admin/videos');
         const json = await res.json();
         _videosAll = (json.success && Array.isArray(json.data)) ? json.data : [];
+        _videosQuery = '';
+        const searchEl = document.getElementById('video-search');
+        if (searchEl) searchEl.value = '';
         _videosPage = 1;
         renderVideosAdmin();
         loadFeaturedVideosPanel();   // v3
@@ -3003,12 +3031,15 @@ async function loadVideosAdmin() {
 function renderVideosAdmin() {
     const tbody = document.getElementById('videos-table-body');
     if (!tbody) return;
-    if (_videosAll.length === 0) {
+    const list = _videosQuery
+        ? _videosAll.filter(v => (v.title || '').toLowerCase().includes(_videosQuery))
+        : _videosAll;
+    if (list.length === 0) {
         tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#888;padding:2rem">Chưa có video</td></tr>';
         renderPagination('videos-pagination', 0, 1, () => {});
         return;
     }
-    tbody.innerHTML = paginate(_videosAll, _videosPage).map(v => {
+    tbody.innerHTML = paginate(list, _videosPage).map(v => {
         const thumb = _escVid(v.thumbnail_path || '');
         const thumbHtml = thumb
             ? `<img src="${thumb}" alt="" style="width:48px;height:64px;object-fit:cover;border-radius:4px" onerror="this.style.display='none'">`
@@ -3036,7 +3067,7 @@ function renderVideosAdmin() {
                 </td>
             </tr>`;
     }).join('');
-    renderPagination('videos-pagination', _videosAll.length, _videosPage, (page) => {
+    renderPagination('videos-pagination', list.length, _videosPage, (page) => {
         _videosPage = page;
         renderVideosAdmin();
     });
@@ -3103,7 +3134,7 @@ async function saveVideo() {
 
     if (!title) { showToast('Tiêu đề không được trống', 'error'); return; }
     if (!TIKTOK_URL_RE.test(tiktok_url)) {
-        showToast('TikTok URL không hợp lệ — phải bắt đầu bằng https://(www.|vt.|m.)tiktok.com/', 'error');
+        showToast('URL không hợp lệ — phải là TikTok (tiktok.com) hoặc YouTube (youtube.com / youtu.be)', 'error');
         return;
     }
     const payload = { title, tiktok_url, thumbnail_path, views_count };
@@ -3243,9 +3274,9 @@ function changeFeaturedVideosPage(page) {
 
 function updateFeaturedVideosCounter() {
     const c = document.getElementById('featured-videos-counter');
-    if (c) c.textContent = `${_featuredVideosSelection.size} / 4 selected`;
+    if (c) c.textContent = `${_featuredVideosSelection.size} / 6 selected`;
     document.querySelectorAll('#featured-videos-available-grid .featured-card').forEach(card => {
-        if (_featuredVideosSelection.size >= 4) {
+        if (_featuredVideosSelection.size >= 6) {
             card.classList.add('disabled');
         } else {
             card.classList.remove('disabled');
@@ -3257,8 +3288,8 @@ function toggleFeaturedVideo(id) {
     if (_featuredVideosSelection.has(id)) {
         _featuredVideosSelection.delete(id);
     } else {
-        if (_featuredVideosSelection.size >= 4) {
-            showToast('Tối đa 4 videos featured', 'error');
+        if (_featuredVideosSelection.size >= 6) {
+            showToast('Tối đa 6 videos featured', 'error');
             return;
         }
         _featuredVideosSelection.add(id);
@@ -3289,17 +3320,18 @@ function _escNews(s) {
     })[c]);
 }
 
-async function loadNewsAdmin(query) {
+async function loadNewsAdmin(query, dateFrom, dateTo) {
     try {
-        const url = query
-            ? '/api/admin/news?q=' + encodeURIComponent(query)
-            : '/api/admin/news';
-        const res = await fetch(url);
+        const params = new URLSearchParams();
+        if (query)   params.set('q', query);
+        if (dateFrom) params.set('date_from', dateFrom);
+        if (dateTo)   params.set('date_to', dateTo);
+        const qs = params.toString();
+        const res = await fetch('/api/admin/news' + (qs ? '?' + qs : ''));
         const json = await res.json();
         _newsAll = (json.success && Array.isArray(json.data)) ? json.data : [];
         _newsPage = 1;
         renderNewsAdmin();
-        loadFeaturedNewsPanel();   // v3
     } catch (err) {
         console.error('loadNewsAdmin:', err);
         showToast('Error loading news: ' + err.message, 'error');
@@ -3342,8 +3374,11 @@ function renderNewsAdmin() {
 }
 
 function searchNews() {
-    const q = document.getElementById('news-search').value.trim();
-    loadNewsAdmin(q || undefined);
+    const q        = (document.getElementById('news-search')?.value    || '').trim() || undefined;
+    const dateFrom = (document.getElementById('news-date-from')?.value || '').trim() || undefined;
+    let   dateTo   = (document.getElementById('news-date-to')?.value   || '').trim() || undefined;
+    if (dateFrom && !dateTo) dateTo = dateFrom;
+    loadNewsAdmin(q, dateFrom, dateTo);
 }
 
 function openNewsModal() {
@@ -3475,122 +3510,3 @@ async function hardDeleteNews(id) {
     }
 }
 
-// ===================== v3: FEATURED NEWS PANEL =====================
-let _featuredNewsSelection = new Set();
-let _featuredNewsAllActive = [];
-let _featuredNewsPage = 1;
-const FEATURED_NEWS_PAGE_SIZE = 5;
-
-async function loadFeaturedNewsPanel() {
-    const grid = document.getElementById('featured-news-available-grid');
-    if (!grid) return;
-    try {
-        const [allRes, featRes] = await Promise.all([
-            fetch('/api/admin/news'),
-            fetch('/api/admin/news/featured')
-        ]);
-        const allJson = await allRes.json();
-        const featJson = await featRes.json();
-        _featuredNewsAllActive = (allJson.success && Array.isArray(allJson.data)) ? allJson.data.filter(n => n.status === 'active') : [];
-        const featuredIds = (featJson.success && Array.isArray(featJson.data)) ? featJson.data.map(n => n.id) : [];
-        _featuredNewsSelection = new Set(featuredIds);
-        _featuredNewsPage = 1;
-        renderFeaturedNewsPanel();
-    } catch (err) {
-        console.error('loadFeaturedNewsPanel:', err);
-    }
-}
-
-function featuredNewsCardHtml(n) {
-    const isSel = _featuredNewsSelection.has(n.id);
-    const cover = (n.cover_image || '/uploads/main_image.jpg');
-    return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${n.id}" onclick="toggleFeaturedNews(${n.id})">
-        <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
-        <div class="featured-card-body">
-            <p class="featured-card-name">${(n.title || '').replace(/[<>"']/g, c => ({'<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}</p>
-        </div>
-    </div>`;
-}
-
-function renderFeaturedNewsPanel() {
-    const selGrid = document.getElementById('featured-news-selected-grid');
-    const availGrid = document.getElementById('featured-news-available-grid');
-    if (!selGrid || !availGrid) return;
-
-    const selected = _featuredNewsAllActive.filter(n => _featuredNewsSelection.has(n.id));
-    const available = _featuredNewsAllActive.filter(n => !_featuredNewsSelection.has(n.id));
-
-    selGrid.innerHTML = selected.length
-        ? selected.map(featuredNewsCardHtml).join('')
-        : '<p class="featured-empty">Chưa chọn tin nào</p>';
-
-    const totalPages = Math.max(1, Math.ceil(available.length / FEATURED_NEWS_PAGE_SIZE));
-    if (_featuredNewsPage > totalPages) _featuredNewsPage = totalPages;
-    const start = (_featuredNewsPage - 1) * FEATURED_NEWS_PAGE_SIZE;
-    const pageItems = available.slice(start, start + FEATURED_NEWS_PAGE_SIZE);
-
-    availGrid.innerHTML = pageItems.length
-        ? pageItems.map(featuredNewsCardHtml).join('')
-        : '<p class="featured-empty">Không còn tin nào</p>';
-
-    renderFeaturedNewsPagination(totalPages);
-    updateFeaturedNewsCounter();
-}
-
-function renderFeaturedNewsPagination(totalPages) {
-    const pag = document.getElementById('featured-news-pagination');
-    if (!pag) return;
-    if (totalPages <= 1) { pag.innerHTML = ''; return; }
-    let html = `<button class="page-btn" ${_featuredNewsPage === 1 ? 'disabled' : ''} onclick="changeFeaturedNewsPage(${_featuredNewsPage - 1})"><i class="fas fa-chevron-left"></i></button>`;
-    for (let i = 1; i <= totalPages; i++) {
-        html += `<button class="page-btn ${i === _featuredNewsPage ? 'active' : ''}" onclick="changeFeaturedNewsPage(${i})">${i}</button>`;
-    }
-    html += `<button class="page-btn" ${_featuredNewsPage === totalPages ? 'disabled' : ''} onclick="changeFeaturedNewsPage(${_featuredNewsPage + 1})"><i class="fas fa-chevron-right"></i></button>`;
-    pag.innerHTML = html;
-}
-
-function changeFeaturedNewsPage(page) {
-    _featuredNewsPage = page;
-    renderFeaturedNewsPanel();
-}
-
-function updateFeaturedNewsCounter() {
-    const c = document.getElementById('featured-news-counter');
-    if (c) c.textContent = `${_featuredNewsSelection.size} / 4 selected`;
-    document.querySelectorAll('#featured-news-available-grid .featured-card').forEach(card => {
-        if (_featuredNewsSelection.size >= 4) {
-            card.classList.add('disabled');
-        } else {
-            card.classList.remove('disabled');
-        }
-    });
-}
-
-function toggleFeaturedNews(id) {
-    if (_featuredNewsSelection.has(id)) {
-        _featuredNewsSelection.delete(id);
-    } else {
-        if (_featuredNewsSelection.size >= 4) {
-            showToast('Tối đa 4 news featured', 'error');
-            return;
-        }
-        _featuredNewsSelection.add(id);
-    }
-    renderFeaturedNewsPanel();
-}
-
-async function saveFeaturedNews() {
-    try {
-        const ids = Array.from(_featuredNewsSelection);
-        const res = await fetch('/api/admin/news/featured', {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ ids })
-        });
-        const json = await res.json();
-        if (!json.success) { showToast(json.message || 'Lỗi', 'error'); return; }
-        showToast(`Đã lưu ${ids.length} featured news`, 'success');
-    } catch (err) {
-        showToast('Error: ' + err.message, 'error');
-    }
-}
