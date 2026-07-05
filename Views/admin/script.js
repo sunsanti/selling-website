@@ -2523,6 +2523,44 @@ function switchMediaTab(tab) {
     applyMediaFilter();
 }
 
+async function loadStorageUsage() {
+    try {
+        const res = await fetch('/api/admin/storage-usage');
+        const { success, data } = await res.json();
+        if (!success) return;
+        const fill  = document.getElementById('storage-gauge-fill');
+        const label = document.getElementById('storage-gauge-label');
+        if (fill) {
+            fill.style.width = data.percent + '%';
+            fill.classList.remove('warn', 'danger');
+            if (data.percent >= 90) fill.classList.add('danger');
+            else if (data.percent >= 70) fill.classList.add('warn');
+        }
+        if (label) label.textContent = `${data.used_mb} MB / ${data.limit_mb} MB (${data.percent}%)`;
+    } catch (_) {}
+}
+
+async function cleanupStorage() {
+    if (!confirm('Dọn dẹp tất cả file rác trong /uploads (file không được dùng ở đâu trong hệ thống)?\n\nHành động này không thể hoàn tác.')) return;
+    const btn = document.getElementById('storage-cleanup-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang dọn...'; }
+    try {
+        const res = await fetch('/api/admin/storage-cleanup', { method: 'POST' });
+        const { success, data, message } = await res.json();
+        if (success) {
+            showToast(`Đã xóa ${data.deleted_count} file, giải phóng ${data.freed_mb} MB`, 'success');
+            loadMediaGrid();
+            loadStorageUsage();
+        } else {
+            showToast(message || 'Lỗi dọn dẹp', 'error');
+        }
+    } catch (_) {
+        showToast('Lỗi kết nối', 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-broom"></i> Dọn file rác'; }
+    }
+}
+
 function openMediaLibrary({ mode = 'single', onSelect = null } = {}) {
     _mediaState.mode = mode;
     _mediaState.onSelect = onSelect;
@@ -2537,6 +2575,7 @@ function openMediaLibrary({ mode = 'single', onSelect = null } = {}) {
     document.getElementById('media-modal').style.display = 'flex';
     updateMediaSelectedCount();
     loadMediaGrid();
+    loadStorageUsage();
 }
 
 function closeMediaLibrary() {
@@ -2692,6 +2731,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 applyMediaFilter();
                 updateMediaSelectedCount();
                 showToast('Upload thành công', 'success');
+                loadStorageUsage();
             } catch (err) {
                 showToast('Lỗi upload: ' + err.message, 'error');
             } finally {

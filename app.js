@@ -104,6 +104,7 @@ const contactLimiter = rateLimit({
 
 const loginController = require('./Controllers/loginController');
 const adminController = require('./Controllers/adminController');
+const storageController = require('./Controllers/storageController');
 const contactController = require('./Controllers/contactController');
 const homeContentController = require('./Controllers/homeContentController');
 const mediaController = require('./Controllers/mediaController');
@@ -149,12 +150,17 @@ app.put('/api/admin/projects/:id', adminController.updateProject);
 app.put('/api/admin/projects/:id/soft-delete', adminController.softDeleteProject);
 app.put('/api/admin/projects/:id/restore', adminController.restoreProject);
 app.delete('/api/admin/projects/:id', requireAdmin, adminController.deleteProject);
-app.post('/api/admin/projects/upload', (req, res, next) => {
-    adminController.uploadMiddleware.single('media')(req, res, (err) => {
-        if (err) return res.status(400).json({ success: false, message: err.message });
-        next();
-    });
-}, adminController.compressImageMiddleware, adminController.handleUpload);
+app.post('/api/admin/projects/upload',
+    storageController.checkLimit,
+    (req, res, next) => {
+        adminController.uploadMiddleware.single('media')(req, res, (err) => {
+            if (err) return res.status(400).json({ success: false, message: err.message });
+            next();
+        });
+    },
+    adminController.compressImageMiddleware,
+    adminController.handleUpload
+);
 
 app.get('/api/admin/contacts', adminController.getContacts);
 app.get('/api/admin/contacts/search', adminController.searchContacts);
@@ -189,6 +195,9 @@ app.put('/api/admin/team/:id', homeContentController.updateTeamMember);
 app.delete('/api/admin/team/:id', requireAdmin, homeContentController.deleteTeamMember);
 
 app.get('/api/admin/media', mediaController.getMedia);
+
+app.get('/api/admin/storage-usage', storageController.getUsage);
+app.post('/api/admin/storage-cleanup', requireAdmin, storageController.cleanup);
 
 app.get('/api/admin/audit-log', requireAdmin, auditLogController.getAuditLog);
 app.get('/api/admin/audit-log/actions', requireAdmin, auditLogController.getActions);
