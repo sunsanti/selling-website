@@ -117,28 +117,51 @@ function renderSettings(s) {
 }
 
 // F06: Video modal handlers (exposed on window because onclick attrs reference them)
+function _isYouTubeUrl(url) {
+    return /youtu\.be|youtube\.com/i.test(url);
+}
+function _toYouTubeEmbed(url) {
+    let id = '';
+    const byParam = url.match(/[?&]v=([^&#]+)/);
+    const byShort = url.match(/youtu\.be\/([^?&#]+)/);
+    const byEmbed = url.match(/youtube\.com\/embed\/([^?&#]+)/);
+    if (byParam) id = byParam[1];
+    else if (byShort) id = byShort[1];
+    else if (byEmbed) id = byEmbed[1];
+    return id ? `https://www.youtube.com/embed/${id}?autoplay=1` : url;
+}
 function openPurposeVideo() {
     const modal = document.getElementById('video-modal');
-    const player = document.getElementById('purpose-video-player');
-    if (!modal || !player) return;
+    if (!modal) return;
     const url = (document.body.dataset.purposeVideoUrl || '').trim();
     if (!url) {
         alert('Video chưa được cấu hình. Vui lòng liên hệ admin.');
         return;
     }
-    player.src = url;
+    const player = document.getElementById('purpose-video-player');
+    const ytPlayer = document.getElementById('purpose-youtube-player');
+    if (_isYouTubeUrl(url)) {
+        if (player) { player.style.display = 'none'; player.removeAttribute('src'); }
+        if (ytPlayer) { ytPlayer.src = _toYouTubeEmbed(url); ytPlayer.style.display = 'block'; }
+    } else {
+        if (ytPlayer) { ytPlayer.style.display = 'none'; ytPlayer.src = ''; }
+        if (player) {
+            player.src = url;
+            player.style.display = 'block';
+            const p = player.play();
+            if (p && typeof p.catch === 'function') p.catch(e => console.warn('autoplay blocked:', e && e.message));
+        }
+    }
     modal.style.display = 'flex';
     modal.classList.add('is-open');
-    const p = player.play();
-    if (p && typeof p.catch === 'function') p.catch(e => console.warn('autoplay blocked:', e && e.message));
 }
 function closePurposeVideo() {
     const modal = document.getElementById('video-modal');
+    if (!modal) return;
     const player = document.getElementById('purpose-video-player');
-    if (!modal || !player) return;
-    try { player.pause(); } catch (_) {}
-    player.removeAttribute('src');
-    player.load();
+    const ytPlayer = document.getElementById('purpose-youtube-player');
+    if (player) { try { player.pause(); } catch (_) {} player.removeAttribute('src'); player.load(); }
+    if (ytPlayer) { ytPlayer.src = ''; ytPlayer.style.display = 'none'; }
     modal.style.display = 'none';
     modal.classList.remove('is-open');
 }

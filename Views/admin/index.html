@@ -585,7 +585,11 @@
                         <input type="text" id="setting-purpose-video-caption" maxlength="300">
                     </div>
                     <div class="form-group">
-                        <label>Video File (MP4 upload)</label>
+                        <label>YouTube Link <small style="font-weight:400;color:#6b7280">(ưu tiên nếu có — video phát trực tiếp trên web)</small></label>
+                        <input type="url" id="setting-purpose-video-url" maxlength="500" placeholder="https://www.youtube.com/watch?v=..." style="font-size:1.3rem">
+                    </div>
+                    <div class="form-group">
+                        <label>Video File <small style="font-weight:400;color:#6b7280">(dùng nếu không có YouTube link)</small></label>
                         <div class="settings-image-area">
                             <div class="settings-image-preview" id="purpose-video-preview-area">
                                 <video id="current-purpose-video" src="" style="display:none" controls muted></video>

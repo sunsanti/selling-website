@@ -154,7 +154,7 @@ app.post('/api/admin/projects/upload', (req, res, next) => {
         if (err) return res.status(400).json({ success: false, message: err.message });
         next();
     });
-}, adminController.handleUpload);
+}, adminController.compressImageMiddleware, adminController.handleUpload);
 
 app.get('/api/admin/contacts', adminController.getContacts);
 app.get('/api/admin/contacts/search', adminController.searchContacts);
