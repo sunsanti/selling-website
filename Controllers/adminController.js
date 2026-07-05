@@ -631,6 +631,7 @@ module.exports = {
     deleteProjectImage,
     handleUpload,
     uploadMiddleware: uploadService.upload,
+    compressImageMiddleware: uploadService.compressImageMiddleware,
     translateText,
     detectTextLanguage
 };
