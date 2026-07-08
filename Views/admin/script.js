@@ -1450,6 +1450,76 @@ async function translateField(fieldId, targetLang, sourceLang) {
     }
 }
 
+// Translate an EN source field → fill a VI target field
+async function translateToVI(btn, sourceId, targetId) {
+    const src = document.getElementById(sourceId);
+    const dst = document.getElementById(targetId);
+    if (!src || !dst) return;
+    const text = (src.value || '').trim();
+    if (!text) { showToast('Nhập nội dung tiếng Anh trước', 'error'); return; }
+
+    btn.disabled = true;
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch('/api/admin/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, targetLang: 'vi', sourceLang: 'en' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            dst.value = data.translated;
+            dst.dispatchEvent(new Event('input', { bubbles: true }));
+            showToast('Đã dịch tự động sang tiếng Việt', 'success');
+        } else {
+            showToast(data.message || 'Không dịch được', 'error');
+        }
+    } catch (e) {
+        showToast('Lỗi kết nối dịch thuật', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+    }
+}
+
+// Translate using class-based fields (for dynamically-rendered cards like services)
+async function translateClassField(btn, srcClass, dstClass) {
+    const card = btn.closest('.service-card-col') || btn.closest('.settings-panel');
+    if (!card) return;
+    const src = card.querySelector('.' + srcClass);
+    const dst = card.querySelector('.' + dstClass);
+    if (!src || !dst) return;
+    const text = (src.value || '').trim();
+    if (!text) { showToast('Nhập nội dung tiếng Anh trước', 'error'); return; }
+
+    btn.disabled = true;
+    const origHTML = btn.innerHTML;
+    btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+    try {
+        const res = await fetch('/api/admin/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text, targetLang: 'vi', sourceLang: 'en' })
+        });
+        const data = await res.json();
+        if (data.success) {
+            dst.value = data.translated;
+            dst.dispatchEvent(new Event('input', { bubbles: true }));
+            showToast('Đã dịch tự động sang tiếng Việt', 'success');
+        } else {
+            showToast(data.message || 'Không dịch được', 'error');
+        }
+    } catch (e) {
+        showToast('Lỗi kết nối dịch thuật', 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = origHTML;
+    }
+}
+
 // ===================== LOGOUT =====================
 function logoutAdmin() {
     fetch('/logout', { method: 'POST' })
@@ -1952,7 +2022,7 @@ async function loadAboutServices() {
                         <input type="text" class="as-title" maxlength="200">
                     </div>
                     <div class="form-group">
-                        <label>Title (VI)</label>
+                        <label>Title (VI) <button type="button" class="btn-translate" onclick="translateClassField(this,'as-title','as-title-vi')"><i class="fas fa-language"></i> Dịch VI</button></label>
                         <input type="text" class="as-title-vi" maxlength="200" placeholder="Tiêu đề tiếng Việt">
                     </div>
                     <div class="form-group">
@@ -1960,7 +2030,7 @@ async function loadAboutServices() {
                         <textarea class="as-desc" rows="3" maxlength="1000"></textarea>
                     </div>
                     <div class="form-group">
-                        <label>Description (VI)</label>
+                        <label>Description (VI) <button type="button" class="btn-translate" onclick="translateClassField(this,'as-desc','as-desc-vi')"><i class="fas fa-language"></i> Dịch VI</button></label>
                         <textarea class="as-desc-vi" rows="3" maxlength="1000" placeholder="Mô tả tiếng Việt"></textarea>
                     </div>
                 </div>`;

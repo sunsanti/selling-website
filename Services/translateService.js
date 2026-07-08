@@ -1,20 +1,51 @@
 /**
- * Google Cloud Translation API Service
- * Requires a Google Cloud Translation API key.
- * Free tier: 500,000 characters/month
+ * Translation Service — Google Cloud Translation API (with MyMemory fallback)
  *
- * Setup:
- * 1. Go to https://console.cloud.google.com/
- * 2. Create a project or select existing
- * 3. Enable "Cloud Translation API"
- * 4. Go to Credentials > Create Credentials > API Key
- * 5. Add your API key to config.env or config/database.js
+ * If GOOGLE_TRANSLATE_API_KEY is set → uses Google (500K chars/month free).
+ * Otherwise falls back to MyMemory (1000 words/day free, no key needed).
  */
 
 const https = require('https');
 
-// API key - set this in environment variable or config
 const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY || '';
+
+// MyMemory free API — no key required, 1000 words/day limit
+function translateWithMyMemory(text, targetLang, sourceLang) {
+    const from = (sourceLang === 'auto' || !sourceLang) ? 'en' : sourceLang;
+    const langPair = encodeURIComponent(`${from}|${targetLang}`);
+    const q = encodeURIComponent(text);
+
+    return new Promise((resolve) => {
+        const options = {
+            hostname: 'api.mymemory.translated.net',
+            path: `/get?q=${q}&langpair=${langPair}`,
+            method: 'GET'
+        };
+
+        const req = https.request(options, (res) => {
+            let data = '';
+            res.on('data', chunk => { data += chunk; });
+            res.on('end', () => {
+                try {
+                    const result = JSON.parse(data);
+                    if (result.responseStatus === 200 && result.responseData && result.responseData.translatedText) {
+                        resolve({ success: true, translated: result.responseData.translatedText, original: text });
+                    } else {
+                        resolve({ success: false, translated: '', original: text, error: result.responseDetails || 'MyMemory translation failed' });
+                    }
+                } catch (e) {
+                    resolve({ success: false, translated: '', original: text, error: 'Failed to parse MyMemory response' });
+                }
+            });
+        });
+
+        req.on('error', (e) => {
+            resolve({ success: false, translated: '', original: text, error: 'Network error: ' + e.message });
+        });
+
+        req.end();
+    });
+}
 
 /**
  * Translate text using Google Cloud Translation API
@@ -29,12 +60,7 @@ async function translateText(text, targetLang, sourceLang = 'auto') {
     }
 
     if (!API_KEY) {
-        return {
-            success: false,
-            translated: '',
-            original: text,
-            error: 'Google Translate API key not configured. Please set GOOGLE_TRANSLATE_API_KEY in environment variables.'
-        };
+        return translateWithMyMemory(text, targetLang, sourceLang);
     }
 
     const langMap = {
