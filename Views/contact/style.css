@@ -19,9 +19,11 @@
 .contact-hero-bg {
     position: absolute;
     inset: 0;
-    background:
-        linear-gradient(135deg, rgba(27,38,53,0.90) 0%, rgba(27,38,53,0.70) 100%),
-        url('/uploads/main_image.jpg') center/cover no-repeat;
+    background-color: #1B2635;
+    background-image: linear-gradient(135deg, rgba(27,38,53,0.90) 0%, rgba(27,38,53,0.70) 100%);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
     z-index: 0;
 }
 .contact-hero-inner {

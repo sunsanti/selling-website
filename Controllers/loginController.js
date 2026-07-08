@@ -3,28 +3,28 @@ const fs = require('fs');
 const userModel = require('../Models/userModel');
 const settingModel = require('../Models/settingModel');
 
-const MAIN_HTML_PATH = path.join(__dirname, '../Views/main/index.html');
+const MAIN_HTML_PATH    = path.join(__dirname, '../Views/main/index.html');
+const ABOUT_HTML_PATH   = path.join(__dirname, '../Views/about/index.html');
+const CONTACT_HTML_PATH = path.join(__dirname, '../Views/contact/index.html');
 
-const getLoginPage = (req, res) => {
-    res.sendFile(path.join(__dirname, '../Views/login/index.html'));
-};
-
-const getMainPage = async (req, res) => {
+// Shared helper: read HTML, inject window.__SETTINGS__ before </body>, send response
+async function injectSettings(htmlPath, res) {
     try {
         const [settings, html] = await Promise.all([
             settingModel.getAll(),
-            fs.promises.readFile(MAIN_HTML_PATH, 'utf8')
+            fs.promises.readFile(htmlPath, 'utf8')
         ]);
-        // Safely serialize — replace </script> inside JSON to prevent tag injection
         const json = JSON.stringify(settings).replace(/<\/script>/gi, '<\\/script>');
-        const injected = `<script>window.__SETTINGS__=${json};</script>`;
-        const result = html.replace('<!--__SETTINGS_INJECT__-->', injected);
-        res.type('html').send(result);
+        res.type('html').send(html.replace('<!--__SETTINGS_INJECT__-->', `<script>window.__SETTINGS__=${json};</script>`));
     } catch (_) {
-        // Fallback: serve static file if DB unavailable
-        res.sendFile(MAIN_HTML_PATH);
+        res.sendFile(htmlPath);
     }
-};
+}
+
+const getLoginPage   = (req, res) => res.sendFile(path.join(__dirname, '../Views/login/index.html'));
+const getMainPage    = (req, res) => injectSettings(MAIN_HTML_PATH, res);
+const getAboutPage   = (req, res) => injectSettings(ABOUT_HTML_PATH, res);
+const getContactPage = (req, res) => injectSettings(CONTACT_HTML_PATH, res);
 
 const handleLogin = async (req, res) => {
     const { username, password } = req.body;
@@ -49,8 +49,4 @@ const handleLogin = async (req, res) => {
     }
 };
 
-module.exports = {
-    getLoginPage,
-    getMainPage,
-    handleLogin
-};
+module.exports = { getLoginPage, getMainPage, getAboutPage, getContactPage, handleLogin };

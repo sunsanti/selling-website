@@ -33,13 +33,12 @@ app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
-app.use('/main', express.static(path.join(__dirname, 'Views/main')));
+// index: false + redirect: false — asset files (render.js, style.css) are served here;
+// the root index.html is served by the explicit GET routes below (after loginController loads)
+// so that window.__SETTINGS__ injection is applied before the page is sent to the browser.
+app.use('/main', express.static(path.join(__dirname, 'Views/main'), { index: false, redirect: false }));
 
-// Contact page
-app.get('/contact', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Views/contact/index.html'));
-});
-app.use('/contact', express.static(path.join(__dirname, 'Views/contact')));
+app.use('/contact', express.static(path.join(__dirname, 'Views/contact'), { index: false, redirect: false }));
 
 // F05c: /projects list page + /projects/:id detail page
 // Explicit GET routes FIRST (pretty URLs) → static fallback for asset files
@@ -59,11 +58,7 @@ app.get('/videos', (req, res) => {
 });
 app.use('/videos', express.static(path.join(__dirname, 'Views/videos')));
 
-// v3: /about page (explicit GET → static fallback for assets)
-app.get('/about', (req, res) => {
-    res.sendFile(path.join(__dirname, 'Views/about/index.html'));
-});
-app.use('/about', express.static(path.join(__dirname, 'Views/about')));
+app.use('/about', express.static(path.join(__dirname, 'Views/about'), { index: false, redirect: false }));
 
 // F09: /news list + /news/:id detail pages.
 // Express 5 path-to-regexp no longer accepts inline :id([0-9]+) — use regex literal.
@@ -104,6 +99,12 @@ const contactLimiter = rateLimit({
 
 const loginController = require('./Controllers/loginController');
 const adminController = require('./Controllers/adminController');
+
+// These explicit GET routes serve the injected HTML for each page root.
+// Static middleware above (index:false, redirect:false) only serves asset files;
+// it passes through for directory-root requests so these handlers run instead.
+app.get('/contact', loginController.getContactPage);
+app.get('/about',   loginController.getAboutPage);
 const storageController = require('./Controllers/storageController');
 const contactController = require('./Controllers/contactController');
 const homeContentController = require('./Controllers/homeContentController');

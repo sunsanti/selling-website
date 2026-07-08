@@ -31,7 +31,7 @@
 
         grid.innerHTML = slice.map(n => {
             const id      = parseInt(n.id, 10) || 0;
-            const cover   = esc(n.cover_image || '/uploads/main_image.jpg');
+            const cover   = esc(n.cover_image || '');
             const title   = esc(n.title   || '');
             const summary = esc(n.summary  || '');
             const ext     = (n.external_url || '').trim();

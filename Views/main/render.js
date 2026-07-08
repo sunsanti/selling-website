@@ -49,7 +49,7 @@ function renderSettings(s) {
         if (thumb) {
             const url = normalizeImageUrl(s.purpose_video_thumbnail);
             // fallback: reuse hero/main image so the section never renders blank
-            thumb.src = url || normalizeImageUrl(s.main_image) || '/uploads/main_image.jpg';
+            thumb.src = url || normalizeImageUrl(s.main_image) || '';
         }
     }
     if (s.purpose_video_url !== undefined) {
@@ -609,7 +609,7 @@ function renderVideoCarousel() {
 
     track.innerHTML = visible.map(v => {
         const url = _escapeAttr(v.tiktok_url || '#');
-        const thumb = _escapeAttr(v.thumbnail_path || '/uploads/main_image.jpg');
+        const thumb = _escapeAttr(v.thumbnail_path || '');
         const title = _escapeHtml(v.title || '');
         const views = _escapeHtml(v.views_count || '0');
         return `
@@ -670,7 +670,7 @@ function renderNewsCarousel() {
     const visible = _allNews.slice(_newsStartIdx, _newsStartIdx + NEWS_PER_VIEW);
     track.innerHTML = visible.map(n => {
         const id = parseInt(n.id, 10) || 0;
-        const cover = _escapeAttr(n.cover_image || '/uploads/main_image.jpg');
+        const cover = _escapeAttr(n.cover_image || '');
         const title = _escapeHtml(n.title || '');
         const summary = _escapeHtml(n.summary || '');
         // v2: READ MORE prefers external article URL when present; falls back to /news/:id

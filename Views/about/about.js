@@ -21,6 +21,13 @@
         if (el && val != null && val !== '') el.textContent = val;
     }
 
+    function applyHeroBg(mainImage) {
+        if (!mainImage) return;
+        const url = (mainImage.startsWith('/') || /^https?:\/\//i.test(mainImage)) ? mainImage : '/' + mainImage;
+        const bg = document.querySelector('.about-hero-bg');
+        if (bg) bg.style.backgroundImage = `linear-gradient(135deg, rgba(27,38,53,0.86) 0%, rgba(27,38,53,0.65) 100%), url('${url}')`;
+    }
+
     function applyAboutSettings(s) {
         if (!s) return;
         setText('about-hero-tag',     s.about_hero_tag);
@@ -90,7 +97,10 @@
         try {
             const res = await fetch('/api/public/settings');
             const data = await res.json();
-            if (data && data.success && data.data) applyAboutSettings(data.data);
+            if (data && data.success && data.data) {
+                applyAboutSettings(data.data);
+                applyHeroBg(data.data.main_image);
+            }
         } catch (e) { console.error('about content load:', e); }
     }
     async function loadTeam(override) {
@@ -166,6 +176,11 @@
     }
 
     // ===== Initial load =====
+    // Apply synchronously if Express injected settings (eliminates hero-bg flash)
+    if (window.__SETTINGS__) {
+        applyAboutSettings(window.__SETTINGS__);
+        applyHeroBg(window.__SETTINGS__.main_image);
+    }
     loadAboutContent();
     loadLeadership();
     loadTeam();

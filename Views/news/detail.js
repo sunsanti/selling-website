@@ -19,7 +19,7 @@
         const n = data.data;
         document.title = `${n.title} — Sealand News`;
         const cover = document.getElementById('news-cover');
-        cover.src = n.cover_image || '/uploads/main_image.jpg';
+        cover.src = n.cover_image || '';
         cover.alt = n.title || '';
         document.getElementById('news-title').textContent = n.title || '';
         const d = n.created_at ? new Date(n.created_at) : null;

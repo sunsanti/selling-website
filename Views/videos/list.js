@@ -19,7 +19,7 @@
         }
         grid.innerHTML = videos.map(v => {
             const url = esc(v.tiktok_url || '#');
-            const thumb = esc(v.thumbnail_path || '/uploads/main_image.jpg');
+            const thumb = esc(v.thumbnail_path || '');
             const title = esc(v.title || '');
             const views = esc(v.views_count || '0');
             return `

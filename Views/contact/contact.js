@@ -1,4 +1,14 @@
 (async function () {
+    function applyHeroBg(mainImage) {
+        if (!mainImage) return;
+        const url = (mainImage.startsWith('/') || /^https?:\/\//i.test(mainImage)) ? mainImage : '/' + mainImage;
+        const bg = document.querySelector('.contact-hero-bg');
+        if (bg) bg.style.backgroundImage = `linear-gradient(135deg, rgba(27,38,53,0.90) 0%, rgba(27,38,53,0.70) 100%), url('${url}')`;
+    }
+
+    // Apply synchronously if Express injected settings (eliminates hero-bg flash)
+    if (window.__SETTINGS__) applyHeroBg(window.__SETTINGS__.main_image);
+
     await Promise.all([loadSettings(), loadTeam()]);
 
     async function loadSettings() {
@@ -6,6 +16,7 @@
             const res = await fetch('/api/public/settings');
             const { data } = await res.json();
             if (!data) return;
+            applyHeroBg(data.main_image);
 
             // Offices — same data source and rendering as /about page
             const grid = document.getElementById('contact-offices-grid');
