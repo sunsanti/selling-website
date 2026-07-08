@@ -178,6 +178,15 @@ window.openPurposeVideo = openPurposeVideo;
 window.closePurposeVideo = closePurposeVideo;
 window.closeVideoModalIfBackdrop = closeVideoModalIfBackdrop;
 
+// Apply settings injected by Express (zero round-trip, prevents hardcoded image flash)
+if (window.__SETTINGS__) {
+    renderSettings(window.__SETTINGS__);
+    const mobileAcc = document.getElementById('mobile-account');
+    const desktopAcc = document.getElementById('account');
+    if (mobileAcc && desktopAcc) mobileAcc.textContent = desktopAcc.textContent || 'User';
+}
+
+// Async fetch keeps data fresh (e.g. admin updated settings in another tab)
 (async function loadSettings() {
     try {
         const res = await fetch('/api/public/settings');
