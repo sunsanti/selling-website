@@ -29,11 +29,13 @@
         const start = (page - 1) * PAGE_SIZE;
         const slice = _allNews.slice(start, start + PAGE_SIZE);
 
+        const td = window.i18n && window.i18n.td ? window.i18n.td.bind(window.i18n) : (obj, f) => obj[f] || '';
+        const t  = window.i18n && window.i18n.t  ? window.i18n.t.bind(window.i18n)  : k => k;
         grid.innerHTML = slice.map(n => {
             const id      = parseInt(n.id, 10) || 0;
             const cover   = esc(n.cover_image || '');
-            const title   = esc(n.title   || '');
-            const summary = esc(n.summary  || '');
+            const title   = esc(td(n, 'title'));
+            const summary = esc(td(n, 'summary'));
             const ext     = (n.external_url || '').trim();
             const isExt   = /^https?:\/\//i.test(ext);
             const href    = isExt ? esc(ext) : `/news/${id}`;
@@ -48,7 +50,7 @@
                         <h3 class="news-title">${title}</h3>
                         <p class="news-summary">${summary}</p>
                         <a class="news-read-more" href="${href}"${target} onclick="event.stopPropagation();">
-                            <span>READ MORE</span>
+                            <span>${t('btn_read_more')}</span>
                         </a>
                     </div>
                 </article>`;
@@ -99,4 +101,8 @@
     }
 
     document.addEventListener('DOMContentLoaded', loadNews);
+
+    window.addEventListener('langchange', function () {
+        if (_allNews.length > 0) renderPage(_currentPage);
+    });
 }());

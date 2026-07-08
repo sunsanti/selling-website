@@ -254,13 +254,18 @@ async function loadInvestContent() {
         if (!result.success || !result.data) return;
         const s = result.data;
 
-        document.getElementById('setting-purpose-tagline').value = s.purpose_tagline || '';
-        document.getElementById('setting-purpose-heading').value = s.purpose_heading || '';
+        const setV = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+        setV('setting-purpose-tagline',    s.purpose_tagline);
+        setV('setting-purpose-tagline-vi', s.purpose_tagline_vi);
+        setV('setting-purpose-heading',    s.purpose_heading);
+        setV('setting-purpose-heading-vi', s.purpose_heading_vi);
         [1, 2, 3, 4].forEach(i => {
-            document.getElementById('setting-purpose-list-' + i).value = s['purpose_list_' + i] || '';
+            setV('setting-purpose-list-' + i,       s['purpose_list_' + i]);
+            setV('setting-purpose-list-' + i + '-vi', s['purpose_list_' + i + '_vi']);
         });
-        document.getElementById('setting-purpose-cta-text').value = s.purpose_cta_text || '';
-        document.getElementById('setting-purpose-video-caption').value = s.purpose_video_caption || '';
+        setV('setting-purpose-cta-text',    s.purpose_cta_text);
+        setV('setting-purpose-cta-text-vi', s.purpose_cta_text_vi);
+        setV('setting-purpose-video-caption', s.purpose_video_caption);
 
         window._currentPurposeThumb = s.purpose_video_thumbnail || '';
 
@@ -311,15 +316,23 @@ async function loadInvestContent() {
 }
 
 async function saveInvestContent() {
+    const gv = id => (document.getElementById(id) || {}).value || '';
     const data = {
-        purpose_tagline: document.getElementById('setting-purpose-tagline').value,
-        purpose_heading: document.getElementById('setting-purpose-heading').value,
-        purpose_list_1: document.getElementById('setting-purpose-list-1').value,
-        purpose_list_2: document.getElementById('setting-purpose-list-2').value,
-        purpose_list_3: document.getElementById('setting-purpose-list-3').value,
-        purpose_list_4: document.getElementById('setting-purpose-list-4').value,
-        purpose_cta_text: document.getElementById('setting-purpose-cta-text').value,
-        purpose_video_caption: document.getElementById('setting-purpose-video-caption').value,
+        purpose_tagline:     gv('setting-purpose-tagline'),
+        purpose_tagline_vi:  gv('setting-purpose-tagline-vi'),
+        purpose_heading:     gv('setting-purpose-heading'),
+        purpose_heading_vi:  gv('setting-purpose-heading-vi'),
+        purpose_list_1:      gv('setting-purpose-list-1'),
+        purpose_list_1_vi:   gv('setting-purpose-list-1-vi'),
+        purpose_list_2:      gv('setting-purpose-list-2'),
+        purpose_list_2_vi:   gv('setting-purpose-list-2-vi'),
+        purpose_list_3:      gv('setting-purpose-list-3'),
+        purpose_list_3_vi:   gv('setting-purpose-list-3-vi'),
+        purpose_list_4:      gv('setting-purpose-list-4'),
+        purpose_list_4_vi:   gv('setting-purpose-list-4-vi'),
+        purpose_cta_text:    gv('setting-purpose-cta-text'),
+        purpose_cta_text_vi: gv('setting-purpose-cta-text-vi'),
+        purpose_video_caption: gv('setting-purpose-video-caption'),
         purpose_video_thumbnail: window._currentPurposeThumb || '',
         purpose_video_url: (document.getElementById('setting-purpose-video-url')?.value || '').trim() || window._currentPurposeVideo || ''
     };
@@ -716,12 +729,14 @@ async function editProject(id) {
         document.getElementById('project-modal-title').textContent = 'Edit Project';
         document.getElementById('project-id').value = id;
         document.getElementById('project-name').value = p.name || '';
+        const pnViEl = document.getElementById('project-name-vi'); if (pnViEl) pnViEl.value = p.name_vi || '';
         document.getElementById('project-area').value = p.area || '';
         document.getElementById('project-square').value = p.square_meters || '';
         document.getElementById('project-category').value = p.category || '';
         document.getElementById('project-year').value = p.year || '';
         document.getElementById('project-style').value = p.style || '';
         document.getElementById('project-content').value = p.small_content || '';
+        const pcViEl = document.getElementById('project-content-vi'); if (pcViEl) pcViEl.value = p.small_content_vi || '';
         // F05d: 8 extended fields
         document.getElementById('project-price').value = parsePriceNumber(p.price);
         document.getElementById('project-state').value = p.state || '';
@@ -844,12 +859,14 @@ document.getElementById('project-form').addEventListener('submit', async (e) => 
     const areaLabel = areaSelect.selectedOptions[0] ? areaSelect.selectedOptions[0].text.toUpperCase() : '';
     const payload = {
         name: document.getElementById('project-name').value,
+        name_vi: (document.getElementById('project-name-vi') || {}).value || '',
         area: areaSelect.value,
         square_meters: document.getElementById('project-square').value,
         category: document.getElementById('project-category').value,
         year: document.getElementById('project-year').value,
         style: document.getElementById('project-style').value,
         small_content: document.getElementById('project-content').value,
+        small_content_vi: (document.getElementById('project-content-vi') || {}).value || '',
         // F05d: 8 extended fields
         price: formatPriceFromNumber(document.getElementById('project-price').value),
         state: document.getElementById('project-state').value,
@@ -1512,12 +1529,19 @@ function gatherPreviewData(target) {
         const v = id => (document.getElementById(id) || {}).value || '';
         return {
             purpose_tagline:       v('setting-purpose-tagline'),
+            purpose_tagline_vi:    v('setting-purpose-tagline-vi'),
             purpose_heading:       v('setting-purpose-heading'),
+            purpose_heading_vi:    v('setting-purpose-heading-vi'),
             purpose_list_1:        v('setting-purpose-list-1'),
+            purpose_list_1_vi:     v('setting-purpose-list-1-vi'),
             purpose_list_2:        v('setting-purpose-list-2'),
+            purpose_list_2_vi:     v('setting-purpose-list-2-vi'),
             purpose_list_3:        v('setting-purpose-list-3'),
+            purpose_list_3_vi:     v('setting-purpose-list-3-vi'),
             purpose_list_4:        v('setting-purpose-list-4'),
+            purpose_list_4_vi:     v('setting-purpose-list-4-vi'),
             purpose_cta_text:      v('setting-purpose-cta-text'),
+            purpose_cta_text_vi:   v('setting-purpose-cta-text-vi'),
             purpose_video_caption: v('setting-purpose-video-caption'),
             purpose_video_thumbnail: window._currentPurposeThumb || '',
             purpose_video_url:     v('setting-purpose-video-url')
@@ -1565,9 +1589,11 @@ function gatherPreviewData(target) {
         const svcs = {};
         document.querySelectorAll('#about-services-cards .service-card-col').forEach(card => {
             const i = parseInt(card.dataset.slot, 10);
-            svcs[`about_service_${i}_icon`]  = (card.querySelector('.as-icon')  || {}).value || '';
-            svcs[`about_service_${i}_title`] = (card.querySelector('.as-title') || {}).value || '';
-            svcs[`about_service_${i}_desc`]  = (card.querySelector('.as-desc')  || {}).value || '';
+            svcs[`about_service_${i}_icon`]     = (card.querySelector('.as-icon')     || {}).value || '';
+            svcs[`about_service_${i}_title`]    = (card.querySelector('.as-title')    || {}).value || '';
+            svcs[`about_service_${i}_title_vi`] = (card.querySelector('.as-title-vi') || {}).value || '';
+            svcs[`about_service_${i}_desc`]     = (card.querySelector('.as-desc')     || {}).value || '';
+            svcs[`about_service_${i}_desc_vi`]  = (card.querySelector('.as-desc-vi')  || {}).value || '';
         });
 
         return {
@@ -1577,8 +1603,11 @@ function gatherPreviewData(target) {
             stats,
             // v12: /about page content
             about_hero_tag:           v('setting-about-hero-tag'),
+            about_hero_tag_vi:        v('setting-about-hero-tag-vi'),
             about_hero_title:         v('setting-about-hero-title'),
+            about_hero_title_vi:      v('setting-about-hero-title-vi'),
             about_mission:            v('setting-about-mission'),
+            about_mission_vi:         v('setting-about-mission-vi'),
             about_offices:            gatherAboutOffices(),
             ...svcs,
             footer_persons,
@@ -1616,6 +1645,7 @@ function gatherPreviewData(target) {
             // v11: include site-wide footer content so the footer preview
             // iframe also reflects desc/address/socials/copyright edits.
             footer_desc:         v('setting-footer-desc'),
+            footer_desc_vi:      v('setting-footer-desc-vi'),
             footer_address:      v('setting-footer-address'),
             footer_copyright:    v('setting-footer-copyright'),
             footer_facebook_url: v('setting-footer-facebook'),
@@ -1665,15 +1695,20 @@ document.addEventListener('DOMContentLoaded', () => {
     if (phone) phone.addEventListener('input', pushPreviewDebounced.settings);
 
     // v15: "Why Invest in Australia" section content — push to invest iframe (/main)
-    ['setting-purpose-tagline','setting-purpose-heading','setting-purpose-list-1',
-     'setting-purpose-list-2','setting-purpose-list-3','setting-purpose-list-4',
-     'setting-purpose-cta-text','setting-purpose-video-caption','setting-purpose-video-url'].forEach(id => {
+    ['setting-purpose-tagline','setting-purpose-tagline-vi',
+     'setting-purpose-heading','setting-purpose-heading-vi',
+     'setting-purpose-list-1','setting-purpose-list-1-vi',
+     'setting-purpose-list-2','setting-purpose-list-2-vi',
+     'setting-purpose-list-3','setting-purpose-list-3-vi',
+     'setting-purpose-list-4','setting-purpose-list-4-vi',
+     'setting-purpose-cta-text','setting-purpose-cta-text-vi',
+     'setting-purpose-video-caption','setting-purpose-video-url'].forEach(id => {
         const el = document.getElementById(id);
         if (el) el.addEventListener('input', pushPreviewDebounced.invest);
     });
 
     // v12: Footer dynamic content (now in Footer tab) — push to settings + footer iframes
-    ['setting-footer-desc','setting-footer-address','setting-footer-copyright',
+    ['setting-footer-desc','setting-footer-desc-vi','setting-footer-address','setting-footer-copyright',
      'setting-footer-facebook','setting-footer-linkedin','setting-footer-youtube',
      'setting-footer-tiktok'].forEach(id => {
         const el = document.getElementById(id);
@@ -1685,7 +1720,9 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // v12: /about page content — push to about iframe (which loads /about?preview=1)
-    ['setting-about-hero-tag','setting-about-hero-title','setting-about-mission'].forEach(id => {
+    ['setting-about-hero-tag','setting-about-hero-tag-vi',
+     'setting-about-hero-title','setting-about-hero-title-vi',
+     'setting-about-mission','setting-about-mission-vi'].forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
         el.addEventListener('input', () => pushPreviewDebounced.about());
@@ -1764,8 +1801,11 @@ async function loadAboutContent() {
         if (!json.success || !json.data) return;
         const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
         setVal('setting-about-hero-tag',      json.data.about_hero_tag);
+        setVal('setting-about-hero-tag-vi',   json.data.about_hero_tag_vi);
         setVal('setting-about-hero-title',    json.data.about_hero_title);
+        setVal('setting-about-hero-title-vi', json.data.about_hero_title_vi);
         setVal('setting-about-mission',       json.data.about_mission);
+        setVal('setting-about-mission-vi',    json.data.about_mission_vi);
         let offices = [];
         try { offices = JSON.parse(json.data.about_offices || '[]'); } catch (e) { offices = []; }
         renderAboutOffices(Array.isArray(offices) ? offices : []);
@@ -1849,10 +1889,13 @@ function addAboutOffice() {
 async function saveAboutContent() {
     const v = id => (document.getElementById(id) || {}).value || '';
     const payload = {
-        about_hero_tag:   v('setting-about-hero-tag'),
-        about_hero_title: v('setting-about-hero-title'),
-        about_mission:    v('setting-about-mission'),
-        about_offices:    gatherAboutOffices()
+        about_hero_tag:       v('setting-about-hero-tag'),
+        about_hero_tag_vi:    v('setting-about-hero-tag-vi'),
+        about_hero_title:     v('setting-about-hero-title'),
+        about_hero_title_vi:  v('setting-about-hero-title-vi'),
+        about_mission:        v('setting-about-mission'),
+        about_mission_vi:     v('setting-about-mission-vi'),
+        about_offices:        gatherAboutOffices()
     };
     try {
         const res = await fetch('/api/admin/settings', {
@@ -1905,25 +1948,37 @@ async function loadAboutServices() {
                         </div>
                     </div>
                     <div class="form-group">
-                        <label>Title</label>
+                        <label>Title (EN)</label>
                         <input type="text" class="as-title" maxlength="200">
                     </div>
                     <div class="form-group">
-                        <label>Description</label>
-                        <textarea class="as-desc" rows="4" maxlength="1000"></textarea>
+                        <label>Title (VI)</label>
+                        <input type="text" class="as-title-vi" maxlength="200" placeholder="Tiêu đề tiếng Việt">
+                    </div>
+                    <div class="form-group">
+                        <label>Description (EN)</label>
+                        <textarea class="as-desc" rows="3" maxlength="1000"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Description (VI)</label>
+                        <textarea class="as-desc-vi" rows="3" maxlength="1000" placeholder="Mô tả tiếng Việt"></textarea>
                     </div>
                 </div>`;
         }).join('') + '</div></div>';
         [1, 2, 3].forEach(i => {
             const card = wrap.querySelector(`[data-slot="${i}"]`);
-            const icon  = d[`about_service_${i}_icon`]  || 'fa-circle';
-            const title = d[`about_service_${i}_title`] || '';
-            const desc  = d[`about_service_${i}_desc`]  || '';
-            card.querySelector('.as-icon').value  = icon;
-            card.querySelector('.as-title').value = title;
-            card.querySelector('.as-desc').value  = desc;
+            const icon    = d[`about_service_${i}_icon`]     || 'fa-circle';
+            const title   = d[`about_service_${i}_title`]    || '';
+            const titleVi = d[`about_service_${i}_title_vi`] || '';
+            const desc    = d[`about_service_${i}_desc`]     || '';
+            const descVi  = d[`about_service_${i}_desc_vi`]  || '';
+            card.querySelector('.as-icon').value     = icon;
+            card.querySelector('.as-title').value    = title;
+            const titleViEl = card.querySelector('.as-title-vi'); if (titleViEl) titleViEl.value = titleVi;
+            card.querySelector('.as-desc').value     = desc;
+            const descViEl = card.querySelector('.as-desc-vi'); if (descViEl) descViEl.value = descVi;
             card.querySelector(`.svc-icon-preview-${i}`).classList.add(icon);
-            card.querySelectorAll('.as-icon, .as-title, .as-desc').forEach(el => {
+            card.querySelectorAll('.as-icon, .as-title, .as-title-vi, .as-desc, .as-desc-vi').forEach(el => {
                 el.addEventListener('input', () => {
                     if (el.classList.contains('as-icon')) {
                         const ic = card.querySelector(`.svc-icon-preview-${i}`);
@@ -1944,9 +1999,11 @@ async function saveAboutServices() {
     [1, 2, 3].forEach(i => {
         const card = wrap.querySelector(`[data-slot="${i}"]`);
         if (!card) return;
-        payload[`about_service_${i}_icon`]  = card.querySelector('.as-icon').value;
-        payload[`about_service_${i}_title`] = card.querySelector('.as-title').value;
-        payload[`about_service_${i}_desc`]  = card.querySelector('.as-desc').value;
+        payload[`about_service_${i}_icon`]     = card.querySelector('.as-icon').value;
+        payload[`about_service_${i}_title`]    = card.querySelector('.as-title').value;
+        const tvEl = card.querySelector('.as-title-vi'); payload[`about_service_${i}_title_vi`] = tvEl ? tvEl.value : '';
+        payload[`about_service_${i}_desc`]     = card.querySelector('.as-desc').value;
+        const dvEl = card.querySelector('.as-desc-vi');  payload[`about_service_${i}_desc_vi`]  = dvEl ? dvEl.value : '';
     });
     try {
         const res = await fetch('/api/admin/settings', {
@@ -2340,6 +2397,7 @@ async function loadFooterContent() {
         if (!json.success || !json.data) return;
         const setVal = (id, v) => { const el = document.getElementById(id); if (el) el.value = v || ''; };
         setVal('setting-footer-desc',       json.data.footer_desc);
+        setVal('setting-footer-desc-vi',    json.data.footer_desc_vi);
         setVal('setting-footer-address',    json.data.footer_address);
         setVal('setting-footer-facebook',   json.data.footer_facebook_url);
         setVal('setting-footer-linkedin',   json.data.footer_linkedin_url);
@@ -2355,6 +2413,7 @@ async function saveFooterContent() {
     const v = id => (document.getElementById(id) || {}).value || '';
     const payload = {
         footer_desc:         v('setting-footer-desc'),
+        footer_desc_vi:      v('setting-footer-desc-vi'),
         footer_address:      v('setting-footer-address'),
         footer_copyright:    v('setting-footer-copyright'),
         footer_facebook_url: v('setting-footer-facebook').trim(),
@@ -3434,8 +3493,11 @@ function openNewsModal() {
     document.getElementById('news-modal-title').textContent = 'Add News';
     document.getElementById('news-id').value = '';
     document.getElementById('news-form-title').value = '';
+    const titleViInp = document.getElementById('news-form-title-vi'); if (titleViInp) titleViInp.value = '';
     document.getElementById('news-form-summary').value = '';
+    const summaryViInp = document.getElementById('news-form-summary-vi'); if (summaryViInp) summaryViInp.value = '';
     document.getElementById('news-form-content').value = '';
+    const contentViInp = document.getElementById('news-form-content-vi'); if (contentViInp) contentViInp.value = '';
     document.getElementById('news-form-cover').value = '';
     document.getElementById('news-form-status').value = 'active';
     const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = '';
@@ -3458,8 +3520,11 @@ async function editNewsItem(id) {
         document.getElementById('news-modal-title').textContent = 'Edit News #' + n.id;
         document.getElementById('news-id').value = n.id;
         document.getElementById('news-form-title').value = n.title || '';
+        const tvInp = document.getElementById('news-form-title-vi'); if (tvInp) tvInp.value = n.title_vi || '';
         document.getElementById('news-form-summary').value = n.summary || '';
+        const svInp = document.getElementById('news-form-summary-vi'); if (svInp) svInp.value = n.summary_vi || '';
         document.getElementById('news-form-content').value = n.content || '';
+        const cvInp = document.getElementById('news-form-content-vi'); if (cvInp) cvInp.value = n.content_vi || '';
         document.getElementById('news-form-cover').value = n.cover_image || '';
         document.getElementById('news-form-status').value = n.status || 'active';
         const extInp = document.getElementById('news-form-external-url'); if (extInp) extInp.value = n.external_url || '';
@@ -3503,7 +3568,15 @@ async function saveNewsItem() {
         return;
     }
 
-    const payload = { title, summary, content, cover_image, external_url };
+    const titleViEl = document.getElementById('news-form-title-vi');
+    const summaryViEl = document.getElementById('news-form-summary-vi');
+    const contentViEl = document.getElementById('news-form-content-vi');
+    const payload = {
+        title, summary, content, cover_image, external_url,
+        title_vi: titleViEl ? titleViEl.value.trim() : '',
+        summary_vi: summaryViEl ? summaryViEl.value : '',
+        content_vi: contentViEl ? contentViEl.value : ''
+    };
     if (id) payload.status = status;
     try {
         const res = await fetch(id ? '/api/admin/news/' + id : '/api/admin/news', {

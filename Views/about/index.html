@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/about/style.css?v=v13">
 </head>
 <body>
+    <script src="/shared/i18n.js"></script>
     <script src="/main/header.js"></script>
 
     <main class="about-page">
@@ -17,15 +18,15 @@
         <section class="about-hero">
             <div class="about-hero-bg"></div>
             <div class="about-hero-inner">
-                <span class="about-hero-tag" id="about-hero-tag">SEALAND PROPERTY</span>
-                <h1 class="about-hero-title" id="about-hero-title">ABOUT US</h1>
+                <span class="about-hero-tag" id="about-hero-tag" data-i18n="about_hero_tag">SEALAND PROPERTY</span>
+                <h1 class="about-hero-title" id="about-hero-title" data-i18n="about_hero_title">ABOUT US</h1>
             </div>
         </section>
 
         <!-- 2. Mission statement (centered, single column) -->
         <section class="about-mission">
             <div class="about-mission-inner">
-                <p class="about-mission-text" id="about-mission-text">
+                <p class="about-mission-text" id="about-mission-text" data-i18n-html="about_mission">
                     Our core mission is to become <strong>a trusted agency for buyers, sellers
                     and investors</strong> looking to achieve property ownership in Australia —
                     connecting people, knowledge and opportunity across Sydney, Melbourne,
@@ -42,8 +43,8 @@
         <!-- 4. Team members grid -->
         <section class="about-team-grid">
             <div class="about-section-header">
-                <span class="about-tag">OUR TEAM</span>
-                <h2 class="about-section-h2">Meet the people behind Sealand.</h2>
+                <span class="about-tag" data-i18n="tag_our_team">OUR TEAM</span>
+                <h2 class="about-section-h2" data-i18n="h2_meet_team">Meet the people behind Sealand.</h2>
             </div>
             <!-- v13: rendered dynamically from /api/public/team or preview-data -->
             <div class="team-grid" id="about-team-grid"></div>
@@ -52,8 +53,8 @@
         <!-- 5. Services 3-column -->
         <section class="about-services">
             <div class="about-section-header about-section-header--centered">
-                <span class="about-tag">OUR SERVICES</span>
-                <h2 class="about-section-h2">What we do for our clients.</h2>
+                <span class="about-tag" data-i18n="tag_our_services">OUR SERVICES</span>
+                <h2 class="about-section-h2" data-i18n="h2_what_we_do">What we do for our clients.</h2>
             </div>
             <div class="about-services-grid" id="about-services-grid"></div>
         </section>
@@ -61,8 +62,8 @@
         <!-- 6. Contact / Offices -->
         <section class="about-offices">
             <div class="about-section-header about-section-header--centered">
-                <span class="about-tag">OUR OFFICES</span>
-                <h2 class="about-section-h2">Get in touch.</h2>
+                <span class="about-tag" data-i18n="tag_our_offices">OUR OFFICES</span>
+                <h2 class="about-section-h2" data-i18n="h2_offices">Get in touch.</h2>
             </div>
             <div class="offices-grid" id="about-offices-grid"></div>
         </section>
@@ -72,12 +73,12 @@
     <section id="footer" class="footer">
         <div id="footer-top">
             <div class="footer-top-inner">
-                <h3 class="footer-form-title">Get in touch with us today</h3>
+                <h3 class="footer-form-title" data-i18n="footer_touch">Get in touch with us today</h3>
                 <form id="customer-contact-form" onsubmit="submitCustomerContact(event)" novalidate>
-                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" required autocomplete="name" maxlength="255">
-                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" autocomplete="tel" maxlength="20">
-                    <input type="email" id="customer-email" name="email" placeholder="Email Address" autocomplete="email" maxlength="255">
-                    <button type="submit" id="btn-submit-form" class="btn-footer-submit">SUBMIT</button>
+                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" data-i18n-ph="ph_fullname" required autocomplete="name" maxlength="255">
+                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" data-i18n-ph="ph_phone" autocomplete="tel" maxlength="20">
+                    <input type="email" id="customer-email" name="email" placeholder="Email Address" data-i18n-ph="ph_email" autocomplete="email" maxlength="255">
+                    <button type="submit" id="btn-submit-form" class="btn-footer-submit" data-i18n="btn_submit">SUBMIT</button>
                 </form>
                 <div id="footer-form-status" class="footer-form-status" role="status" aria-live="polite"></div>
             </div>
@@ -86,10 +87,7 @@
             <div class="footer-bottom-inner">
                 <div id="footer-col-brand">
                     <span id="footer-logo" class="footer-logo">SEALAND PROPERTY</span>
-                    <p id="footer-desc">
-                        Helping investors and homeowners across Australia build long-term
-                        wealth through trusted real-estate guidance.
-                    </p>
+                    <p id="footer-desc">Helping investors and homeowners across Australia build long-term wealth through trusted real-estate guidance.</p>
                     <p id="footer-desc-2">
                         <i class="fa-solid fa-location-dot"></i>
                         Level 20, 135 King Street, Sydney NSW 2000, Australia
@@ -102,18 +100,18 @@
                     </div>
                 </div>
                 <div id="footer-col-links">
-                    <h3 class="footer-col-title">QUICK LINKS</h3>
+                    <h3 class="footer-col-title" data-i18n="h3_quick_links">QUICK LINKS</h3>
                     <ul id="footer-nav-list">
-                        <li><a href="/main">Home</a></li>
-                        <li><a href="/projects">Projects</a></li>
-                        <li><a href="/main#services">Services</a></li>
-                        <li><a href="/videos">Video</a></li>
-                        <li><a href="/news">News</a></li>
-                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/main" data-i18n="lnk_home">Home</a></li>
+                        <li><a href="/projects" data-i18n="lnk_projects">Projects</a></li>
+                        <li><a href="/main#services" data-i18n="lnk_services">Services</a></li>
+                        <li><a href="/videos" data-i18n="lnk_video">Video</a></li>
+                        <li><a href="/news" data-i18n="lnk_news">News</a></li>
+                        <li><a href="/about" data-i18n="lnk_about">About Us</a></li>
                     </ul>
                 </div>
                 <div id="footer-col-contact">
-                    <h3 class="footer-col-title">CONTACT OUR TEAM</h3>
+                    <h3 class="footer-col-title" data-i18n="h3_team">CONTACT OUR TEAM</h3>
                     <div class="footer-container" id="footer-container"></div>
                 </div>
             </div>

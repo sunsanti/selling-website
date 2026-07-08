@@ -86,6 +86,8 @@
         });
     }
 
+    let _projectData = null;
+
     async function loadDetail() {
         const parts = window.location.pathname.split('/').filter(Boolean);
         // /projects/:id  → parts = ['projects', ':id']
@@ -106,7 +108,8 @@
                 showNotFound();
                 return;
             }
-            renderDetail(data.data);
+            _projectData = data.data;
+            renderDetail(_projectData);
         } catch (e) {
             console.error('Failed to load project detail:', e);
             showNotFound();
@@ -114,7 +117,10 @@
     }
 
     function renderDetail(p) {
-        document.title = (p.name || 'Project') + ' — Sealand Property';
+        const td = window.i18n && window.i18n.td ? window.i18n.td.bind(window.i18n) : (obj, f) => obj[f] || '';
+        const t  = window.i18n && window.i18n.t  ? window.i18n.t.bind(window.i18n)  : k => k;
+        const name = td(p, 'name') || p.name || '';
+        document.title = (name || 'Project') + ' — Sealand Property';
 
         // Hero image (fallback to first tableimages image, else default)
         const imgEl = document.getElementById('detail-image');
@@ -123,7 +129,7 @@
         } else if (Array.isArray(p.images) && p.images.length > 0 && p.images[0].image_path) {
             imgEl.src = p.images[0].image_path;
         }
-        imgEl.alt = p.name || '';
+        imgEl.alt = name;
 
         // Area badge
         const areaLabel = (p.area_label || p.area || '').toString().trim();
@@ -133,18 +139,18 @@
             badge.style.display = 'inline-block';
         }
 
-        setText('detail-name', p.name || '');
+        setText('detail-name', name);
         setText('detail-address', p.address || '');
         setText('detail-price', p.price || '');
-        setText('detail-description', p.small_content || '');
+        setText('detail-description', td(p, 'small_content'));
 
         // Specs strip
         const specsRow = document.getElementById('detail-specs-row');
         specsRow.innerHTML = '';
         const specItems = [
-            ['fa-bed', p.beds, 'Beds'],
-            ['fa-bath', p.baths, 'Baths'],
-            ['fa-car', p.cars, 'Car'],
+            ['fa-bed', p.beds, t('lbl_beds')],
+            ['fa-bath', p.baths, t('lbl_baths')],
+            ['fa-car', p.cars, t('lbl_cars')],
             ['fa-vector-square', p.square_meters, 'm²']
         ];
         specItems.forEach(([icon, value, label]) => {
@@ -203,5 +209,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         loadDetail();
         initGalleryLightbox();
+    });
+
+    window.addEventListener('langchange', function () {
+        if (_projectData) renderDetail(_projectData);
     });
 })();

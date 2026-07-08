@@ -91,7 +91,7 @@
             info.className = 'project-card-info';
             const name = document.createElement('h3');
             name.className = 'project-name';
-            name.textContent = p.name || '';
+            name.textContent = (window.i18n && window.i18n.td ? window.i18n.td(p, 'name') : p.name) || '';
             info.appendChild(name);
             if (p.address) {
                 const addr = document.createElement('p');
@@ -110,7 +110,8 @@
             if (p.beds || p.baths || p.cars) {
                 const specs = document.createElement('div');
                 specs.className = 'project-specs';
-                [['fa-bed', p.beds, 'Beds'], ['fa-bath', p.baths, 'Baths'], ['fa-car', p.cars, 'Car']].forEach(([icon, value, label]) => {
+                const t = window.i18n && window.i18n.t ? window.i18n.t.bind(window.i18n) : k => k;
+                [[`fa-bed`, p.beds, t('lbl_beds')], [`fa-bath`, p.baths, t('lbl_baths')], [`fa-car`, p.cars, t('lbl_cars')]].forEach(([icon, value, label]) => {
                     if (!value) return;
                     const item = document.createElement('span');
                     item.className = 'spec-item';
@@ -197,5 +198,9 @@
     document.addEventListener('DOMContentLoaded', () => {
         prefillSearchBar();
         loadProjects();
+    });
+
+    window.addEventListener('langchange', function () {
+        if (_allProjects.length > 0) renderPage(_currentPage);
     });
 }());

@@ -12,22 +12,23 @@
     <link rel="stylesheet" href="/projects/style.css?v=v2">
 </head>
 <body>
+    <script src="/shared/i18n.js"></script>
     <script src="/main/header.js"></script>
 
     <main class="projects-page">
         <section class="projects-page-header">
-            <span class="section-tagline">OUR PORTFOLIO</span>
-            <h1 class="projects-page-title">All Projects</h1>
-            <p class="projects-page-subtitle">Browse our complete portfolio of premium properties across Australia.</p>
+            <span class="section-tagline" data-i18n="tag_portfolio">OUR PORTFOLIO</span>
+            <h1 class="projects-page-title" data-i18n="h1_all_projects">All Projects</h1>
+            <p class="projects-page-subtitle" data-i18n="p_projects_sub">Browse our complete portfolio of premium properties across Australia.</p>
         </section>
 
         <!-- v2: Property search bar (mirrors /main hero search bar) -->
         <section class="projects-page-search">
             <form id="property-search" class="property-search" onsubmit="handleProjectsSearch(event)">
                 <div class="search-field">
-                    <label>STATE</label>
+                    <label data-i18n="lbl_state">STATE</label>
                     <select name="state" id="search-state">
-                        <option value="">All States</option>
+                        <option value="" data-i18n="opt_all_states">All States</option>
                         <option value="NSW">NSW</option>
                         <option value="VIC">VIC</option>
                         <option value="QLD">QLD</option>
@@ -39,9 +40,9 @@
                     </select>
                 </div>
                 <div class="search-field">
-                    <label>AREA</label>
+                    <label data-i18n="lbl_area">AREA</label>
                     <select name="area" id="search-area">
-                        <option value="">All Areas</option>
+                        <option value="" data-i18n="opt_all_areas">All Areas</option>
                         <option value="sydney">Sydney</option>
                         <option value="melbourne">Melbourne</option>
                         <option value="brisbane">Brisbane</option>
@@ -49,19 +50,19 @@
                     </select>
                 </div>
                 <div class="search-field">
-                    <label>PROPERTY TYPE</label>
+                    <label data-i18n="lbl_prop_type">PROPERTY TYPE</label>
                     <select name="type" id="search-type">
-                        <option value="">All Types</option>
-                        <option value="apartment">Apartment</option>
-                        <option value="house">House</option>
-                        <option value="townhouse">Townhouse</option>
-                        <option value="land">Land</option>
+                        <option value="" data-i18n="opt_all_types">All Types</option>
+                        <option value="apartment" data-i18n="opt_apartment">Apartment</option>
+                        <option value="house" data-i18n="opt_house">House</option>
+                        <option value="townhouse" data-i18n="opt_townhouse">Townhouse</option>
+                        <option value="land" data-i18n="opt_land">Land</option>
                     </select>
                 </div>
                 <div class="search-field">
-                    <label>PRICE RANGE</label>
+                    <label data-i18n="lbl_price_range">PRICE RANGE</label>
                     <select name="price" id="search-price">
-                        <option value="">Any Price</option>
+                        <option value="" data-i18n="opt_any_price">Any Price</option>
                         <option value="500k-800k">$500k – $800k</option>
                         <option value="800k-1m">$800k – $1M</option>
                         <option value="1m-2m">$1M – $2M</option>
@@ -70,7 +71,7 @@
                 </div>
                 <button type="submit" class="btn-search-property">
                     <i class="fa-solid fa-magnifying-glass"></i>
-                    SEARCH
+                    <span data-i18n="btn_search_short">SEARCH</span>
                 </button>
             </form>
         </section>
@@ -81,23 +82,23 @@
         <section class="projects-grid-wrapper">
             <div class="project-grid" id="projects-list-grid"></div>
             <div id="projects-empty" class="empty-state" style="display:none;">
-                <p>No projects match your search.</p>
-                <a href="/projects" class="btn-clear-filters">Clear filters</a>
+                <p data-i18n="txt_no_projects">No projects match your search.</p>
+                <a href="/projects" class="btn-clear-filters" data-i18n="lnk_clear_filters">Clear filters</a>
             </div>
             <div id="projects-pagination" class="pagination-bar"></div>
         </section>
     </main>
 
-        <!-- Shared full footer (mirrors /main) -->
+    <!-- Shared full footer (mirrors /main) -->
     <section id="footer" class="footer">
         <div id="footer-top">
             <div class="footer-top-inner">
-                <h3 class="footer-form-title">Get in touch with us today</h3>
+                <h3 class="footer-form-title" data-i18n="footer_touch">Get in touch with us today</h3>
                 <form id="customer-contact-form" onsubmit="submitCustomerContact(event)" novalidate>
-                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" required autocomplete="name" maxlength="255">
-                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" autocomplete="tel" maxlength="20">
-                    <input type="email" id="customer-email" name="email" placeholder="Email Address" autocomplete="email" maxlength="255">
-                    <button type="submit" id="btn-submit-form" class="btn-footer-submit">SUBMIT</button>
+                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" data-i18n-ph="ph_fullname" required autocomplete="name" maxlength="255">
+                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" data-i18n-ph="ph_phone" autocomplete="tel" maxlength="20">
+                    <input type="email" id="customer-email" name="email" placeholder="Email Address" data-i18n-ph="ph_email" autocomplete="email" maxlength="255">
+                    <button type="submit" id="btn-submit-form" class="btn-footer-submit" data-i18n="btn_submit">SUBMIT</button>
                 </form>
                 <div id="footer-form-status" class="footer-form-status" role="status" aria-live="polite"></div>
             </div>
@@ -106,10 +107,7 @@
             <div class="footer-bottom-inner">
                 <div id="footer-col-brand">
                     <span id="footer-logo" class="footer-logo">SEALAND PROPERTY</span>
-                    <p id="footer-desc">
-                        Helping investors and homeowners across Australia build long-term
-                        wealth through trusted real-estate guidance.
-                    </p>
+                    <p id="footer-desc">Helping investors and homeowners across Australia build long-term wealth through trusted real-estate guidance.</p>
                     <p id="footer-desc-2">
                         <i class="fa-solid fa-location-dot"></i>
                         Level 12, 1 Market Street, Sydney NSW 2000, Australia
@@ -122,18 +120,18 @@
                     </div>
                 </div>
                 <div id="footer-col-links">
-                    <h3 class="footer-col-title">QUICK LINKS</h3>
+                    <h3 class="footer-col-title" data-i18n="h3_quick_links">QUICK LINKS</h3>
                     <ul id="footer-nav-list">
-                        <li><a href="/main">Home</a></li>
-                        <li><a href="/projects">Projects</a></li>
-                        <li><a href="/main#services">Services</a></li>
-                        <li><a href="/videos">Video</a></li>
-                        <li><a href="/news">News</a></li>
-                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/main" data-i18n="lnk_home">Home</a></li>
+                        <li><a href="/projects" data-i18n="lnk_projects">Projects</a></li>
+                        <li><a href="/main#services" data-i18n="lnk_services">Services</a></li>
+                        <li><a href="/videos" data-i18n="lnk_video">Video</a></li>
+                        <li><a href="/news" data-i18n="lnk_news">News</a></li>
+                        <li><a href="/about" data-i18n="lnk_about">About Us</a></li>
                     </ul>
                 </div>
                 <div id="footer-col-contact">
-                    <h3 class="footer-col-title">CONTACT OUR TEAM</h3>
+                    <h3 class="footer-col-title" data-i18n="h3_team">CONTACT OUR TEAM</h3>
                     <div class="footer-container" id="footer-container"></div>
                 </div>
             </div>

@@ -3499,5 +3499,34 @@ img{
 .page-btn.active { background: var(--color-navy, #1B2635); color: #fff; border-color: var(--color-navy, #1B2635); cursor: default; }
 .page-btn.page-arrow { font-size: 1.2rem; }
 
+/* ── Language toggle ─────────────────────────────────── */
+.lang-toggle {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    margin-right: 8px;
+}
+.lang-btn {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-family: inherit;
+    font-size: 0.78rem;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    padding: 3px 6px;
+    color: rgba(255,255,255,0.55);
+    border-radius: 3px;
+    transition: color 0.15s, background 0.15s;
+    line-height: 1;
+}
+.lang-btn:hover      { color: #fff; }
+.lang-btn-active     { color: #fff !important; }
+.lang-sep            { color: rgba(255,255,255,0.35); font-size: 0.75rem; user-select: none; }
+
+/* Mobile: move toggle into nav drawer */
+@media (max-width: 900px) {
+    .lang-toggle { margin-right: 0; order: -1; }
+}
 
 

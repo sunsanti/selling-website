@@ -1,5 +1,13 @@
 // /about page: render Leadership + Team + Services + apply editable settings
 (function () {
+    let _lastAboutSettings = null;
+
+    function getLangSetting(s, key) {
+        var lang = window.i18n && window.i18n.getLang ? window.i18n.getLang() : 'en';
+        if (lang === 'vi') { var v = s[key + '_vi']; if (v && String(v).trim()) return v; }
+        return s[key] !== undefined ? s[key] : '';
+    }
+
     const ROLES = {
         1: { title: 'DIRECTOR', quote: 'Our mission is to help you grow wealth through real estate, thereby building a prosperous future for yourself and your loved ones.' },
         2: { title: 'PROPERTY SALES CONSULTANT', quote: 'We assist Vietnamese families settling abroad — from school choices and banking to long-term portfolio growth.' }
@@ -30,9 +38,10 @@
 
     function applyAboutSettings(s) {
         if (!s) return;
-        setText('about-hero-tag',     s.about_hero_tag);
-        setText('about-hero-title',   s.about_hero_title);
-        setText('about-mission-text', s.about_mission);
+        _lastAboutSettings = s;
+        setText('about-hero-tag',     getLangSetting(s, 'about_hero_tag'));
+        setText('about-hero-title',   getLangSetting(s, 'about_hero_title'));
+        setText('about-mission-text', getLangSetting(s, 'about_mission'));
         renderOffices(s.about_offices);
         renderServices(s);
     }
@@ -62,8 +71,8 @@
         if (!grid) return;
         const cards = [1, 2, 3].map(i => {
             const icon  = s[`about_service_${i}_icon`]  || (i === 1 ? 'fa-house-chimney' : i === 2 ? 'fa-scale-balanced' : 'fa-suitcase-rolling');
-            const title = s[`about_service_${i}_title`] || '';
-            const desc  = s[`about_service_${i}_desc`]  || '';
+            const title = getLangSetting(s, `about_service_${i}_title`) || '';
+            const desc  = getLangSetting(s, `about_service_${i}_desc`) || '';
             const safeIcon = FA_ICON_RE.test(String(icon)) ? icon : 'fa-circle';
             return `
                 <div class="about-service-card">
@@ -184,4 +193,8 @@
     loadAboutContent();
     loadLeadership();
     loadTeam();
+
+    window.addEventListener('langchange', function () {
+        if (_lastAboutSettings) applyAboutSettings(_lastAboutSettings);
+    });
 })();

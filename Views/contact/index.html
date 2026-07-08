@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="/contact/style.css?v=v1">
 </head>
 <body>
+    <script src="/shared/i18n.js"></script>
     <script src="/main/header.js"></script>
 
     <main class="contact-page">
@@ -18,8 +19,8 @@
         <section class="contact-hero">
             <div class="contact-hero-bg"></div>
             <div class="contact-hero-inner">
-                <span class="contact-hero-tag">WE'D LOVE TO HEAR FROM YOU</span>
-                <h1 class="contact-hero-title">Contact Us</h1>
+                <span class="contact-hero-tag" data-i18n="contact_hero_tag">WE'D LOVE TO HEAR FROM YOU</span>
+                <h1 class="contact-hero-title" data-i18n="contact_hero_title">Contact Us</h1>
             </div>
         </section>
 
@@ -29,20 +30,20 @@
 
                 <!-- Left: form -->
                 <div class="contact-form-panel">
-                    <h2 class="contact-panel-heading">Send Us a Message</h2>
-                    <p class="contact-panel-sub">Fill in your details and we'll get back to you as soon as possible.</p>
+                    <h2 class="contact-panel-heading" data-i18n="h2_send_msg">Send Us a Message</h2>
+                    <p class="contact-panel-sub" data-i18n="p_fill_details">Fill in your details and we'll get back to you as soon as possible.</p>
                     <form id="contact-form" onsubmit="submitContactPage(event)" novalidate>
                         <div class="cf-group">
-                            <input type="text" id="c-name" name="name" placeholder="Full Name *" required maxlength="255" autocomplete="name">
+                            <input type="text" id="c-name" name="name" placeholder="Full Name *" data-i18n-ph="ph_fullname" required maxlength="255" autocomplete="name">
                         </div>
                         <div class="cf-group">
-                            <input type="tel" id="c-phone" name="phone" placeholder="Phone Number" maxlength="20" autocomplete="tel">
+                            <input type="tel" id="c-phone" name="phone" placeholder="Phone Number" data-i18n-ph="ph_phone" maxlength="20" autocomplete="tel">
                         </div>
                         <div class="cf-group">
-                            <input type="email" id="c-email" name="email" placeholder="Email Address" maxlength="255" autocomplete="email">
+                            <input type="email" id="c-email" name="email" placeholder="Email Address" data-i18n-ph="ph_email" maxlength="255" autocomplete="email">
                         </div>
                         <button type="submit" class="cf-submit" id="cf-submit-btn">
-                            <i class="fa-solid fa-paper-plane"></i> SEND MESSAGE
+                            <i class="fa-solid fa-paper-plane"></i> <span data-i18n="btn_send_msg">SEND MESSAGE</span>
                         </button>
                     </form>
                     <div id="cf-status" class="cf-status" role="status" aria-live="polite"></div>
@@ -50,7 +51,7 @@
 
                 <!-- Right: office info -->
                 <div class="contact-info-panel">
-                    <h2 class="contact-panel-heading">Our Offices</h2>
+                    <h2 class="contact-panel-heading" data-i18n="h2_our_offices">Our Offices</h2>
                     <div class="offices-grid" id="contact-offices-grid"></div>
 
                     <div id="contact-social" style="display:none;">
@@ -64,8 +65,8 @@
         <!-- Team cards -->
         <section class="contact-team">
             <div class="contact-team-inner">
-                <h2 class="contact-section-title">Contact Our Team</h2>
-                <p class="contact-section-sub">Reach out directly to a member of our team.</p>
+                <h2 class="contact-section-title" data-i18n="h2_contact_team">Contact Our Team</h2>
+                <p class="contact-section-sub" data-i18n="p_contact_team">Reach out directly to a member of our team.</p>
                 <div class="contact-team-cards" id="team-cards">
                     <div class="team-card-skeleton"></div>
                     <div class="team-card-skeleton"></div>

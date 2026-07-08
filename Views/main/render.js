@@ -17,6 +17,12 @@ function normalizeImageUrl(v) {
     return '/' + v;
 }
 
+function getLangSetting(s, key) {
+    var lang = window.i18n && window.i18n.getLang ? window.i18n.getLang() : 'en';
+    if (lang === 'vi') { var v = s[key + '_vi']; if (v && String(v).trim()) return v; }
+    return s[key] !== undefined ? s[key] : '';
+}
+
 function renderSettings(s) {
     if (!s) return;
     if (s.logo !== undefined) {
@@ -56,41 +62,44 @@ function renderSettings(s) {
         document.body.dataset.purposeVideoUrl = s.purpose_video_url || '';
     }
     // v14: "Why Invest in Australia" (Purpose-Invest) section content
-    if (s.purpose_tagline !== undefined) setText('purpose-tagline-text', s.purpose_tagline);
+    if (s.purpose_tagline !== undefined) setText('purpose-tagline-text', getLangSetting(s, 'purpose_tagline'));
     if (s.purpose_heading !== undefined) {
         const heading = document.getElementById('purpose-heading-text');
         if (heading) {
             heading.innerHTML = '';
-            String(s.purpose_heading || '').split('\n').forEach((line, i) => {
+            String(getLangSetting(s, 'purpose_heading') || '').split('\n').forEach((line, i) => {
                 if (i > 0) heading.appendChild(document.createElement('br'));
                 heading.appendChild(document.createTextNode(line));
             });
         }
     }
     [1, 2, 3, 4].forEach(i => {
-        if (s['purpose_list_' + i] !== undefined) setText('purpose-list-' + i + '-text', s['purpose_list_' + i]);
+        if (s['purpose_list_' + i] !== undefined) setText('purpose-list-' + i + '-text', getLangSetting(s, 'purpose_list_' + i));
     });
-    if (s.purpose_cta_text !== undefined) setText('purpose-cta-text', s.purpose_cta_text);
-    if (s.purpose_video_caption !== undefined) setText('purpose-video-caption', s.purpose_video_caption);
+    if (s.purpose_cta_text !== undefined) setText('purpose-cta-text', getLangSetting(s, 'purpose_cta_text'));
+    if (s.purpose_video_caption !== undefined) setText('purpose-video-caption', getLangSetting(s, 'purpose_video_caption'));
     // v11: Footer dynamic content (shared across /main + sub-pages)
     if (s.footer_desc !== undefined) {
         const el = document.getElementById('footer-desc');
-        if (el && s.footer_desc) el.textContent = s.footer_desc;
+        const val = getLangSetting(s, 'footer_desc');
+        if (el && val) el.textContent = val;
     }
     if (s.footer_address !== undefined) {
         const el = document.getElementById('footer-desc-2');
-        if (el && s.footer_address) {
+        const val = getLangSetting(s, 'footer_address');
+        if (el && val) {
             // Rebuild safely: icon + text node (XSS-safe via textContent)
             el.innerHTML = '';
             const i = document.createElement('i');
             i.className = 'fa-solid fa-location-dot';
             el.appendChild(i);
-            el.appendChild(document.createTextNode(' ' + s.footer_address));
+            el.appendChild(document.createTextNode(' ' + val));
         }
     }
     if (s.footer_copyright !== undefined) {
         const el = document.getElementById('copyright-text');
-        if (el && s.footer_copyright) el.textContent = s.footer_copyright;
+        const val = getLangSetting(s, 'footer_copyright');
+        if (el && val) el.textContent = val;
     }
     // Social links
     const sockets = [
@@ -114,6 +123,7 @@ function renderSettings(s) {
             a.removeAttribute('rel');
         }
     });
+    window.__lastSettings = s;
 }
 
 // F06: Video modal handlers (exposed on window because onclick attrs reference them)
@@ -202,6 +212,12 @@ if (window.__SETTINGS__) {
     }
 })();
 
+// Re-render translatable content when language changes
+window.addEventListener('langchange', function () {
+    if (window.__lastSettings) renderSettings(window.__lastSettings);
+    if (allProjects && allProjects.length > 0) renderProjects(allProjects);
+});
+
 // ========== MODULE 2: Projects (grid + filter) ==========
 async function loadProjectsFromDB() {
     try {
@@ -278,7 +294,7 @@ function renderProjects(projects) {
 
         const name = document.createElement('h3');
         name.className = 'project-name';
-        name.textContent = p.name || '';
+        name.textContent = (window.i18n && window.i18n.td ? window.i18n.td(p, 'name') : p.name) || '';
         info.appendChild(name);
 
         if (p.address) {
@@ -299,10 +315,11 @@ function renderProjects(projects) {
         if (p.beds || p.baths || p.cars) {
             const specs = document.createElement('div');
             specs.className = 'project-specs';
+            const t = window.i18n && window.i18n.t ? window.i18n.t.bind(window.i18n) : k => k;
             const items = [
-                ['fa-bed', p.beds, 'Beds'],
-                ['fa-bath', p.baths, 'Baths'],
-                ['fa-car', p.cars, 'Car']
+                ['fa-bed', p.beds, t('lbl_beds')],
+                ['fa-bath', p.baths, t('lbl_baths')],
+                ['fa-car', p.cars, t('lbl_cars')]
             ];
             items.forEach(([icon, value, label]) => {
                 if (!value) return;

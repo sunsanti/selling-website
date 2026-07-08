@@ -9,13 +9,14 @@
     <link rel="stylesheet" href="/news/style.css?v=f09">
 </head>
 <body>
+    <script src="/shared/i18n.js"></script>
     <script src="/main/header.js"></script>
 
     <main class="news-detail-page">
         <article id="news-article" style="display:none;">
             <img id="news-cover" class="news-detail-cover" src="" alt="">
             <div class="news-detail-body">
-                <a class="news-back-link" href="/news"><i class="fa-solid fa-arrow-left"></i> Back to all news</a>
+                <a class="news-back-link" href="/news"><i class="fa-solid fa-arrow-left"></i> <span data-i18n="lnk_back_news">Back to all news</span></a>
                 <h1 id="news-title" class="news-detail-title"></h1>
                 <p class="news-meta">
                     <i class="fa-regular fa-calendar"></i>
@@ -26,22 +27,22 @@
             </div>
         </article>
         <div id="news-not-found" class="news-not-found" style="display:none;">
-            <h2>News not found</h2>
-            <p>The article you're looking for may have been removed.</p>
-            <a href="/news" class="btn-clear-filters">Browse all news</a>
+            <h2 data-i18n="h2_news_not_found">News not found</h2>
+            <p data-i18n="p_news_not_found">The article you're looking for may have been removed.</p>
+            <a href="/news" class="btn-clear-filters" data-i18n="lnk_browse_news">Browse all news</a>
         </div>
     </main>
 
-        <!-- Shared full footer (mirrors /main) -->
+    <!-- Shared full footer (mirrors /main) -->
     <section id="footer" class="footer">
         <div id="footer-top">
             <div class="footer-top-inner">
-                <h3 class="footer-form-title">Get in touch with us today</h3>
+                <h3 class="footer-form-title" data-i18n="footer_touch">Get in touch with us today</h3>
                 <form id="customer-contact-form" onsubmit="submitCustomerContact(event)" novalidate>
-                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" required autocomplete="name" maxlength="255">
-                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" autocomplete="tel" maxlength="20">
-                    <input type="email" id="customer-email" name="email" placeholder="Email Address" autocomplete="email" maxlength="255">
-                    <button type="submit" id="btn-submit-form" class="btn-footer-submit">SUBMIT</button>
+                    <input type="text" id="customer-name" name="name" placeholder="Full Name *" data-i18n-ph="ph_fullname" required autocomplete="name" maxlength="255">
+                    <input type="tel" id="customer-phone" name="phone" placeholder="Phone Number" data-i18n-ph="ph_phone" autocomplete="tel" maxlength="20">
+                    <input type="email" id="customer-email" name="email" placeholder="Email Address" data-i18n-ph="ph_email" autocomplete="email" maxlength="255">
+                    <button type="submit" id="btn-submit-form" class="btn-footer-submit" data-i18n="btn_submit">SUBMIT</button>
                 </form>
                 <div id="footer-form-status" class="footer-form-status" role="status" aria-live="polite"></div>
             </div>
@@ -50,10 +51,7 @@
             <div class="footer-bottom-inner">
                 <div id="footer-col-brand">
                     <span id="footer-logo" class="footer-logo">SEALAND PROPERTY</span>
-                    <p id="footer-desc">
-                        Helping investors and homeowners across Australia build long-term
-                        wealth through trusted real-estate guidance.
-                    </p>
+                    <p id="footer-desc">Helping investors and homeowners across Australia build long-term wealth through trusted real-estate guidance.</p>
                     <p id="footer-desc-2">
                         <i class="fa-solid fa-location-dot"></i>
                         Level 12, 1 Market Street, Sydney NSW 2000, Australia
@@ -66,18 +64,18 @@
                     </div>
                 </div>
                 <div id="footer-col-links">
-                    <h3 class="footer-col-title">QUICK LINKS</h3>
+                    <h3 class="footer-col-title" data-i18n="h3_quick_links">QUICK LINKS</h3>
                     <ul id="footer-nav-list">
-                        <li><a href="/main">Home</a></li>
-                        <li><a href="/projects">Projects</a></li>
-                        <li><a href="/main#services">Services</a></li>
-                        <li><a href="/videos">Video</a></li>
-                        <li><a href="/news">News</a></li>
-                        <li><a href="/about">About Us</a></li>
+                        <li><a href="/main" data-i18n="lnk_home">Home</a></li>
+                        <li><a href="/projects" data-i18n="lnk_projects">Projects</a></li>
+                        <li><a href="/main#services" data-i18n="lnk_services">Services</a></li>
+                        <li><a href="/videos" data-i18n="lnk_video">Video</a></li>
+                        <li><a href="/news" data-i18n="lnk_news">News</a></li>
+                        <li><a href="/about" data-i18n="lnk_about">About Us</a></li>
                     </ul>
                 </div>
                 <div id="footer-col-contact">
-                    <h3 class="footer-col-title">CONTACT OUR TEAM</h3>
+                    <h3 class="footer-col-title" data-i18n="h3_team">CONTACT OUR TEAM</h3>
                     <div class="footer-container" id="footer-container"></div>
                 </div>
             </div>

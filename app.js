@@ -32,6 +32,7 @@ app.use(session({
 app.get('/favicon.ico', (req, res) => res.status(204).end());
 
 app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/shared', express.static(path.join(__dirname, 'Views/shared'), { index: false, redirect: false }));
 app.use('/login', express.static(path.join(__dirname, 'Views/login')));
 // index: false + redirect: false — asset files (render.js, style.css) are served here;
 // the root index.html is served by the explicit GET routes below (after loginController loads)

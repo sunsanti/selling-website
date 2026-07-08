@@ -101,7 +101,8 @@ const getProjectById = async (id) => {
 
 const createProject = async (projectData) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path } = projectData;
+        const { name, area, square_meters, category, year, style, small_content, image_path,
+                name_vi, small_content_vi } = projectData;
 
         // Limit max active projects per area
         const [existing] = await pool.query(
@@ -127,11 +128,13 @@ const createProject = async (projectData) => {
 
         const [result] = await pool.query(
             `INSERT INTO projects
-             (name, area, square_meters, category, year, style, small_content, image_path, display_order, status,
+             (name, name_vi, area, square_meters, category, year, style, small_content, small_content_vi,
+              image_path, display_order, status,
               price, beds, baths, cars, address, state, property_type, area_label)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, "active",
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, "active",
                      ?, ?, ?, ?, ?, ?, ?, ?)`,
-            [name, area, square_meters, category, year, style, small_content, image_path, display_order,
+            [name, name_vi || null, area, square_meters, category, year, style, small_content, small_content_vi || null,
+             image_path, display_order,
              ext.price, ext.beds, ext.baths, ext.cars, ext.address, ext.state, ext.property_type, ext.area_label]
         );
         return result.insertId;
@@ -189,19 +192,21 @@ const searchProjects = async ({ state, type, price, area, status = 'active' } = 
 
 const updateProject = async (id, projectData) => {
     try {
-        const { name, area, square_meters, category, year, style, small_content, image_path, display_order } = projectData;
+        const { name, area, square_meters, category, year, style, small_content, image_path, display_order,
+                name_vi, small_content_vi } = projectData;
         const ext = EXTENDED_FIELDS.reduce((acc, k) => {
             acc[k] = (projectData[k] !== undefined && projectData[k] !== null) ? String(projectData[k]) : '';
             return acc;
         }, {});
         const [result] = await pool.query(
             `UPDATE projects SET
-                name = ?, area = ?, square_meters = ?, category = ?, year = ?, style = ?,
-                small_content = ?, image_path = ?, display_order = ?,
+                name = ?, name_vi = ?, area = ?, square_meters = ?, category = ?, year = ?, style = ?,
+                small_content = ?, small_content_vi = ?, image_path = ?, display_order = ?,
                 price = ?, beds = ?, baths = ?, cars = ?, address = ?, state = ?, property_type = ?, area_label = ?,
                 updated_at = CURRENT_TIMESTAMP
              WHERE id = ?`,
-            [name, area, square_meters, category, year, style, small_content, image_path, display_order || 0,
+            [name, name_vi || null, area, square_meters, category, year, style,
+             small_content, small_content_vi || null, image_path, display_order || 0,
              ext.price, ext.beds, ext.baths, ext.cars, ext.address, ext.state, ext.property_type, ext.area_label,
              id]
         );

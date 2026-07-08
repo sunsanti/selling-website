@@ -5,7 +5,7 @@ const SUMMARY_CAP = 200;          // shorten for list endpoint
 const TITLE_MAX = 255;
 const SUMMARY_MAX = 500;
 
-const UPDATABLE_FIELDS = ['title', 'summary', 'content', 'cover_image', 'status', 'external_url'];
+const UPDATABLE_FIELDS = ['title', 'title_vi', 'summary', 'summary_vi', 'content', 'content_vi', 'cover_image', 'status', 'external_url'];
 const URL_RE = /^https?:\/\//i;
 
 function truncate(s, n) {
@@ -16,7 +16,7 @@ function truncate(s, n) {
 const getActive = async ({ limit = 12 } = {}) => {
     const lim = Math.min(parseInt(limit, 10) || 12, 500);
     const [rows] = await pool.query(
-        "SELECT id, title, summary, cover_image, external_url, created_at FROM news WHERE status = 'active' ORDER BY created_at DESC LIMIT ?",
+        "SELECT id, title, title_vi, summary, summary_vi, cover_image, external_url, created_at FROM news WHERE status = 'active' ORDER BY created_at DESC LIMIT ?",
         [lim]
     );
     return rows.map(r => ({ ...r, summary: truncate(r.summary, SUMMARY_CAP) }));
