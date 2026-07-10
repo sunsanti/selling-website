@@ -6,7 +6,7 @@ const getAbout = async () => {
         'SELECT banner, paragraph_left, paragraph_right FROM about_section WHERE id = 1'
     );
     const [statsRows] = await pool.query(
-        'SELECT slot, num, label FROM about_stats ORDER BY slot ASC'
+        'SELECT slot, num, label, label_vi FROM about_stats ORDER BY slot ASC'
     );
     if (sectionRows.length === 0) return null;
     return { ...sectionRows[0], stats: statsRows };
@@ -27,8 +27,8 @@ const updateAbout = async ({ banner, paragraph_left, paragraph_right, stats }) =
                 if (!s || typeof s.slot !== 'number') continue;
                 if (s.slot < 1 || s.slot > HOME_ABOUT_STATS_COUNT) continue;
                 await conn.query(
-                    'UPDATE about_stats SET num = ?, label = ? WHERE slot = ?',
-                    [s.num || '', s.label || '', s.slot]
+                    'UPDATE about_stats SET num = ?, label = ?, label_vi = ? WHERE slot = ?',
+                    [s.num || '', s.label || '', s.label_vi || null, s.slot]
                 );
             }
         }

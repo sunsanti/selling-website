@@ -2322,6 +2322,33 @@ async function loadHomeAbout() {
             lbl.style.marginTop = '6px';
             wrap.appendChild(lbl);
 
+            const lblViWrap = document.createElement('div');
+            lblViWrap.style.cssText = 'display:flex;align-items:center;gap:8px;margin-top:6px';
+            const lblVi = document.createElement('input');
+            lblVi.type = 'text';
+            lblVi.placeholder = 'Label tiếng Việt';
+            lblVi.maxLength = 255;
+            lblVi.dataset.slot = s.slot;
+            lblVi.dataset.field = 'label_vi';
+            lblVi.value = s.label_vi || '';
+            lblVi.style.flex = '1';
+            const btnTranslate = document.createElement('button');
+            btnTranslate.type = 'button';
+            btnTranslate.className = 'btn-translate';
+            btnTranslate.innerHTML = '<i class="fas fa-language"></i> Dịch VI';
+            btnTranslate.onclick = async function() {
+                if (btnTranslate.disabled) return;
+                btnTranslate.disabled = true;
+                try {
+                    const r = await fetch('/api/admin/translate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: lbl.value, target: 'vi', source: 'en' }) });
+                    const j = await r.json();
+                    if (j.success) { lblVi.value = j.translated; lblVi.dispatchEvent(new Event('input')); }
+                } finally { btnTranslate.disabled = false; }
+            };
+            lblViWrap.appendChild(lblVi);
+            lblViWrap.appendChild(btnTranslate);
+            wrap.appendChild(lblViWrap);
+
             grid.appendChild(wrap);
         });
     } catch (err) {

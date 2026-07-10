@@ -216,6 +216,7 @@ if (window.__SETTINGS__) {
 window.addEventListener('langchange', function () {
     if (window.__lastSettings) renderSettings(window.__lastSettings);
     if (allProjects && allProjects.length > 0) renderProjects(allProjects);
+    if (_cachedServices && _cachedServices.length > 0) renderServices(_cachedServices);
 });
 
 // ========== MODULE 2: Projects (grid + filter) ==========
@@ -558,24 +559,26 @@ function renderServices(items) {
 
         const title = document.createElement('h3');
         title.className = 'service-title';
-        title.textContent = s.title || '';
+        title.textContent = getLangSetting(s, 'title');
         card.appendChild(title);
 
         const desc = document.createElement('p');
         desc.className = 'service-desc';
-        desc.textContent = s.description || '';
+        desc.textContent = getLangSetting(s, 'description');
         card.appendChild(desc);
 
         list.appendChild(card);
     });
 }
 
+var _cachedServices = [];
 async function loadServices() {
     try {
         const res = await fetch('/api/public/services');
         const json = await res.json();
         if (!json.success) return;
-        renderServices(json.data);
+        _cachedServices = json.data || [];
+        renderServices(_cachedServices);
     } catch (e) {
         console.error('loadServices:', e);
     }
