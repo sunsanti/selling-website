@@ -59,8 +59,8 @@ const getServiceBySlot = async (req, res) => {
 const updateService = async (req, res) => {
     try {
         const slot = parseInt(req.params.slot, 10);
-        const { title, description, image_path, icon } = req.body;
-        const ok = await serviceModel.updateService(slot, { title, description, image_path, icon });
+        const { title, title_vi, description, description_vi, image_path, icon } = req.body;
+        const ok = await serviceModel.updateService(slot, { title, title_vi, description, description_vi, image_path, icon });
         if (!ok) return res.status(400).json({ success: false, message: 'Không có thay đổi nào' });
         auditLogModel.log({
             req, action: 'SERVICE_UPDATE', target_type: 'service', target_id: slot,

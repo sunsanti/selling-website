@@ -1690,7 +1690,9 @@ function gatherPreviewData(target) {
             services.push({
                 slot: parseInt(card.dataset.slot, 10),
                 title: (card.querySelector('.svc-title') || {}).value || '',
+                title_vi: (card.querySelector('.svc-title-vi') || {}).value || '',
                 description: (card.querySelector('.svc-desc') || {}).value || '',
+                description_vi: (card.querySelector('.svc-desc-vi') || {}).value || '',
                 image_path: card.dataset.imagePath || ''
             });
         });
@@ -2398,10 +2400,18 @@ async function loadHomeServices() {
                 `<option value="${cls}">${lbl} (${cls})</option>`).join('');
             card.innerHTML = ''
                 + '<h2><i class="fas fa-concierge-bell"></i> Service ' + svc.slot + '</h2>'
-                + '<div class="form-group"><label>Title</label>'
+                + '<div class="form-row">'
+                + '<div class="form-group"><label>Title (EN)</label>'
                 + '  <input type="text" class="svc-title" maxlength="255"></div>'
-                + '<div class="form-group"><label>Description</label>'
+                + '<div class="form-group"><label>Title (VI) <button type="button" class="btn-translate" onclick="translateClassField(this,\'svc-title\',\'svc-title-vi\')"><i class="fas fa-language"></i> Dịch VI</button></label>'
+                + '  <input type="text" class="svc-title-vi" maxlength="255" placeholder="Tiêu đề tiếng Việt"></div>'
+                + '</div>'
+                + '<div class="form-row">'
+                + '<div class="form-group"><label>Description (EN)</label>'
                 + '  <textarea class="svc-desc" rows="5" maxlength="2000"></textarea></div>'
+                + '<div class="form-group"><label>Description (VI) <button type="button" class="btn-translate" onclick="translateClassField(this,\'svc-desc\',\'svc-desc-vi\')"><i class="fas fa-language"></i> Dịch VI</button></label>'
+                + '  <textarea class="svc-desc-vi" rows="5" maxlength="2000" placeholder="Mô tả tiếng Việt"></textarea></div>'
+                + '</div>'
                 + '<div class="form-group"><label>Icon <small style="color:#888;font-weight:400">(Font Awesome 6 — chọn 1 trong danh sách)</small></label>'
                 + '  <div style="display:flex;gap:1rem;align-items:center">'
                 + '    <i class="svc-icon-preview fa-solid" style="font-size:2.6rem;color:var(--color-gold);width:48px;text-align:center"></i>'
@@ -2413,7 +2423,9 @@ async function loadHomeServices() {
             wrap.appendChild(card);
 
             card.querySelector('.svc-title').value = svc.title || '';
+            const titleViEl = card.querySelector('.svc-title-vi'); if (titleViEl) titleViEl.value = svc.title_vi || '';
             card.querySelector('.svc-desc').value = svc.description || '';
+            const descViEl = card.querySelector('.svc-desc-vi'); if (descViEl) descViEl.value = svc.description_vi || '';
             const iconSelect = card.querySelector('.svc-icon-select');
             const iconPreview = card.querySelector('.svc-icon-preview');
             const DEFAULT_ICONS = { 1:'fa-key', 2:'fa-chart-line', 3:'fa-building', 4:'fa-hand-holding-dollar', 5:'fa-shield-halved' };
@@ -2434,7 +2446,9 @@ async function loadHomeServices() {
                 try {
                     const payload = {
                         title: card.querySelector('.svc-title').value,
+                        title_vi: (card.querySelector('.svc-title-vi') || {}).value || '',
                         description: card.querySelector('.svc-desc').value,
+                        description_vi: (card.querySelector('.svc-desc-vi') || {}).value || '',
                         icon: iconSelect.value
                     };
                     const res = await fetch('/api/admin/services/' + svc.slot, {

@@ -6,27 +6,29 @@ const ICON_RE = /^fa-[a-z0-9-]{2,40}$/i;
 
 const getServices = async () => {
     const [rows] = await pool.query(
-        'SELECT slot, title, description, image_path, icon FROM services ORDER BY slot ASC'
+        'SELECT slot, title, title_vi, description, description_vi, image_path, icon FROM services ORDER BY slot ASC'
     );
     return rows;
 };
 
 const getService = async (slot) => {
     const [rows] = await pool.query(
-        'SELECT slot, title, description, image_path, icon FROM services WHERE slot = ?',
+        'SELECT slot, title, title_vi, description, description_vi, image_path, icon FROM services WHERE slot = ?',
         [slot]
     );
     return rows[0] || null;
 };
 
-const updateService = async (slot, { title, description, image_path, icon }) => {
+const updateService = async (slot, { title, title_vi, description, description_vi, image_path, icon }) => {
     if (!Number.isInteger(slot) || slot < 1 || slot > HOME_SERVICES_COUNT) {
         throw new Error(`slot must be 1..${HOME_SERVICES_COUNT}`);
     }
     const fields = [];
     const values = [];
     if (title !== undefined) { fields.push('title = ?'); values.push(title || ''); }
+    if (title_vi !== undefined) { fields.push('title_vi = ?'); values.push(title_vi || null); }
     if (description !== undefined) { fields.push('description = ?'); values.push(description || ''); }
+    if (description_vi !== undefined) { fields.push('description_vi = ?'); values.push(description_vi || null); }
     if (image_path !== undefined && image_path !== null && image_path !== '') {
         fields.push('image_path = ?');
         values.push(image_path);
