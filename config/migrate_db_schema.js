@@ -261,14 +261,16 @@ const TABLES = [
                 id INT AUTO_INCREMENT PRIMARY KEY,
                 slot TINYINT NOT NULL UNIQUE,
                 title VARCHAR(255) NOT NULL DEFAULT '',
+                title_vi VARCHAR(255) DEFAULT NULL,
                 description TEXT NOT NULL,
+                description_vi TEXT DEFAULT NULL,
                 image_path VARCHAR(255) NOT NULL DEFAULT '',
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
                 icon VARCHAR(50) NOT NULL DEFAULT ''
             )
         `,
         seed: [
-            // v23 — full snapshot of current services (icon column included)
+            // v24 — full snapshot of current services (i18n _vi columns included)
             [
                 'INSERT IGNORE INTO services (slot, title, description, image_path, icon) VALUES (?, ?, ?, ?, ?)',
                 [1, 'See more about our business', 'Our company specializes in buying and selling real estate with a focus on value and long-term investment.', '/uploads/service1.jpg', 'fa-house']
@@ -604,6 +606,69 @@ async function ensureServiceIcon() {
     }
 }
 
+// i18n: idempotent ALTER for services.title_vi + services.description_vi
+async function ensureServiceVI() {
+    if (!(await hasTable('services'))) return;
+    const cols = [
+        ['title_vi',       "VARCHAR(255) DEFAULT NULL"],
+        ['description_vi', "TEXT DEFAULT NULL"]
+    ];
+    for (const [name, type] of cols) {
+        if (await hasColumn('services', name)) {
+            console.log(`   ⏭️  services.${name} already exists`);
+        } else {
+            await pool.query(`ALTER TABLE services ADD COLUMN ${name} ${type}`);
+            console.log(`   ✅ Added services.${name}`);
+        }
+    }
+}
+
+// i18n: idempotent ALTER for news _vi columns
+async function ensureNewsVI() {
+    if (!(await hasTable('news'))) return;
+    const cols = [
+        ['title_vi',   "VARCHAR(255) DEFAULT NULL"],
+        ['summary_vi', "VARCHAR(500) DEFAULT NULL"],
+        ['content_vi', "TEXT DEFAULT NULL"]
+    ];
+    for (const [name, type] of cols) {
+        if (await hasColumn('news', name)) {
+            console.log(`   ⏭️  news.${name} already exists`);
+        } else {
+            await pool.query(`ALTER TABLE news ADD COLUMN ${name} ${type}`);
+            console.log(`   ✅ Added news.${name}`);
+        }
+    }
+}
+
+// i18n: idempotent ALTER for projects _vi columns
+async function ensureProjectsVI() {
+    if (!(await hasTable('projects'))) return;
+    const cols = [
+        ['name_vi',          "VARCHAR(255) DEFAULT NULL"],
+        ['small_content_vi', "TEXT DEFAULT NULL"]
+    ];
+    for (const [name, type] of cols) {
+        if (await hasColumn('projects', name)) {
+            console.log(`   ⏭️  projects.${name} already exists`);
+        } else {
+            await pool.query(`ALTER TABLE projects ADD COLUMN ${name} ${type}`);
+            console.log(`   ✅ Added projects.${name}`);
+        }
+    }
+}
+
+// i18n: idempotent ALTER for about_stats.label_vi
+async function ensureAboutStatsVI() {
+    if (!(await hasTable('about_stats'))) return;
+    if (await hasColumn('about_stats', 'label_vi')) {
+        console.log('   ⏭️  about_stats.label_vi already exists');
+    } else {
+        await pool.query("ALTER TABLE about_stats ADD COLUMN label_vi VARCHAR(255) DEFAULT NULL");
+        console.log('   ✅ Added about_stats.label_vi');
+    }
+}
+
 // F07: idempotent top-up for service slots 4-5
 async function ensureServiceSlots() {
     if (!(await hasTable('services'))) return;
@@ -758,6 +823,13 @@ async function dropAllTables() {
         console.log('\n🔧 v3: adding videos.is_featured + news.is_featured...');
         await ensureVideosFeatured();
         await ensureNewsFeatured();
+
+        // i18n: add _vi columns for bilingual content (idempotent)
+        console.log('\n🔧 i18n: adding _vi columns for bilingual content...');
+        await ensureServiceVI();
+        await ensureNewsVI();
+        await ensureProjectsVI();
+        await ensureAboutStatsVI();
 
         // F10.fix: normalize all legacy /images/ + bare-filename media paths to /uploads/
         console.log('\n🔧 Normalizing media paths to /uploads/...');

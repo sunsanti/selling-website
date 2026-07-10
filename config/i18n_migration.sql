@@ -15,3 +15,7 @@ ALTER TABLE projects
 
 ALTER TABLE about_stats
     ADD COLUMN label_vi VARCHAR(255) DEFAULT NULL AFTER label;
+
+ALTER TABLE services
+    ADD COLUMN title_vi       VARCHAR(255) DEFAULT NULL AFTER title,
+    ADD COLUMN description_vi TEXT         DEFAULT NULL AFTER description;
