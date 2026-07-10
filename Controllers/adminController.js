@@ -33,20 +33,22 @@ const updateSettings = async (req, res) => {
         const {
             logo, phone, main_image, purpose_video_url, purpose_video_thumbnail,
             // v11: footer dynamic content
-            footer_desc, footer_address, footer_copyright,
+            footer_desc, footer_desc_vi, footer_address, footer_copyright,
             footer_facebook_url, footer_linkedin_url, footer_youtube_url, footer_tiktok_url,
             // v12 — /about page content
-            about_hero_tag, about_hero_title, about_mission,
+            about_hero_tag, about_hero_tag_vi, about_hero_title, about_hero_title_vi,
+            about_mission, about_mission_vi,
             // v16 — /about Offices (dynamic list, JSON array of {name, flag, address, phone, email})
             about_offices,
-            // v13 — /about Our Services (3 cards × icon/title/desc)
-            about_service_1_icon, about_service_1_title, about_service_1_desc,
-            about_service_2_icon, about_service_2_title, about_service_2_desc,
-            about_service_3_icon, about_service_3_title, about_service_3_desc,
-            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
-            purpose_tagline, purpose_heading,
-            purpose_list_1, purpose_list_2, purpose_list_3, purpose_list_4,
-            purpose_cta_text, purpose_video_caption
+            // v13 — /about Our Services (3 cards × icon/title/desc + VI)
+            about_service_1_icon, about_service_1_title, about_service_1_title_vi, about_service_1_desc, about_service_1_desc_vi,
+            about_service_2_icon, about_service_2_title, about_service_2_title_vi, about_service_2_desc, about_service_2_desc_vi,
+            about_service_3_icon, about_service_3_title, about_service_3_title_vi, about_service_3_desc, about_service_3_desc_vi,
+            // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content + VI
+            purpose_tagline, purpose_tagline_vi, purpose_heading, purpose_heading_vi,
+            purpose_list_1, purpose_list_1_vi, purpose_list_2, purpose_list_2_vi,
+            purpose_list_3, purpose_list_3_vi, purpose_list_4, purpose_list_4_vi,
+            purpose_cta_text, purpose_cta_text_vi, purpose_video_caption
         } = req.body;
         if (logo !== undefined) await settingModel.updateSetting('logo', logo);
         if (phone !== undefined) await settingModel.updateSetting('phone', phone);
@@ -85,6 +87,7 @@ const updateSettings = async (req, res) => {
         };
         try {
             await setFooterText('footer_desc', footer_desc, 2000);
+            await setFooterText('footer_desc_vi', footer_desc_vi, 2000);
             await setFooterText('footer_address', footer_address, 500);
             await setFooterText('footer_copyright', footer_copyright, 500);
             await setFooterUrl('footer_facebook_url', footer_facebook_url);
@@ -92,9 +95,12 @@ const updateSettings = async (req, res) => {
             await setFooterUrl('footer_youtube_url', footer_youtube_url);
             await setFooterUrl('footer_tiktok_url', footer_tiktok_url);
             // v12 /about content
-            await setFooterText('about_hero_tag', about_hero_tag, 100);
-            await setFooterText('about_hero_title', about_hero_title, 200);
-            await setFooterText('about_mission', about_mission, 2000);
+            await setFooterText('about_hero_tag',    about_hero_tag,    100);
+            await setFooterText('about_hero_tag_vi', about_hero_tag_vi, 100);
+            await setFooterText('about_hero_title',    about_hero_title,    200);
+            await setFooterText('about_hero_title_vi', about_hero_title_vi, 200);
+            await setFooterText('about_mission',    about_mission,    2000);
+            await setFooterText('about_mission_vi', about_mission_vi, 2000);
             // v16 — /about Offices (dynamic list, replaces fixed Sydney/HCM fields)
             if (about_offices !== undefined) {
                 let list = about_offices;
@@ -117,19 +123,33 @@ const updateSettings = async (req, res) => {
                 2: { icon: about_service_2_icon, title: about_service_2_title, desc: about_service_2_desc },
                 3: { icon: about_service_3_icon, title: about_service_3_title, desc: about_service_3_desc }
             };
+            const svcVi = {
+                1: { title_vi: about_service_1_title_vi, desc_vi: about_service_1_desc_vi },
+                2: { title_vi: about_service_2_title_vi, desc_vi: about_service_2_desc_vi },
+                3: { title_vi: about_service_3_title_vi, desc_vi: about_service_3_desc_vi }
+            };
             for (const i of [1, 2, 3]) {
-                await setFooterText(`about_service_${i}_icon`,  svc[i].icon,  60);
-                await setFooterText(`about_service_${i}_title`, svc[i].title, 200);
-                await setFooterText(`about_service_${i}_desc`,  svc[i].desc,  1000);
+                await setFooterText(`about_service_${i}_icon`,     svc[i].icon,          60);
+                await setFooterText(`about_service_${i}_title`,    svc[i].title,         200);
+                await setFooterText(`about_service_${i}_title_vi`, svcVi[i].title_vi,    200);
+                await setFooterText(`about_service_${i}_desc`,     svc[i].desc,          1000);
+                await setFooterText(`about_service_${i}_desc_vi`,  svcVi[i].desc_vi,     1000);
             }
             // v14 — /main "Why Invest in Australia" (Purpose-Invest) section content
-            await setFooterText('purpose_tagline', purpose_tagline, 100);
-            await setFooterText('purpose_heading', purpose_heading, 300);
-            await setFooterText('purpose_list_1', purpose_list_1, 200);
-            await setFooterText('purpose_list_2', purpose_list_2, 200);
-            await setFooterText('purpose_list_3', purpose_list_3, 200);
-            await setFooterText('purpose_list_4', purpose_list_4, 200);
-            await setFooterText('purpose_cta_text', purpose_cta_text, 100);
+            await setFooterText('purpose_tagline',    purpose_tagline,    100);
+            await setFooterText('purpose_tagline_vi', purpose_tagline_vi, 100);
+            await setFooterText('purpose_heading',    purpose_heading,    300);
+            await setFooterText('purpose_heading_vi', purpose_heading_vi, 300);
+            await setFooterText('purpose_list_1',    purpose_list_1,    200);
+            await setFooterText('purpose_list_1_vi', purpose_list_1_vi, 200);
+            await setFooterText('purpose_list_2',    purpose_list_2,    200);
+            await setFooterText('purpose_list_2_vi', purpose_list_2_vi, 200);
+            await setFooterText('purpose_list_3',    purpose_list_3,    200);
+            await setFooterText('purpose_list_3_vi', purpose_list_3_vi, 200);
+            await setFooterText('purpose_list_4',    purpose_list_4,    200);
+            await setFooterText('purpose_list_4_vi', purpose_list_4_vi, 200);
+            await setFooterText('purpose_cta_text',    purpose_cta_text,    100);
+            await setFooterText('purpose_cta_text_vi', purpose_cta_text_vi, 100);
             await setFooterText('purpose_video_caption', purpose_video_caption, 300);
         } catch (e) {
             if (e.status === 400) return res.status(400).json({ success: false, message: e.message });
@@ -214,7 +234,8 @@ const getProjectById = async (req, res) => {
 const createProject = async (req, res) => {
     try {
         const {
-            name, area, square_meters, category, year, style, small_content, image_path,
+            name, name_vi, area, square_meters, category, year, style,
+            small_content, small_content_vi, image_path,
             // F05d extended fields
             price, beds, baths, cars, address, state, property_type, area_label
         } = req.body;
@@ -223,8 +244,9 @@ const createProject = async (req, res) => {
         }
         // F10.fix: store image_path verbatim (Media Library returns /uploads/<file>)
         const id = await projectModel.createProject({
-            name, area, square_meters, category, year, style,
-            small_content, image_path: image_path || '',
+            name, name_vi: name_vi || null, area, square_meters, category, year, style,
+            small_content, small_content_vi: small_content_vi || null,
+            image_path: image_path || '',
             // F05d
             price: price ? String(price).slice(0, 50) : null,
             beds: beds ? String(beds).slice(0, 20) : null,
@@ -249,7 +271,8 @@ const createProject = async (req, res) => {
 const updateProject = async (req, res) => {
     try {
         const {
-            name, area, square_meters, category, year, style, small_content, image_path, display_order,
+            name, name_vi, area, square_meters, category, year, style,
+            small_content, small_content_vi, image_path, display_order,
             // F05d extended fields
             price, beds, baths, cars, address, state, property_type, area_label
         } = req.body;
@@ -257,12 +280,14 @@ const updateProject = async (req, res) => {
         // Build fields to update (only defined values)
         const fields = {};
         if (name !== undefined) fields.name = name;
+        if (name_vi !== undefined) fields.name_vi = name_vi || null;
         if (area !== undefined) fields.area = area;
         if (square_meters !== undefined) fields.square_meters = square_meters;
         if (category !== undefined) fields.category = category;
         if (year !== undefined) fields.year = year;
         if (style !== undefined) fields.style = style;
         if (small_content !== undefined) fields.small_content = small_content;
+        if (small_content_vi !== undefined) fields.small_content_vi = small_content_vi || null;
         if (image_path !== undefined) {
             // F10.fix: store image_path verbatim under /uploads/
             fields.image_path = String(image_path || '').slice(0, 255);
