@@ -2,6 +2,8 @@
 -- Run once against the production DB after deploying the i18n feature branch.
 -- All columns default to NULL so existing rows are unaffected.
 
+USE sellingweb;
+
 ALTER TABLE news
     ADD COLUMN title_vi   VARCHAR(255) DEFAULT NULL AFTER title,
     ADD COLUMN summary_vi VARCHAR(500) DEFAULT NULL AFTER summary,

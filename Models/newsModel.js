@@ -62,7 +62,7 @@ const search = async ({ q, date_from, date_to } = {}) => {
     return rows;
 };
 
-const create = async ({ title, summary, content, cover_image, external_url }) => {
+const create = async ({ title, title_vi, summary, summary_vi, content, content_vi, cover_image, external_url }) => {
     const t = String(title || '').trim();
     if (!t) { const err = new Error('Tiêu đề bắt buộc'); err.status = 400; throw err; }
     if (t.length > TITLE_MAX) { const err = new Error(`Tiêu đề tối đa ${TITLE_MAX} ký tự`); err.status = 400; throw err; }
@@ -71,8 +71,10 @@ const create = async ({ title, summary, content, cover_image, external_url }) =>
     const ext = String(external_url || '').trim().slice(0, 500);
     if (ext && !URL_RE.test(ext)) { const err = new Error('External URL phải bắt đầu bằng http(s)://'); err.status = 400; throw err; }
     const [r] = await pool.query(
-        'INSERT INTO news (title, summary, content, cover_image, external_url) VALUES (?, ?, ?, ?, ?)',
-        [t, s, String(content || ''), String(cover_image || '').slice(0, 255), ext]
+        'INSERT INTO news (title, title_vi, summary, summary_vi, content, content_vi, cover_image, external_url) VALUES (?, ?, ?, ?, ?, ?, ?, ?)',
+        [t, String(title_vi || '') || null, s, String(summary_vi || '') || null,
+         String(content || ''), String(content_vi || '') || null,
+         String(cover_image || '').slice(0, 255), ext]
     );
     return r.insertId;
 };
