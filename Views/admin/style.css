@@ -1579,6 +1579,28 @@ body {
 
 .media-tab:hover { color: #2c3e50; background: rgba(52,152,219,0.05); }
 .media-tab.active { color: #3498db; border-bottom-color: #3498db; }
+.media-tab-delete { color: #e74c3c; }
+.media-tab-delete:hover { background: rgba(231,76,60,0.05) !important; }
+.media-tab-delete.active { color: #e74c3c; border-bottom-color: #e74c3c; }
+.btn-delete-media {
+    padding: 10px 22px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: #fff;
+    transition: box-shadow 0.2s, transform 0.15s;
+}
+.btn-delete-media:hover:not(:disabled) {
+    box-shadow: 0 4px 14px rgba(231,76,60,0.45);
+    transform: translateY(-1px);
+}
+.btn-delete-media:disabled { background: #d5dadc; color: #95a5a6; cursor: not-allowed; }
 
 .media-modal-content {
     width: 92%;

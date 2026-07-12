@@ -1181,6 +1181,7 @@
         <div class="media-tabs">
             <button type="button" class="media-tab active" data-tab="images" onclick="switchMediaTab('images')"><i class="fas fa-image"></i> Ảnh</button>
             <button type="button" class="media-tab" data-tab="videos" onclick="switchMediaTab('videos')"><i class="fas fa-film"></i> Video</button>
+            <button type="button" class="media-tab media-tab-delete" data-tab="delete" onclick="switchMediaTab('delete')"><i class="fas fa-trash"></i> Xóa ảnh</button>
         </div>
         <div class="media-toolbar">
             <button type="button" class="btn-add" onclick="document.getElementById('media-upload-input').click()">
@@ -1208,12 +1209,20 @@
                 <p>Chưa có file — bấm Upload để thêm</p>
             </div>
         </div>
-        <div class="form-actions media-actions">
+        <div class="form-actions media-actions" id="media-actions-select">
             <button type="button" class="btn-cancel" onclick="closeMediaLibrary()">
                 <i class="fas fa-times"></i> Hủy
             </button>
             <button type="button" class="btn-save" id="media-confirm-btn" onclick="confirmMediaSelection()" disabled>
                 <i class="fas fa-check"></i> Chọn <span id="media-selected-count">(0)</span>
+            </button>
+        </div>
+        <div class="form-actions media-actions" id="media-actions-delete" style="display:none">
+            <button type="button" class="btn-cancel" onclick="closeMediaLibrary()">
+                <i class="fas fa-times"></i> Hủy
+            </button>
+            <button type="button" class="btn-delete-media" id="media-delete-btn" onclick="deleteSelectedMedia()" disabled>
+                <i class="fas fa-trash"></i> Xóa đã chọn <span id="media-delete-count">(0)</span>
             </button>
         </div>
     </div>

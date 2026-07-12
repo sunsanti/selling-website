@@ -197,6 +197,7 @@ app.put('/api/admin/team/:id', homeContentController.updateTeamMember);
 app.delete('/api/admin/team/:id', requireAdmin, homeContentController.deleteTeamMember);
 
 app.get('/api/admin/media', mediaController.getMedia);
+app.delete('/api/admin/media', requireAdmin, mediaController.deleteMedia);
 
 app.get('/api/admin/storage-usage', storageController.getUsage);
 app.post('/api/admin/storage-cleanup', requireAdmin, storageController.cleanup);

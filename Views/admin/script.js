@@ -2687,10 +2687,17 @@ let _mediaState = {
 
 function switchMediaTab(tab) {
     _mediaState.tab = tab;
+    _mediaState.selectedUrls.clear();
     document.querySelectorAll('.media-tab').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === tab);
     });
+    const isDelete = tab === 'delete';
+    const actSelect = document.getElementById('media-actions-select');
+    const actDelete = document.getElementById('media-actions-delete');
+    if (actSelect) actSelect.style.display = isDelete ? 'none' : '';
+    if (actDelete) actDelete.style.display = isDelete ? '' : 'none';
     applyMediaFilter();
+    updateMediaSelectedCount();
 }
 
 async function loadStorageUsage() {
@@ -2742,6 +2749,11 @@ function openMediaLibrary({ mode = 'single', onSelect = null } = {}) {
     document.querySelectorAll('.media-tab').forEach(btn => {
         btn.classList.toggle('active', btn.dataset.tab === 'images');
     });
+    // Ensure select footer visible, delete footer hidden
+    const actSelect = document.getElementById('media-actions-select');
+    const actDelete = document.getElementById('media-actions-delete');
+    if (actSelect) actSelect.style.display = '';
+    if (actDelete) actDelete.style.display = 'none';
     document.getElementById('media-modal').style.display = 'flex';
     updateMediaSelectedCount();
     loadMediaGrid();
@@ -2780,6 +2792,7 @@ function applyMediaFilter() {
         const isVideo = _MEDIA_VIDEO_RE.test(m.name || m.url || '');
         if (tab === 'images' && isVideo) return false;
         if (tab === 'videos' && !isVideo) return false;
+        // delete tab shows everything — no type filter
         if (q && !m.name.toLowerCase().includes(q)) return false;
         return true;
     });
@@ -2837,7 +2850,8 @@ function renderMediaGrid() {
 }
 
 function toggleMediaSelection(url) {
-    if (_mediaState.mode === 'single') {
+    const forceMulti = _mediaState.tab === 'delete';
+    if (!forceMulti && _mediaState.mode === 'single') {
         _mediaState.selectedUrls.clear();
         _mediaState.selectedUrls.add(url);
     } else {
@@ -2854,6 +2868,10 @@ function updateMediaSelectedCount() {
     const btnEl = document.getElementById('media-confirm-btn');
     if (countEl) countEl.textContent = '(' + n + ')';
     if (btnEl) btnEl.disabled = n === 0;
+    const delCountEl = document.getElementById('media-delete-count');
+    const delBtnEl = document.getElementById('media-delete-btn');
+    if (delCountEl) delCountEl.textContent = '(' + n + ')';
+    if (delBtnEl) delBtnEl.disabled = n === 0;
 }
 
 function confirmMediaSelection() {
@@ -2861,6 +2879,41 @@ function confirmMediaSelection() {
     const cb = _mediaState.onSelect;
     closeMediaLibrary();
     if (cb && urls.length > 0) cb(urls);
+}
+
+async function deleteSelectedMedia() {
+    const urls = Array.from(_mediaState.selectedUrls);
+    if (urls.length === 0) return;
+    const names = urls.map(u => {
+        const item = _mediaState.allMedia.find(m => m.url === u);
+        return item ? item.name : u.split('/').pop();
+    });
+    if (!confirm(`Xóa ${names.length} file đã chọn?\nHành động này không thể hoàn tác.`)) return;
+    const btn = document.getElementById('media-delete-btn');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Đang xóa...'; }
+    try {
+        const res = await fetch('/api/admin/media', {
+            method: 'DELETE',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ names })
+        });
+        if (!res.ok && res.status !== 422) throw new Error('HTTP ' + res.status);
+        const json = await res.json();
+        if (!json.success) throw new Error(json.message || 'Lỗi xóa');
+        const deletedSet = new Set(json.deleted.map(n => '/uploads/' + n));
+        _mediaState.allMedia = _mediaState.allMedia.filter(m => !deletedSet.has(m.url));
+        _mediaState.selectedUrls.clear();
+        applyMediaFilter();
+        updateMediaSelectedCount();
+        const msg = json.deleted.length + ' file đã xóa' + (json.errors.length ? `, ${json.errors.length} lỗi` : '');
+        showToast(msg, json.errors.length ? 'warning' : 'success');
+        loadStorageUsage();
+    } catch (err) {
+        showToast('Lỗi xóa: ' + err.message, 'error');
+    } finally {
+        if (btn) { btn.disabled = false; btn.innerHTML = '<i class="fas fa-trash"></i> Xóa đã chọn'; }
+        updateMediaSelectedCount();
+    }
 }
 
 // Wire static listeners on DOMContentLoaded (modal elements always present in HTML)
