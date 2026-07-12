@@ -107,6 +107,7 @@ section{
 .mobile-logout-btn{
   display: none;
 }
+.mobile-lang-toggle { display: none; }
 
 .btn-get-in-touch::before {
   content: "";
