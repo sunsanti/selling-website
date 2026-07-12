@@ -3467,8 +3467,9 @@ img{
 }
 @media (max-width: 768px) {
     .footer-bottom-inner { grid-template-columns: 1fr; gap: 2.5rem; }
-    #customer-contact-form { flex-direction: column; }
-    .btn-footer-submit { width: 100%; }
+    #customer-contact-form { flex-direction: column; width: 100%; }
+    #customer-contact-form input { flex: 0 0 auto; width: 100%; min-width: 0; box-sizing: border-box; }
+    .btn-footer-submit { width: 100%; display: block; box-sizing: border-box; }
     #footer-top { padding: 3rem 5%; }
     #footer-bottom { padding: 3rem 5%; }
 }

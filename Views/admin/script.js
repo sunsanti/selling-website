@@ -2340,7 +2340,7 @@ async function loadHomeAbout() {
                 if (btnTranslate.disabled) return;
                 btnTranslate.disabled = true;
                 try {
-                    const r = await fetch('/api/admin/translate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: lbl.value, target: 'vi', source: 'en' }) });
+                    const r = await fetch('/api/admin/translate', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ text: lbl.value, targetLang: 'vi', sourceLang: 'en' }) });
                     const j = await r.json();
                     if (j.success) { lblVi.value = j.translated; lblVi.dispatchEvent(new Event('input')); }
                 } finally { btnTranslate.disabled = false; }
