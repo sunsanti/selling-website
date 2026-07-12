@@ -217,6 +217,7 @@ window.addEventListener('langchange', function () {
     if (window.__lastSettings) renderSettings(window.__lastSettings);
     if (allProjects && allProjects.length > 0) renderProjects(allProjects);
     if (_cachedServices && _cachedServices.length > 0) renderServices(_cachedServices);
+    if (_cachedAbout) renderAbout(_cachedAbout);
 });
 
 // ========== MODULE 2: Projects (grid + filter) ==========
@@ -491,7 +492,7 @@ function renderAboutStats(stats) {
 
         const lbl = document.createElement('div');
         lbl.className = 'detail-content';
-        lbl.textContent = s.label || '';
+        lbl.textContent = getLangSetting(s, 'label');
 
         textWrap.appendChild(num);
         textWrap.appendChild(lbl);
@@ -516,12 +517,14 @@ function renderAbout(d) {
     renderAboutStats(d.stats);
 }
 
+var _cachedAbout = null;
 async function loadAboutSection() {
     try {
         const res = await fetch('/api/public/about');
         const json = await res.json();
         if (!json.success || !json.data) return;
-        renderAbout(json.data);
+        _cachedAbout = json.data;
+        renderAbout(_cachedAbout);
     } catch (e) {
         console.error('loadAboutSection:', e);
     }

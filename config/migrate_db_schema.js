@@ -241,11 +241,12 @@ const TABLES = [
                 slot TINYINT NOT NULL UNIQUE,
                 num VARCHAR(20) NOT NULL DEFAULT '',
                 label VARCHAR(255) NOT NULL DEFAULT '',
+                label_vi VARCHAR(255) DEFAULT NULL,
                 updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
             )
         `,
         seed: [
-            // v23 — full snapshot of current about_stats (admin-edited)
+            // v24 — label_vi column included
             ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [1, '20+', 'years of experience']],
             ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [2, '200+', 'projects have done']],
             ['INSERT IGNORE INTO about_stats (slot, num, label) VALUES (?, ?, ?)', [3, '7+', 'awards received']],
