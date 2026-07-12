@@ -40,6 +40,11 @@
         '        ' + navLink('/news',     'nav_news')     + '\n' +
         '        ' + navLink('/contact',  'nav_contact')  + '\n' +
         '        <a class="nav-item desktop-admin-btn" id="admin-btn" style="display:none;" onclick="window.location.href=\'/admin\'" data-i18n="nav_admin">' + T('nav_admin') + '</a>\n' +
+        '        <div class="mobile-lang-toggle">\n' +
+        '            <button class="lang-btn' + (window.i18n && window.i18n.getLang() === 'vi' ? '' : ' lang-btn-active') + '" data-lang="en" onclick="i18n.setLang(\'en\')">EN</button>\n' +
+        '            <span class="lang-sep">|</span>\n' +
+        '            <button class="lang-btn' + (window.i18n && window.i18n.getLang() === 'vi' ? ' lang-btn-active' : '') + '" data-lang="vi" onclick="i18n.setLang(\'vi\')">VI</button>\n' +
+        '        </div>\n' +
         '        <button id="mobile-logout-btn" class="mobile-logout-btn" onclick="logoutAdmin()" data-i18n="nav_logout">' + T('nav_logout') + '</button>\n' +
         '    </nav>\n' +
         '    <div class="header-zone header-zone-right">\n' +

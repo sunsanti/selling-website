@@ -1736,6 +1736,19 @@ body.logged-in .header .navbar .mobile-nav-header .mobile-account-name {
     background-color: var(--color-gold);
     color: var(--color-navy);
 }
+.mobile-lang-toggle { display: none; }
+.header .navbar .mobile-lang-toggle {
+    display: none;
+    align-items: center;
+    justify-content: center;
+    gap: 0.6rem;
+    margin: 0 2.4rem 1.2rem;
+    padding: 1rem 0;
+    border-top: 1px solid rgba(255,255,255,0.12);
+}
+.header .navbar.open .mobile-lang-toggle {
+    display: flex !important;
+}
 
 .home .sub-content{
     font-size:1.8rem;
