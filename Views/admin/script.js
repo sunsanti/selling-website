@@ -2929,36 +2929,47 @@ document.addEventListener('DOMContentLoaded', () => {
     const uploadInp = document.getElementById('media-upload-input');
     if (uploadInp) {
         uploadInp.addEventListener('change', async (e) => {
-            const file = e.target.files[0];
-            if (!file) return;
+            const files = Array.from(e.target.files);
+            if (files.length === 0) return;
+            const uploadBtn = document.querySelector('.media-toolbar .btn-add');
+            const originalLabel = uploadBtn ? uploadBtn.innerHTML : '';
+            let done = 0;
+            const updateProgress = () => {
+                done++;
+                if (uploadBtn) uploadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> ${done}/${files.length}`;
+            };
+            if (uploadBtn) uploadBtn.innerHTML = `<i class="fas fa-spinner fa-spin"></i> 0/${files.length}`;
             try {
-                const fd = new FormData();
-                fd.append('media', file);
-                const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: fd });
-                const json = await res.json();
-                if (!json.success) throw new Error(json.message || 'Upload failed');
-                // Optimistically prepend the new file
-                const newItem = {
-                    url: json.path,
-                    name: json.path.split('/').pop(),
-                    size: 0,
-                    mtime: Date.now()
-                };
-                _mediaState.allMedia.unshift(newItem);
-                _mediaState.query = '';
-                if (searchInp) searchInp.value = '';
-                // D6: multi-mode auto-adds to selection; D7: single-mode does NOT
-                if (_mediaState.mode === 'multi') {
-                    _mediaState.selectedUrls.add(newItem.url);
+                const results = await Promise.allSettled(files.map(async file => {
+                    const fd = new FormData();
+                    fd.append('media', file);
+                    const res = await fetch('/api/admin/projects/upload', { method: 'POST', body: fd });
+                    const json = await res.json();
+                    if (!json.success) throw new Error(json.message || 'Upload failed');
+                    updateProgress();
+                    return { url: json.path, name: json.path.split('/').pop(), size: 0, mtime: Date.now() };
+                }));
+                const succeeded = results.filter(r => r.status === 'fulfilled').map(r => r.value);
+                const failCount = results.length - succeeded.length;
+                // Prepend all new items newest-first
+                for (let i = succeeded.length - 1; i >= 0; i--) {
+                    _mediaState.allMedia.unshift(succeeded[i]);
+                    if (_mediaState.mode === 'multi') _mediaState.selectedUrls.add(succeeded[i].url);
                 }
-                applyMediaFilter();
-                updateMediaSelectedCount();
-                showToast('Upload thành công', 'success');
-                loadStorageUsage();
+                if (succeeded.length > 0) {
+                    _mediaState.query = '';
+                    if (searchInp) searchInp.value = '';
+                    applyMediaFilter();
+                    updateMediaSelectedCount();
+                    loadStorageUsage();
+                }
+                if (failCount > 0) showToast(`Upload: ${succeeded.length} thành công, ${failCount} thất bại`, 'warning');
+                else showToast(`Upload ${succeeded.length} file thành công`, 'success');
             } catch (err) {
                 showToast('Lỗi upload: ' + err.message, 'error');
             } finally {
                 e.target.value = '';
+                if (uploadBtn) uploadBtn.innerHTML = originalLabel;
             }
         });
     }
