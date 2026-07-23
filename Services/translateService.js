@@ -10,7 +10,39 @@ const https = require('https');
 const API_KEY = process.env.GOOGLE_TRANSLATE_API_KEY || '';
 
 // MyMemory free API — no key required, 1000 words/day limit
-function translateWithMyMemory(text, targetLang, sourceLang) {
+// Hard limit: 500 chars per request — long texts are split into chunks.
+
+function chunkText(text, maxLen) {
+    if (text.length <= maxLen) return [text];
+    const chunks = [];
+    let remaining = text;
+    while (remaining.length > maxLen) {
+        let splitAt = -1;
+        // Prefer sentence boundary (. ! ? newline) scanning back from maxLen
+        for (let i = maxLen - 1; i > maxLen / 2; i--) {
+            const ch = remaining[i];
+            const next = remaining[i + 1];
+            if ((ch === '.' || ch === '!' || ch === '?') && (!next || next === ' ' || next === '\n')) {
+                splitAt = i + 1;
+                break;
+            }
+            if (ch === '\n') { splitAt = i + 1; break; }
+        }
+        // Fallback: word boundary
+        if (splitAt === -1) {
+            for (let i = maxLen - 1; i > maxLen / 2; i--) {
+                if (remaining[i] === ' ') { splitAt = i; break; }
+            }
+        }
+        if (splitAt === -1) splitAt = maxLen;
+        chunks.push(remaining.slice(0, splitAt).trim());
+        remaining = remaining.slice(splitAt).trim();
+    }
+    if (remaining.length > 0) chunks.push(remaining);
+    return chunks;
+}
+
+function translateWithMyMemorySingle(text, targetLang, sourceLang) {
     const from = (sourceLang === 'auto' || !sourceLang) ? 'en' : sourceLang;
     const langPair = encodeURIComponent(`${from}|${targetLang}`);
     const q = encodeURIComponent(text);
@@ -45,6 +77,23 @@ function translateWithMyMemory(text, targetLang, sourceLang) {
 
         req.end();
     });
+}
+
+async function translateWithMyMemory(text, targetLang, sourceLang) {
+    const MYMEMORY_LIMIT = 500;
+    const chunks = chunkText(text, MYMEMORY_LIMIT);
+    if (chunks.length === 1) {
+        return translateWithMyMemorySingle(chunks[0], targetLang, sourceLang);
+    }
+    const translated = [];
+    for (const chunk of chunks) {
+        const result = await translateWithMyMemorySingle(chunk, targetLang, sourceLang);
+        if (!result.success) return { success: false, translated: '', original: text, error: result.error };
+        translated.push(result.translated);
+        // Brief pause between requests to respect MyMemory rate limits
+        await new Promise(r => setTimeout(r, 300));
+    }
+    return { success: true, translated: translated.join(' '), original: text };
 }
 
 /**
