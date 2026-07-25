@@ -1034,7 +1034,7 @@ async function loadFeaturedPanel() {
 
 function featuredCardHtml(p) {
     const isSel = _featuredSelection.has(p.id);
-    const cover = (p.image_path || '/uploads/main_image.jpg');
+    const cover = p.image_path || '';
     return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${p.id}" onclick="toggleFeatured(${p.id})">
         <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
         <div class="featured-card-body">
@@ -3503,7 +3503,7 @@ async function loadFeaturedVideosPanel() {
 
 function featuredVideoCardHtml(v) {
     const isSel = _featuredVideosSelection.has(v.id);
-    const cover = (v.thumbnail_path || '/uploads/main_image.jpg');
+    const cover = v.thumbnail_path || '';
     return `<div class="featured-card ${isSel ? 'selected' : ''}" data-id="${v.id}" onclick="toggleFeaturedVideo(${v.id})">
         <img src="${cover}" alt="" onerror="this.style.visibility='hidden'">
         <div class="featured-card-body">
